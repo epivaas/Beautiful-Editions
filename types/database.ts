@@ -4,7 +4,7 @@ export type Edition = {
     title: string;
     publication_year: number;
     description: string;
-    # Voeg hier meer velden toe (zoals price, stock, etc.)
+    // Voeg hier meer velden toe (zoals price, stock, etc.)
   };
   
   // De basisstructuur van een foto
