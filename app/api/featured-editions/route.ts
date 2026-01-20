@@ -30,9 +30,9 @@ export async function GET() {
     }
 
     // Get work IDs from editions
-    const workIds = [...new Set(editions?.map((e: any) => e.work_id).filter(Boolean))] || [];
-    const publisherIds = [...new Set(editions?.map((e: any) => e.publisher_id).filter(Boolean))] || [];
-    const seriesIds = [...new Set(editions?.map((e: any) => e.series_id).filter(Boolean))] || [];
+    const workIds = [...new Set((editions || []).map((e: any) => e.work_id).filter(Boolean))];
+    const publisherIds = [...new Set((editions || []).map((e: any) => e.publisher_id).filter(Boolean))];
+    const seriesIds = [...new Set((editions || []).map((e: any) => e.series_id).filter(Boolean))];
 
     // Fetch works data
     let works: any = {};
