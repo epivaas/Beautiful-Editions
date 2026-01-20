@@ -51,7 +51,7 @@ export default function PublishersSeriesMenu() {
     >
       <Link
         href="/publishers-series"
-        className="text-[#1a1a1a] hover:text-[#8b6f47] transition font-medium px-3 py-1 rounded hover:bg-[#fdfcf0]"
+        className="text-[#1a1a1a] hover:text-[#8b6f47] transition font-bold px-4 py-2 rounded hover:bg-[#fdfcf0] whitespace-nowrap"
       >
         Publishers and Series
       </Link>
