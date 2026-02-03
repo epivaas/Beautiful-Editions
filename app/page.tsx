@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { getMainPhoto, getAuthorName, getEditionInfo } from "./lib/editionUtils";
 
 interface Photo {
   id: number;
@@ -65,33 +66,8 @@ export default function Home() {
     fetchEditions();
   }, []);
 
-  const getMainPhoto = (photos?: Photo[]) => {
-    if (!photos || photos.length === 0) return null;
-    const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
-    return sorted[0];
-  };
-
-  const getAuthorName = (work?: Work) => {
-    if (!work) return "Unknown Author";
-    const author = work.work_authors?.[0]?.author;
-    return author?.name || "Unknown Author";
-  };
-
-  const getEditionInfo = (edition: Edition) => {
-    if (edition.series) {
-      const seriesName = edition.series.name;
-      // Try to find publisher from our fetched data
-      const matchingPublisher = editions.find(e => e.publisher?.id === edition.series.publisher_id)?.publisher;
-      if (matchingPublisher) {
-        return `photo from the ${seriesName} (${matchingPublisher.name}) edition`;
-      }
-      return `photo from the ${seriesName} edition`;
-    }
-    if (edition.publisher) {
-      return `photo from the ${edition.publisher.name} edition`;
-    }
-    return null;
-  };
+  
+  
 
   return (
     <div style={{ paddingTop: '3rem', paddingBottom: '3rem', maxWidth: '1400px', margin: '0 auto', paddingLeft: '1rem', paddingRight: '1rem' }}>
@@ -207,13 +183,13 @@ export default function Home() {
                   }}>
                     {getAuthorName(edition.work)}
                   </p>
-                  {getEditionInfo(edition) && (
+                  {getEditionInfo(edition, editions) && (
                     <p style={{
                       fontFamily: 'sans-serif',
                       fontSize: '0.75rem',
                       color: '#666666'
                     }}>
-                      {getEditionInfo(edition)}
+                      {getEditionInfo(edition, editions)}
                     </p>
                   )}
                 </div>

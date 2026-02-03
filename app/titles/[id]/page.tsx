@@ -87,7 +87,7 @@ export default async function TitleDetailPage({
           )}
           {authors.length > 0 && (
             <p className="text-lg text-[#6b6b6b]">
-              by {authors.map((a) => a.name).join(", ")}
+              by {authors.map((a: { name: string }) => a.name).join(", ")}
             </p>
           )}
           {work.original_publication_year && (
