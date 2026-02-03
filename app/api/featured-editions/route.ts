@@ -1,9 +1,19 @@
 import { supabase } from "@/utils/supabase";
 import { NextResponse } from "next/server";
 
+// Fisher-Yates shuffle for random selection
+function shuffle<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export async function GET() {
   try {
-    // Fetch random editions with their related data
+    // Fetch all editions with their related data
     const { data: editions, error } = await supabase
       .from("editions")
       .select(`
@@ -20,8 +30,7 @@ export async function GET() {
           is_main
         )
       `)
-      .order("random", { ascending: true })
-      .limit(8);
+      .order("id", { ascending: false });
 
     if (error) {
       console.error("Error fetching editions:", error);
@@ -98,11 +107,13 @@ export async function GET() {
         publisher: publishers[e.publisher_id],
         series: series[e.series_id],
       }))
-      .filter((e: any) => e.photos && e.photos.length > 0)
-      .slice(0, 8);
+      .filter((e: any) => e.photos && e.photos.length > 0);
 
-    console.log("Fetched editions:", enrichedEditions);
-    return NextResponse.json(enrichedEditions);
+    // Shuffle and select random 8 editions
+    const randomEditions = shuffle(enrichedEditions).slice(0, 8);
+
+    console.log("Fetched editions:", randomEditions);
+    return NextResponse.json(randomEditions);
   } catch (error) {
     console.error("Error in API route:", error);
     return NextResponse.json(
