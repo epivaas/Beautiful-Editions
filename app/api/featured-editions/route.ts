@@ -13,7 +13,7 @@ function shuffle<T>(array: T[]): T[] {
 
 export async function GET() {
   try {
-    // Fetch all editions with their related data
+    // Fetch editions with their related data (fetch batch without specific order for better randomness)
     const { data: editions, error } = await supabase
       .from("editions")
       .select(`
@@ -30,7 +30,7 @@ export async function GET() {
           is_main
         )
       `)
-      .order("id", { ascending: false });
+      .limit(100);
 
     if (error) {
       console.error("Error fetching editions:", error);
