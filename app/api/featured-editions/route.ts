@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    // Fetch all editions with their related data
+    // Fetch random editions with their related data
     const { data: editions, error } = await supabase
       .from("editions")
       .select(`
@@ -16,10 +16,12 @@ export async function GET() {
           id,
           storage_path,
           sort_order,
-          copyright_statement
+          copyright_statement,
+          is_main
         )
       `)
-      .order("id", { ascending: false });
+      .order("random", { ascending: true })
+      .limit(8);
 
     if (error) {
       console.error("Error fetching editions:", error);

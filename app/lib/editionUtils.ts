@@ -69,14 +69,3 @@ export const getEditionInfo = (edition: Edition, editionsList: Edition[]) => {
   }
   return null;
 };
-
-export const shuffleEditions = (editions: Edition[]) => {
-  const arr = [...editions];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const tmp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = tmp;
-  }
-  return arr;
-};
