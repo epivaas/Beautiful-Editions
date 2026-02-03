@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getMainPhoto, getAuthorName, getEditionInfo } from "./lib/editionUtils";
+import { getMainPhoto, getAuthorName, getEditionInfo, shuffleEditions } from "./lib/editionUtils";
 
 interface Photo {
   id: number;
@@ -54,7 +54,7 @@ export default function Home() {
         const response = await fetch("/api/featured-editions");
         const data = await response.json();
         console.log("Fetched editions:", data);
-        setEditions(Array.isArray(data) ? data : []);
+        setEditions(Array.isArray(data) ? shuffleEditions(data) : []);
       } catch (error) {
         console.error("Failed to fetch editions:", error);
         setEditions([]);

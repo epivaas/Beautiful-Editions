@@ -3,6 +3,7 @@ export interface Photo {
   storage_path: string;
   sort_order: number;
   copyright_statement?: string;
+  is_main?: boolean;
 }
 
 export interface Author {
@@ -40,6 +41,9 @@ export interface Edition {
 
 export const getMainPhoto = (photos?: Photo[]) => {
   if (!photos || photos.length === 0) return null;
+  // Prefer explicit `is_main` photo when present
+  const main = photos.find(p => p.is_main === true);
+  if (main) return main;
   const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
   return sorted[0];
 };
@@ -64,4 +68,15 @@ export const getEditionInfo = (edition: Edition, editionsList: Edition[]) => {
     return `photo from the ${edition.publisher.name} edition`;
   }
   return null;
+};
+
+export const shuffleEditions = (editions: Edition[]) => {
+  const arr = [...editions];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+  return arr;
 };
