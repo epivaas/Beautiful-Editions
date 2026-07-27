@@ -1,49 +1,55 @@
 import { supabase } from "@/utils/supabase";
-import { EditionWithRelations } from "@/types/database";
 import Link from "next/link";
 
-async function getEditions(): Promise<EditionWithRelations[]> {
+interface PublisherSummary {
+  id: number;
+  name: string;
+}
+
+interface SeriesSummary {
+  id: number;
+  name: string;
+  publisher: { id: number; name: string }[] | null;
+}
+
+async function getPublishers(): Promise<PublisherSummary[]> {
   const { data, error } = await supabase
-    .from("editions")
-    .select(`
-      *,
-      work:works (
-        id,
-        original_title,
-        english_title,
-        work_authors (
-          author:authors (
-            id,
-            name
-          )
-        )
-      ),
-      publisher:publishers (
-        id,
-        name
-      ),
-      series:series (
-        id,
-        name
-      ),
-      photos (
-        id,
-        storage_path,
-        sort_order
-      )
-    `)
-    .order("title", { ascending: true });
+    .from("publishers")
+    .select("id, name")
+    .order("name", { ascending: true });
 
   if (error) {
-    console.error("Error fetching editions:", error);
+    console.error("Error fetching publishers:", error);
     return [];
   }
 
-  return (data || []) as EditionWithRelations[];
+  return (data || []) as PublisherSummary[];
+}
+
+async function getSeries(): Promise<SeriesSummary[]> {
+  const { data, error } = await supabase
+    .from("series")
+    .select(`
+      id,
+      name,
+      publisher:publishers (
+        id,
+        name
+      )
+    `)
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching series:", error);
+    return [];
+  }
+
+  return (data || []) as SeriesSummary[];
 }
 
 export default async function PublishersSeriesPage() {
-  const editions = await getEditions();
+  const publishers = await getPublishers();
+  const series = await getSeries();
 
   return (
     <div className="py-8">
@@ -51,68 +57,55 @@ export default async function PublishersSeriesPage() {
         Publishers & Series
       </h1>
 
-      <div className="bg-white border border-[#e0ddd0] rounded overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#f9f8f0] border-b border-[#e0ddd0]">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#8b6f47]">
-                  Edition Title
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#8b6f47]">
-                  Author
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#8b6f47]">
-                  Original Title
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#8b6f47]">
-                  Publisher
-                </th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-[#8b6f47]">
-                  Photo
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {editions.map((edition) => {
-                const authors = edition.work?.work_authors?.map((wa) => wa.author.name).join(", ") || "Unknown";
-                const originalTitle = edition.work?.original_title || "—";
-                const firstPhoto = edition.photos && edition.photos.length > 0 ? edition.photos[0] : null;
+      <div className="publisher-series-grid">
+        <div className="w-full bg-white border border-[#e0ddd0] rounded p-6">
+          <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">Publishers</h2>
+
+          {publishers.length === 0 ? (
+            <p className="text-[#6b6b6b]">No publishers found.</p>
+          ) : (
+            <ul className="space-y-3">
+              {publishers.map((publisher) => (
+                <li key={publisher.id}>
+                  <Link
+                    href={`/publishers-series/${publisher.id}`}
+                    className="text-[#8b6f47] hover:underline font-medium"
+                  >
+                    {publisher.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="w-full bg-white border border-[#e0ddd0] rounded p-6">
+          <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">Series</h2>
+
+          {series.length === 0 ? (
+            <p className="text-[#6b6b6b]">No series found.</p>
+          ) : (
+            <ul className="space-y-3">
+              {series.map((item) => {
+                const publisherList = Array.isArray(item.publisher) ? item.publisher : [];
+                const publisherName = publisherList[0]?.name || null;
 
                 return (
-                  <tr
-                    key={edition.id}
-                    className="border-b border-[#e0ddd0] hover:bg-[#fdfcf0] transition"
-                  >
-                    <td className="px-6 py-4">
-                      <Link
-                        href={`/edition/${edition.id}`}
-                        className="text-[#8b6f47] hover:underline font-medium"
-                      >
-                        {edition.title}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-[#6b6b6b]">{authors}</td>
-                    <td className="px-6 py-4 text-[#6b6b6b]">{originalTitle}</td>
-                    <td className="px-6 py-4 text-[#6b6b6b]">
-                      {edition.publisher?.name || "—"}
-                    </td>
-                    <td className="px-6 py-4">
-                      {firstPhoto ? (
-                        <img
-                          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Book-photos/${firstPhoto.storage_path}`}
-                          alt={edition.title}
-                          className="w-20 h-28 object-cover rounded border border-[#e0ddd0]"
-                        />
-                      ) : (
-                        <span className="text-[#d0d0d0]">—</span>
-                      )}
-                    </td>
-                  </tr>
+                  <li key={item.id}>
+                    <Link
+                      href={`/publishers-series/${item.id}`}
+                      className="text-[#8b6f47] hover:text-[#6f5330] hover:underline transition-colors duration-150"
+                    >
+                      {item.name}
+                    </Link>
+                    {publisherName && (
+                      <span className="text-[#6b6b6b] ml-2">({publisherName})</span>
+                    )}
+                  </li>
                 );
               })}
-            </tbody>
-          </table>
+            </ul>
+          )}
         </div>
       </div>
     </div>

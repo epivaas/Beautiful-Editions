@@ -3,6 +3,10 @@ import { EditionWithRelations } from "@/types/database";
 import { notFound } from "next/navigation";
 import ImageCarousel from "@/components/ImageCarousel";
 
+function getPhotoUrl(storagePath: string) {
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Book-photos/${storagePath}`;
+}
+
 async function getEdition(id: number): Promise<EditionWithRelations | null> {
   const { data, error } = await supabase
     .from("editions")
@@ -48,6 +52,19 @@ async function getEdition(id: number): Promise<EditionWithRelations | null> {
   return data as EditionWithRelations;
 }
 
+async function getSubEditions(parentId: number) {
+  // The `sub_editions` table contains rows that reference `editions` via `edition_id`.
+  // Query `sub_editions` for rows where `edition_id` = parentId and return them.
+  const { data, error } = await supabase
+    .from("sub_editions")
+    .select(`id, edition_id, impression_label, sequence_number, publication_year, catalogue_number`)
+    .eq("edition_id", parentId)
+    .order("sequence_number", { ascending: true });
+
+  if (error || !data) return [];
+  return data;
+}
+
 export default async function EditionDetailPage({
   params,
 }: {
@@ -63,24 +80,40 @@ export default async function EditionDetailPage({
 
   const authors = edition.work?.work_authors?.map((wa) => wa.author) || [];
   const photos = edition.photos?.sort((a, b) => a.sort_order - b.sort_order) || [];
+  const featuredPhoto = photos[0];
+  const secondaryPhotos = photos.slice(1);
+  const subEditions = (await getSubEditions(edition.id)) || [];
 
   return (
     <div className="py-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif text-[#8b6f47] mb-2">
-            {edition.title}
-          </h1>
-          {edition.work?.original_title && (
-            <p className="text-xl text-[#6b6b6b] italic">
-              {edition.work.original_title}
-            </p>
-          )}
-          {authors.length > 0 && (
-            <p className="text-lg text-[#6b6b6b] mt-2">
-              by {authors.map((a) => a.name).join(", ")}
-            </p>
+      <div className="max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-[1.4fr_420px] gap-8 items-start mb-8">
+          <div>
+            <h1 className="text-4xl font-serif text-[#8b6f47] mb-2">
+              {edition.title}
+            </h1>
+            {edition.work?.original_title && (
+              <p className="text-xl text-[#6b6b6b] italic">
+                {edition.work.original_title}
+              </p>
+            )}
+            {authors.length > 0 && (
+              <p className="text-lg text-[#6b6b6b] mt-2">
+                by {authors.map((a) => a.name).join(", ")}
+              </p>
+            )}
+          </div>
+
+          {featuredPhoto && (
+            <div className="lg:justify-self-end">
+              <div className="bg-white border border-[#e0ddd0] rounded p-3 shadow-sm w-full max-w-[240px]">
+                <img
+                  src={getPhotoUrl(featuredPhoto.storage_path)}
+                  alt={featuredPhoto.caption || "Edition photo"}
+                  className="w-full h-[220px] object-contain rounded mx-auto"
+                />
+              </div>
+            </div>
           )}
         </div>
 
@@ -195,13 +228,13 @@ export default async function EditionDetailPage({
           )}
         </div>
 
-        {/* Photo Carousel */}
-        {photos.length > 0 && (
+        {/* Secondary Photo Carousel */}
+        {secondaryPhotos.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">
-              Photos
+              Other Photos
             </h2>
-            <ImageCarousel photos={photos} />
+            <ImageCarousel photos={secondaryPhotos} />
           </div>
         )}
 
@@ -261,6 +294,31 @@ export default async function EditionDetailPage({
                   </>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Sub-editions */}
+        {subEditions && subEditions.length > 0 && (
+          <div className="bg-white border border-[#e0ddd0] rounded p-8 mt-8">
+            <h2 className="text-2xl font-serif text-[#8b6f47] mb-4">Sub-editions</h2>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {subEditions.map((sub: any) => (
+                <a
+                  key={sub.id}
+                  href={`/sub-editions/${sub.id}`}
+                  className="flex items-center gap-4 p-3 border border-[#e9e7dd] rounded hover:shadow-sm"
+                >
+                  <div className="flex-1">
+                    <div className="text-[#8b6f47] font-medium">
+                      {sub.impression_label || `Variant ${sub.sequence_number || sub.id}`}
+                    </div>
+                    <div className="text-sm text-[#6b6b6b]">
+                      {sub.publication_year ? `${sub.publication_year}` : "—"}
+                    </div>
+                  </div>
+                </a>
+              ))}
             </div>
           </div>
         )}

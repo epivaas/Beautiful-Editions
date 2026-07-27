@@ -50,6 +50,7 @@ export type Edition = {
   work?: Work;
   publisher?: Publisher;
   series?: Series;
+  sub_editions?: Edition[];
 };
 
 export type Photo = {
@@ -70,4 +71,5 @@ export type EditionWithRelations = Edition & {
   publisher?: Publisher;
   series?: Series | null;
   photos?: Photo[];
+  sub_editions?: Edition[];
 };

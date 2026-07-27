@@ -48,4 +48,21 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     transform: translateY(-2px);
   }
+
+  .publisher-series-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  @media (min-width: 1024px) {
+    .publisher-series-grid {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+
+    .publisher-series-grid > div {
+      width: 50%;
+    }
+  }
 }
