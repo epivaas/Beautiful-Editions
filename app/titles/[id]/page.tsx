@@ -27,6 +27,22 @@ async function getWork(id: number): Promise<any | null> {
 }
 
 async function getEditionsForWork(workId: number): Promise<EditionWithRelations[]> {
+  const { data: links, error: linksError } = await supabase
+    .from("work_editions")
+    .select("edition_id")
+    .eq("work_id", workId);
+
+  if (linksError) {
+    console.error("Error fetching work-edition links:", linksError);
+    return [];
+  }
+
+  const editionIds = (links || []).map(link => link.edition_id).filter(Boolean);
+
+  if (editionIds.length === 0) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from("editions")
     .select(`
@@ -45,7 +61,7 @@ async function getEditionsForWork(workId: number): Promise<EditionWithRelations[
         sort_order
       )
     `)
-    .eq("work_id", workId)
+    .in("id", editionIds)
     .order("publication_year", { ascending: false });
 
   if (error) {

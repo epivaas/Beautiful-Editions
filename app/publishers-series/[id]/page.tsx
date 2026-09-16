@@ -2,6 +2,18 @@ import { supabase } from "@/utils/supabase";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
+interface WorkSummary {
+  id: number;
+  original_title: string;
+  english_title: string | null;
+}
+
+interface EditionWithWorks {
+  id: number;
+  publication_year: number | null;
+  works: WorkSummary[];
+}
+
 interface GroupedYear {
   year: string;
   works: Array<{
@@ -46,72 +58,131 @@ async function getSeries(id: number) {
   return data;
 }
 
-async function getEditionsForPublisher(publisherId: number) {
-  const { data, error } = await supabase
+async function getEditionsForPublisher(publisherId: number): Promise<EditionWithWorks[]> {
+  const { data: editionsData, error: editionsError } = await supabase
     .from("editions")
-    .select(`
-      id,
-      publication_year,
-      work:works (
-        id,
-        original_title,
-        english_title
-      )
-    `)
+    .select("id, publication_year")
     .eq("publisher_id", publisherId)
     .order("publication_year", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching publisher editions:", error);
+  if (editionsError) {
+    console.error("Error fetching publisher editions:", editionsError);
     return [];
   }
 
-  return data || [];
+  const editionIds = (editionsData || []).map((edition) => edition.id).filter(Boolean);
+
+  if (editionIds.length === 0) {
+    return [];
+  }
+
+  const { data: linksData, error: linksError } = await supabase
+    .from("work_editions")
+    .select("edition_id, work_id")
+    .in("edition_id", editionIds);
+
+  if (linksError) {
+    console.error("Error fetching publisher work links:", linksError);
+    return [];
+  }
+
+  const workIds = Array.from(new Set((linksData || []).map((link) => link.work_id).filter(Boolean)));
+  let worksById: Record<number, WorkSummary> = {};
+
+  if (workIds.length > 0) {
+    const { data: worksData, error: worksError } = await supabase
+      .from("works")
+      .select("id, original_title, english_title")
+      .in("id", workIds);
+
+    if (worksError) {
+      console.error("Error fetching publisher works:", worksError);
+    } else {
+      worksById = Object.fromEntries((worksData || []).map((work) => [work.id, work]));
+    }
+  }
+
+  return (editionsData || []).map((edition) => ({
+    id: edition.id,
+    publication_year: edition.publication_year,
+    works: (linksData || [])
+      .filter((link) => link.edition_id === edition.id)
+      .map((link) => worksById[link.work_id])
+      .filter(Boolean),
+  }));
 }
 
-async function getEditionsForSeries(seriesId: number) {
-  const { data, error } = await supabase
+async function getEditionsForSeries(seriesId: number): Promise<EditionWithWorks[]> {
+  const { data: editionsData, error: editionsError } = await supabase
     .from("editions")
-    .select(`
-      id,
-      publication_year,
-      work:works (
-        id,
-        original_title,
-        english_title
-      )
-    `)
+    .select("id, publication_year")
     .eq("series_id", seriesId)
     .order("publication_year", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching series editions:", error);
+  if (editionsError) {
+    console.error("Error fetching series editions:", editionsError);
     return [];
   }
 
-  return data || [];
+  const editionIds = (editionsData || []).map((edition) => edition.id).filter(Boolean);
+
+  if (editionIds.length === 0) {
+    return [];
+  }
+
+  const { data: linksData, error: linksError } = await supabase
+    .from("work_editions")
+    .select("edition_id, work_id")
+    .in("edition_id", editionIds);
+
+  if (linksError) {
+    console.error("Error fetching series work links:", linksError);
+    return [];
+  }
+
+  const workIds = Array.from(new Set((linksData || []).map((link) => link.work_id).filter(Boolean)));
+  let worksById: Record<number, WorkSummary> = {};
+
+  if (workIds.length > 0) {
+    const { data: worksData, error: worksError } = await supabase
+      .from("works")
+      .select("id, original_title, english_title")
+      .in("id", workIds);
+
+    if (worksError) {
+      console.error("Error fetching series works:", worksError);
+    } else {
+      worksById = Object.fromEntries((worksData || []).map((work) => [work.id, work]));
+    }
+  }
+
+  return (editionsData || []).map((edition) => ({
+    id: edition.id,
+    publication_year: edition.publication_year,
+    works: (linksData || [])
+      .filter((link) => link.edition_id === edition.id)
+      .map((link) => worksById[link.work_id])
+      .filter(Boolean),
+  }));
 }
 
-function groupByYear(editions: any[]): GroupedYear[] {
+function groupByYear(editions: EditionWithWorks[]): GroupedYear[] {
   const grouped = new Map<string, Array<{ edition_id: number; original_title: string; english_title: string | null }>>();
 
   editions.forEach((edition) => {
     const year = edition.publication_year ? String(edition.publication_year) : "Unknown";
-    const work = edition.work;
-
-    if (!work) {
-      return;
-    }
 
     if (!grouped.has(year)) {
       grouped.set(year, []);
     }
 
     const existingWorks = grouped.get(year) || [];
-    existingWorks.push({
-      edition_id: edition.id,
-      original_title: work.original_title,
-      english_title: work.english_title,
+    edition.works.forEach((work) => {
+      existingWorks.push({
+        edition_id: edition.id,
+        original_title: work.original_title,
+        english_title: work.english_title,
+      });
     });
   });
 
@@ -177,8 +248,8 @@ export default async function PublisherSeriesDetailPage({
               <div key={group.year}>
                 <h2 className="text-3xl font-serif text-[#8b6f47] mb-4">{group.year}</h2>
                 <ul className="space-y-3 pl-4 border-l border-[#e0ddd0]">
-                  {group.works.map((work) => (
-                    <li key={work.edition_id}>
+                  {group.works.map((work, index) => (
+                    <li key={`${work.edition_id}-${work.original_title}-${index}`}>
                       <Link
                         href={`/edition/${work.edition_id}`}
                         className="text-[#4f4a3d] hover:underline font-medium"

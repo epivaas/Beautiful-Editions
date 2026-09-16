@@ -3,7 +3,20 @@ import { Work } from "@/types/database";
 import Link from "next/link";
 import SearchBox from "@/components/SearchBox";
 
-async function getWorks(sortBy?: string): Promise<any[]> {
+interface AuthorLink {
+  id: number;
+  name: string;
+}
+
+type TitleWork = Work & {
+  work_authors?: { author: AuthorLink }[];
+};
+
+type TitleWorkWithCount = TitleWork & {
+  edition_count: number;
+};
+
+async function getWorks(): Promise<TitleWorkWithCount[]> {
   // Get works
   const { data: worksData, error: worksError } = await supabase
     .from("works")
@@ -16,7 +29,10 @@ async function getWorks(sortBy?: string): Promise<any[]> {
         )
       )
     `)
-    .order(sortBy === "sort_title" ? "sort_title" : "original_title", { ascending: true })
+    .order("sort_title", {
+      ascending: true,
+      nullsFirst: false,
+    })
     .limit(1000);
 
   if (worksError) {
@@ -24,10 +40,11 @@ async function getWorks(sortBy?: string): Promise<any[]> {
     return [];
   }
 
-  // Get edition counts
-  const workIds = (worksData || []).map(w => w.id);
+  // Get edition counts through the junction table
+  const fetchedWorks = (worksData || []) as TitleWork[];
+  const workIds = fetchedWorks.map((work) => work.id);
   const { data: countsData, error: countsError } = await supabase
-    .from("editions")
+    .from("work_editions")
     .select("work_id")
     .in("work_id", workIds);
 
@@ -37,12 +54,12 @@ async function getWorks(sortBy?: string): Promise<any[]> {
 
   // Count editions per work
   const editionCounts: Record<number, number> = {};
-  (countsData || []).forEach(edition => {
-    editionCounts[edition.work_id] = (editionCounts[edition.work_id] || 0) + 1;
+  (countsData || []).forEach((link) => {
+    editionCounts[link.work_id] = (editionCounts[link.work_id] || 0) + 1;
   });
 
   // Add counts to works
-  const works = (worksData || []).map(work => ({
+  const works: TitleWorkWithCount[] = fetchedWorks.map((work) => ({
     ...work,
     edition_count: editionCounts[work.id] || 0
   }));
@@ -50,24 +67,13 @@ async function getWorks(sortBy?: string): Promise<any[]> {
   return works;
 }
 
-export default async function TitlesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ sort?: string }> | { sort?: string };
-}) {
-  // Handle both Promise and object formats for Next.js compatibility
-  const params = searchParams instanceof Promise ? await searchParams : searchParams;
-  const works = await getWorks(params.sort);
+export default async function TitlesPage() {
+  const works = await getWorks();
 
   // Group works by first letter
-  const groupedWorks: Record<string, any[]> = {};
-  works.forEach(work => {
-    let titleToUse = work.original_title || '';
-    
-    // Use sort_title if available and if that's what we're sorting by
-    if (params.sort === 'sort_title' && work.sort_title) {
-      titleToUse = work.sort_title;
-    }
+  const groupedWorks: Record<string, TitleWorkWithCount[]> = {};
+  works.forEach((work) => {
+    const titleToUse = work.sort_title || work.original_title || '';
     
     const firstLetter = (titleToUse.charAt(0) || '').toUpperCase();
     if (!firstLetter) return; // Skip if no letter
@@ -94,22 +100,6 @@ export default async function TitlesPage({
           <h2 className="text-2xl font-serif text-[#8b6f47]">
             All Titles ({works.length})
           </h2>
-          <div className="mt-4">
-            <span className="text-sm text-[#6b6b6b] mr-2">Sort by:</span>
-            <Link
-              href="/titles"
-              className={`text-sm ${!params.sort || params.sort === 'original_title' ? 'text-[#8b6f47] font-medium' : 'text-[#6b6b6b] hover:underline'}`}
-            >
-              Original Title
-            </Link>
-            <span className="text-[#6b6b6b] mx-2">|</span>
-            <Link
-              href="/titles?sort=sort_title"
-              className={`text-sm ${params.sort === 'sort_title' ? 'text-[#8b6f47] font-medium' : 'text-[#6b6b6b] hover:underline'}`}
-            >
-              Sort Title
-            </Link>
-          </div>
         </div>
 
         {works.length === 0 ? (
@@ -125,9 +115,11 @@ export default async function TitlesPage({
                 </h3>
                 <ul className="list-disc list-inside space-y-3">
                   {groupedWorks[letter].map((work) => {
-                    const authors = (work as any).work_authors?.map((wa: any) => wa.author) || [];
-                    const authorNames = authors.map((a: any) => a.name).join(", ");
-                    const hasEnglishTitle = work.english_title && work.english_title !== work.original_title;
+                    const authors = work.work_authors?.map((workAuthor) => workAuthor.author) || [];
+                    const authorNames = authors.map((author) => author.name).join(", ");
+                    const displayedTitle = work.sort_title || work.original_title;
+                    const hasOriginalTitle = displayedTitle !== work.original_title;
+                    const hasEnglishTitle = work.english_title && work.english_title !== displayedTitle;
 
                     return (
                       <li key={work.id} className="mb-4">
@@ -136,12 +128,12 @@ export default async function TitlesPage({
                             href={`/titles/${work.id}`}
                             className="text-[#8b6f47] hover:underline font-medium text-lg"
                           >
-                            {work.original_title}
+                            {displayedTitle}
                           </Link>
                           {authorNames && (
                             <span className="text-[#6b6b6b]"> by </span>
                           )}
-                          {authors.map((author: any, index: number) => (
+                          {authors.map((author, index) => (
                             <span key={author.id}>
                               <Link
                                 href={`/author/${author.id}`}
@@ -153,9 +145,15 @@ export default async function TitlesPage({
                             </span>
                           ))}
                           <span className="text-[#6b6b6b] ml-2">
+                            {" "}
                             ({work.edition_count} edition{work.edition_count !== 1 ? 's' : ''})
                           </span>
                         </div>
+                        {hasOriginalTitle && (
+                          <div className="text-[#6b6b6b] text-sm ml-6 mt-1">
+                            {work.original_title}
+                          </div>
+                        )}
                         {hasEnglishTitle && (
                           <div className="text-[#6b6b6b] italic text-sm ml-6 mt-1">
                             {work.english_title}

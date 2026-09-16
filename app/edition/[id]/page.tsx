@@ -1,32 +1,96 @@
 import { supabase } from "@/utils/supabase";
+import { supabaseUrl } from "@/utils/supabase";
 import { EditionWithRelations } from "@/types/database";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import ImageCarousel from "@/components/ImageCarousel";
+import Image from "next/image";
+
+interface SubEdition {
+  id: number;
+  edition_id: number;
+  impression_label?: string | null;
+  sequence_number?: number | null;
+  publication_year?: number | null;
+  catalogue_number?: string | null;
+  is_limited_edition?: boolean | null;
+  limited_edition_count?: number | null;
+  publisher_url?: string | null;
+}
 
 function getPhotoUrl(storagePath: string) {
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Book-photos/${storagePath}`;
+  return `${supabaseUrl}/storage/v1/object/public/Book-photos/${storagePath}`;
+}
+
+function firstRelation<T>(relation: T | T[] | null | undefined): T | undefined {
+  return Array.isArray(relation) ? relation[0] : relation ?? undefined;
+}
+
+function formatValue(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return "NULL";
+  }
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+  return String(value);
+}
+
+function hasValidString(value: unknown) {
+  return (
+    typeof value === "string" &&
+    value.trim() !== "" &&
+    value.trim().toUpperCase() !== "NULL"
+  );
+}
+
+function renderField(label: string, value: unknown, opts?: { link?: boolean }) {
+  return (
+    <div className="mb-4">
+      <h3 className="font-semibold text-[#8b6f47] mb-2">{label}</h3>
+      {opts?.link && hasValidString(value) ? (
+        <a
+          href={String(value)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#8b6f47] hover:underline"
+        >
+          {String(value)}
+        </a>
+      ) : (
+        <p className="text-[#6b6b6b]">{formatValue(value)}</p>
+      )}
+    </div>
+  );
 }
 
 async function getEdition(id: number): Promise<EditionWithRelations | null> {
-  const { data, error } = await supabase
+  const { data: editionData, error: editionError } = await supabase
     .from("editions")
     .select(`
-      *,
-      work:works (
-        id,
-        original_title,
-        english_title,
-        original_publication_year,
-        original_language,
-        wiki_link,
-        work_authors (
-          author:authors (
-            id,
-            name,
-            wiki_link
-          )
-        )
-      ),
+      id,
+      publisher_id,
+      series_id,
+      title,
+      isbn,
+      publication_year,
+      language,
+      slipcase,
+      dustjacket,
+      clamshell,
+      is_limited_edition,
+      limited_edition_count,
+      publisher_url,
+      sequence_number,
+      catalogue_number,
+      size_dimensions,
+      pages_description,
+      binding_type,
+      typeface,
+      printer,
+      binder,
+      details,
+      notes,
       publisher:publishers (
         id,
         name
@@ -45,19 +109,105 @@ async function getEdition(id: number): Promise<EditionWithRelations | null> {
     .eq("id", id)
     .single();
 
-  if (error || !data) {
+  if (editionError || !editionData) {
     return null;
   }
 
-  return data as EditionWithRelations;
+  const { data: contributorsData, error: contributorsError } = await supabase
+    .from("edition_contributors")
+    .select(`
+      role,
+      contributor:contributors (
+        id,
+        name,
+        wiki_link
+      )
+    `)
+    .eq("edition_id", id)
+    .order("role", { ascending: true });
+
+  if (contributorsError) {
+    console.error("Error fetching edition contributors:", contributorsError);
+  }
+
+  const { data: workLinkData, error: workLinkError } = await supabase
+    .from("work_editions")
+    .select("work_id")
+    .eq("edition_id", id)
+    .limit(1)
+    .single();
+
+  if (workLinkError || !workLinkData?.work_id) {
+    return {
+      ...editionData,
+      publisher: firstRelation(editionData.publisher),
+      series: firstRelation(editionData.series),
+      work: undefined,
+      contributors: (contributorsData || []).map((entry) => ({
+        role: entry.role,
+        contributor: firstRelation(entry.contributor),
+      })),
+    } as unknown as EditionWithRelations;
+  }
+
+  const { data: workData, error: workError } = await supabase
+    .from("works")
+    .select(`
+      id,
+      original_title,
+      english_title,
+      original_publication_year,
+      original_language,
+      wiki_link,
+      notes,
+      sort_title,
+      work_authors (
+        author:authors (
+          id,
+          name,
+          wiki_link
+        )
+      )
+    `)
+    .eq("id", workLinkData.work_id)
+    .single();
+
+  if (workError || !workData) {
+    return {
+      ...editionData,
+      publisher: firstRelation(editionData.publisher),
+      series: firstRelation(editionData.series),
+      work: undefined,
+      contributors: (contributorsData || []).map((entry) => ({
+        role: entry.role,
+        contributor: firstRelation(entry.contributor),
+      })),
+    } as unknown as EditionWithRelations;
+  }
+
+  return {
+    ...editionData,
+    publisher: firstRelation(editionData.publisher),
+    series: firstRelation(editionData.series),
+    work: {
+      ...workData,
+      work_authors: (workData.work_authors || [])
+        .map((entry) => ({ author: firstRelation(entry.author) }))
+        .filter((entry): entry is { author: NonNullable<typeof entry.author> } => Boolean(entry.author)),
+    },
+    contributors: (contributorsData || []).map((entry) => ({
+      role: entry.role,
+      contributor: firstRelation(entry.contributor),
+    })),
+  } as unknown as EditionWithRelations;
 }
 
-async function getSubEditions(parentId: number) {
+async function getSubEditions(parentId: number): Promise<SubEdition[]> {
   // The `sub_editions` table contains rows that reference `editions` via `edition_id`.
   // Query `sub_editions` for rows where `edition_id` = parentId and return them.
   const { data, error } = await supabase
     .from("sub_editions")
-    .select(`id, edition_id, impression_label, sequence_number, publication_year, catalogue_number`)
+    .select(`*`)
     .eq("edition_id", parentId)
     .order("sequence_number", { ascending: true });
 
@@ -89,27 +239,69 @@ export default async function EditionDetailPage({
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-[1.4fr_420px] gap-8 items-start mb-8">
           <div>
-            <h1 className="text-4xl font-serif text-[#8b6f47] mb-2">
+            <h1 className="text-4xl md:text-5xl font-serif text-[#8b6f47] mb-4 leading-tight">
               {edition.title}
             </h1>
+
             {edition.work?.original_title && (
-              <p className="text-xl text-[#6b6b6b] italic">
-                {edition.work.original_title}
+              <p className="text-xl text-[#6b6b6b] italic mb-2">
+                Original title: {edition.work.original_title}
               </p>
             )}
+
+            {edition.work?.english_title &&
+              edition.work.english_title !== edition.work.original_title && (
+                <p className="text-lg text-[#6b6b6b] mb-2">
+                  English title: {edition.work.english_title}
+                </p>
+              )}
+          </div>
+
+          <div className="lg:justify-self-end w-full max-w-[280px]">
+            {edition.publisher && (
+              <div className="mb-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-[#8b6f47] mb-1">
+                  Publisher
+                </p>
+                <Link
+                  href={`/publisher/${edition.publisher.id}`}
+                  className="text-lg font-medium text-[#4f4a3d] hover:text-[#8b6f47] hover:underline"
+                >
+                  {edition.publisher.name}
+                </Link>
+              </div>
+            )}
+
             {authors.length > 0 && (
-              <p className="text-lg text-[#6b6b6b] mt-2">
-                by {authors.map((a) => a.name).join(", ")}
-              </p>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-[#8b6f47] mb-1">
+                  Author{authors.length > 1 ? "s" : ""}
+                </p>
+                <div className="flex flex-wrap gap-x-2 gap-y-1 text-lg text-[#4f4a3d]">
+                  {authors.map((author, index) => (
+                    <span key={author.id || `${author.name}-${index}`} className="flex items-center gap-2">
+                      <Link
+                        href={`/author/${author.id}`}
+                        className="font-medium hover:text-[#8b6f47] hover:underline"
+                      >
+                        {author.name}
+                      </Link>
+                      {index < authors.length - 1 && <span className="text-[#6b6b6b]">,</span>}
+                    </span>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 
           {featuredPhoto && (
             <div className="lg:justify-self-end">
-              <div className="bg-white border border-[#e0ddd0] rounded p-3 shadow-sm w-full max-w-[240px]">
-                <img
+              <div className="relative bg-white border border-[#e0ddd0] rounded p-3 shadow-sm w-full max-w-[240px] h-[244px]">
+                <Image
+                  fill
                   src={getPhotoUrl(featuredPhoto.storage_path)}
                   alt={featuredPhoto.caption || "Edition photo"}
+                  sizes="(max-width: 1024px) 100vw, 240px"
                   className="w-full h-[220px] object-contain rounded mx-auto"
                 />
               </div>
@@ -122,111 +314,148 @@ export default async function EditionDetailPage({
           <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">
             Edition Details
           </h2>
-          
+
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-semibold text-[#8b6f47] mb-2">Publisher</h3>
-              <p className="text-[#6b6b6b] mb-4">
-                {edition.publisher?.name || "—"}
-              </p>
-
-              {edition.series && (
-                <>
-                  <h3 className="font-semibold text-[#8b6f47] mb-2">Series</h3>
-                  <p className="text-[#6b6b6b] mb-4">{edition.series.name}</p>
-                </>
-              )}
-
-              <h3 className="font-semibold text-[#8b6f47] mb-2">Publication Year</h3>
-              <p className="text-[#6b6b6b] mb-4">
-                {edition.publication_year || "—"}
-              </p>
-
-              <h3 className="font-semibold text-[#8b6f47] mb-2">Language</h3>
-              <p className="text-[#6b6b6b] mb-4">
-                {edition.language || "—"}
-              </p>
-
-              {edition.isbn && (
-                <>
-                  <h3 className="font-semibold text-[#8b6f47] mb-2">ISBN</h3>
-                  <p className="text-[#6b6b6b] mb-4">{edition.isbn}</p>
-                </>
-              )}
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Edition ID</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.id)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Work</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.work?.original_title || edition.work?.id)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Publisher</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.publisher?.name)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Series</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.series?.name)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Title</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.title)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">ISBN</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.isbn)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Publication Year</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.publication_year)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Language</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.language)}</p>
+              </div>
             </div>
 
             <div>
-              {edition.size_dimensions && (
-                <>
-                  <h3 className="font-semibold text-[#8b6f47] mb-2">Dimensions</h3>
-                  <p className="text-[#6b6b6b] mb-4">{edition.size_dimensions}</p>
-                </>
-              )}
-
-              {edition.pages_description && (
-                <>
-                  <h3 className="font-semibold text-[#8b6f47] mb-2">Pages</h3>
-                  <p className="text-[#6b6b6b] mb-4">{edition.pages_description}</p>
-                </>
-              )}
-
-              {edition.binding_type && (
-                <>
-                  <h3 className="font-semibold text-[#8b6f47] mb-2">Binding</h3>
-                  <p className="text-[#6b6b6b] mb-4">{edition.binding_type}</p>
-                </>
-              )}
-
-              <div className="flex gap-4 mb-4">
-                {edition.slipcase && (
-                  <span className="px-3 py-1 bg-[#f9f8f0] border border-[#e0ddd0] rounded text-sm">
-                    Slipcase
-                  </span>
-                )}
-                {edition.dustjacket && (
-                  <span className="px-3 py-1 bg-[#f9f8f0] border border-[#e0ddd0] rounded text-sm">
-                    Dust Jacket
-                  </span>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Publisher URL</h3>
+                {edition.publisher_url ? (
+                  <a
+                    href={edition.publisher_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#8b6f47] hover:underline"
+                  >
+                    {edition.publisher_url}
+                  </a>
+                ) : (
+                  <p className="text-[#6b6b6b]">{formatValue(edition.publisher_url)}</p>
                 )}
               </div>
-
-              {edition.typeface && (
-                <>
-                  <h3 className="font-semibold text-[#8b6f47] mb-2">Typeface</h3>
-                  <p className="text-[#6b6b6b] mb-4">{edition.typeface}</p>
-                </>
-              )}
-
-              {edition.printer && (
-                <>
-                  <h3 className="font-semibold text-[#8b6f47] mb-2">Printer</h3>
-                  <p className="text-[#6b6b6b] mb-4">{edition.printer}</p>
-                </>
-              )}
-
-              {edition.binder && (
-                <>
-                  <h3 className="font-semibold text-[#8b6f47] mb-2">Binder</h3>
-                  <p className="text-[#6b6b6b] mb-4">{edition.binder}</p>
-                </>
-              )}
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Sequence Number</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.sequence_number)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Catalogue Number</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.catalogue_number)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Slipcase</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.slipcase)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Dustjacket</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.dustjacket)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Clamshell</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.clamshell)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Limited Edition</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.is_limited_edition)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Limited Edition Count</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.limited_edition_count)}</p>
+              </div>
             </div>
           </div>
 
-          {edition.details && (
-            <div className="mt-6 pt-6 border-t border-[#e0ddd0]">
-              <h3 className="font-semibold text-[#8b6f47] mb-2">Details</h3>
-              <p className="text-[#6b6b6b] whitespace-pre-line">{edition.details}</p>
+          <div className="grid md:grid-cols-2 gap-6 mt-6">
+            <div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Size / Dimensions</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.size_dimensions)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Pages Description</h3>
+                <p className="text-[#6b6b6b] whitespace-pre-line">{formatValue(edition.pages_description)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Binding Type</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.binding_type)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Typeface</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.typeface)}</p>
+              </div>
             </div>
-          )}
-
-          {edition.notes && (
-            <div className="mt-6 pt-6 border-t border-[#e0ddd0]">
-              <h3 className="font-semibold text-[#8b6f47] mb-2">Notes</h3>
-              <p className="text-[#6b6b6b] whitespace-pre-line">{edition.notes}</p>
+            <div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Printer</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.printer)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Binder</h3>
+                <p className="text-[#6b6b6b]">{formatValue(edition.binder)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Details</h3>
+                <p className="text-[#6b6b6b] whitespace-pre-line">{formatValue(edition.details)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Notes</h3>
+                <p className="text-[#6b6b6b] whitespace-pre-line">{formatValue(edition.notes)}</p>
+              </div>
             </div>
-          )}
+          </div>
         </div>
+
+        {/* Contributors */}
+        {edition.contributors && edition.contributors.length > 0 && (
+          <div className="bg-white border border-[#e0ddd0] rounded p-8 mb-8">
+            <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">Contributors</h2>
+            <div className="grid gap-3">
+              {edition.contributors.map((entry, index) => (
+                <div key={`${entry.contributor?.id || index}-${entry.role || "role"}`} className="flex flex-wrap items-center gap-2 border-b border-[#f0eee4] pb-3 last:border-b-0 last:pb-0">
+                  <span className="font-medium text-[#4f4a3d]">
+                    {entry.contributor?.name || "Unknown contributor"}
+                  </span>
+                  {entry.role && (
+                    <span className="text-sm text-[#6b6b6b]">({entry.role})</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Secondary Photo Carousel */}
         {secondaryPhotos.length > 0 && (
@@ -239,85 +468,87 @@ export default async function EditionDetailPage({
         )}
 
         {/* Work Information */}
-        {edition.work && (
-          <div className="bg-white border border-[#e0ddd0] rounded p-8">
-            <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">
-              Work Information
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                {edition.work.english_title && (
-                  <>
-                    <h3 className="font-semibold text-[#8b6f47] mb-2">
-                      English Title
-                    </h3>
-                    <p className="text-[#6b6b6b] mb-4">
-                      {edition.work.english_title}
-                    </p>
-                  </>
-                )}
-                {edition.work.original_publication_year && (
-                  <>
-                    <h3 className="font-semibold text-[#8b6f47] mb-2">
-                      Original Publication Year
-                    </h3>
-                    <p className="text-[#6b6b6b] mb-4">
-                      {edition.work.original_publication_year}
-                    </p>
-                  </>
-                )}
-              </div>
-              <div>
-                {edition.work.original_language && (
-                  <>
-                    <h3 className="font-semibold text-[#8b6f47] mb-2">
-                      Original Language
-                    </h3>
-                    <p className="text-[#6b6b6b] mb-4">
-                      {edition.work.original_language}
-                    </p>
-                  </>
-                )}
-                {edition.work.wiki_link && (
-                  <>
-                    <h3 className="font-semibold text-[#8b6f47] mb-2">
-                      Reference
-                    </h3>
-                    <a
-                      href={edition.work.wiki_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#8b6f47] hover:underline"
-                    >
-                      View Source
-                    </a>
-                  </>
-                )}
-              </div>
+        <div className="bg-white border border-[#e0ddd0] rounded p-8">
+          <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">
+            Work Information
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              {renderField("Work ID", edition.work?.id)}
+              {renderField("Original Title", edition.work?.original_title)}
+              {renderField("English Title", edition.work?.english_title)}
+              {renderField("Original Publication Year", edition.work?.original_publication_year)}
+            </div>
+            <div>
+              {renderField("Original Language", edition.work?.original_language)}
+              {renderField("Reference", edition.work?.wiki_link, { link: true })}
+              {renderField("Sort Title", edition.work?.sort_title)}
+              {renderField("Work Notes", edition.work?.notes)}
             </div>
           </div>
-        )}
+        </div>
 
         {/* Sub-editions */}
         {subEditions && subEditions.length > 0 && (
           <div className="bg-white border border-[#e0ddd0] rounded p-8 mt-8">
             <h2 className="text-2xl font-serif text-[#8b6f47] mb-4">Sub-editions</h2>
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {subEditions.map((sub: any) => (
-                <a
+            <div className="grid gap-4">
+              {subEditions.map((sub) => (
+                <div
                   key={sub.id}
-                  href={`/sub-editions/${sub.id}`}
-                  className="flex items-center gap-4 p-3 border border-[#e9e7dd] rounded hover:shadow-sm"
+                  className="p-4 border border-[#e9e7dd] rounded hover:shadow-sm"
                 >
-                  <div className="flex-1">
-                    <div className="text-[#8b6f47] font-medium">
-                      {sub.impression_label || `Variant ${sub.sequence_number || sub.id}`}
+                  <div className="flex flex-col gap-2">
+                    <div className="text-[#8b6f47] font-medium text-lg">
+                      {sub.impression_label ? sub.impression_label : `Variant ${formatValue(sub.sequence_number || sub.id)}`}
                     </div>
-                    <div className="text-sm text-[#6b6b6b]">
-                      {sub.publication_year ? `${sub.publication_year}` : "—"}
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="font-semibold text-[#8b6f47] mb-1">Sub-edition ID</h3>
+                        <p className="text-[#6b6b6b]">{formatValue(sub.id)}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-[#8b6f47] mb-1">Edition ID</h3>
+                        <p className="text-[#6b6b6b]">{formatValue(sub.edition_id)}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-[#8b6f47] mb-1">Sequence Number</h3>
+                        <p className="text-[#6b6b6b]">{formatValue(sub.sequence_number)}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-[#8b6f47] mb-1">Publication Year</h3>
+                        <p className="text-[#6b6b6b]">{formatValue(sub.publication_year)}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-[#8b6f47] mb-1">Catalogue Number</h3>
+                        <p className="text-[#6b6b6b]">{formatValue(sub.catalogue_number)}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-[#8b6f47] mb-1">Limited Edition</h3>
+                        <p className="text-[#6b6b6b]">{formatValue(sub.is_limited_edition)}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-[#8b6f47] mb-1">Limited Edition Count</h3>
+                        <p className="text-[#6b6b6b]">{formatValue(sub.limited_edition_count)}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-[#8b6f47] mb-1">Publisher URL</h3>
+                        {sub.publisher_url ? (
+                          <a
+                            href={sub.publisher_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#8b6f47] hover:underline"
+                          >
+                            {formatValue(sub.publisher_url)}
+                          </a>
+                        ) : (
+                          <p className="text-[#6b6b6b]">{formatValue(sub.publisher_url)}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           </div>

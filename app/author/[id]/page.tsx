@@ -48,35 +48,38 @@ async function getWorksByAuthor(authorId: number) {
     return [];
   }
 
-  const { data: editions, error: editionsError } = await supabase
-    .from("editions")
+  const { data: workEditions, error: editionsError } = await supabase
+    .from("work_editions")
     .select(`
-      id,
-      title,
-      publication_year,
       work_id,
-      publisher:publishers (
+      edition:editions (
         id,
-        name
-      ),
-      series:series (
-        id,
-        name
+        title,
+        publication_year,
+        publisher:publishers (id, name),
+        series:series (id, name)
       )
     `)
-    .in("work_id", workIds)
-    .order("publication_year", { ascending: false });
+    .in("work_id", workIds);
 
   if (editionsError) {
     console.error("Error fetching editions:", editionsError);
   }
 
   const editionsByWork = new Map<number, any[]>();
-  (editions || []).forEach((edition: any) => {
-    if (!editionsByWork.has(edition.work_id)) {
-      editionsByWork.set(edition.work_id, []);
+  (workEditions || []).forEach((workEdition: any) => {
+    if (!workEdition.edition) {
+      return;
     }
-    editionsByWork.get(edition.work_id)?.push(edition);
+
+    if (!editionsByWork.has(workEdition.work_id)) {
+      editionsByWork.set(workEdition.work_id, []);
+    }
+    editionsByWork.get(workEdition.work_id)?.push(workEdition.edition);
+  });
+
+  editionsByWork.forEach((editions) => {
+    editions.sort((a, b) => (b.publication_year || 0) - (a.publication_year || 0));
   });
 
   return (works || []).map((work: any) => ({
@@ -137,6 +140,7 @@ export default async function AuthorPage({
                   {index > 0 && <div className="border-t-2 border-[#d8cfbe] mb-6" />}
                   <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between mb-3">
                     <div>
+                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                       <Link
                         href={`/titles/${work.id}`}
                         className="text-[#8b6f47] hover:underline font-semibold text-2xl tracking-wide"
@@ -144,14 +148,15 @@ export default async function AuthorPage({
                         {work.original_title}
                       </Link>
                       {work.english_title && (
-                        <span className="text-[#6b6b6b] italic ml-2 font-serif">
-                          ({work.english_title})
+                        <span className="text-[#6b6b6b] italic font-serif">
+                          {"\u00a0"}({work.english_title})
                         </span>
                       )}
+                      </div>
                       {work.original_publication_year && (
-                        <p className="text-sm text-[#6b6b6b] mt-1">
+                        <div className="text-sm text-[#6b6b6b] mt-2">
                           Originally published: {work.original_publication_year}
-                        </p>
+                        </div>
                       )}
                     </div>
                     <div className="text-sm font-medium text-[#8b6f47] whitespace-nowrap">
@@ -176,9 +181,9 @@ export default async function AuthorPage({
                                 {edition.title}
                               </Link>
                               <div className="text-sm text-[#8b6f47] flex flex-wrap items-center gap-x-3">
-                                {edition.publisher?.name && <span>{edition.publisher.name}</span>}
+                                {edition.publisher?.name && <span>{"\u00a0"}{edition.publisher.name}</span>}
                                 {edition.series?.name && (
-                                  <span className="italic">{edition.series.name}</span>
+                                  <span className="italic">{"\u00a0"}{edition.series.name}</span>
                                 )}
                               </div>
                             </div>

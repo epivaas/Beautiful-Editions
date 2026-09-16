@@ -25,11 +25,12 @@ export type Work = {
   original_publication_year: string | null;
   original_language: string | null;
   wiki_link: string | null;
+  notes: string | null;
+  sort_title: string | null;
 };
 
 export type Edition = {
   id: number;
-  work_id: number;
   publisher_id: number;
   series_id: number | null;
   title: string;
@@ -38,6 +39,12 @@ export type Edition = {
   language: string | null;
   slipcase: boolean;
   dustjacket: boolean;
+  clamshell: boolean;
+  is_limited_edition: boolean;
+  limited_edition_count: number | null;
+  publisher_url: string | null;
+  sequence_number: number | null;
+  catalogue_number: string | null;
   size_dimensions: string | null;
   pages_description: string | null;
   binding_type: string | null;
@@ -62,6 +69,15 @@ export type Photo = {
   sub_edition_id: number | null;
 };
 
+export type EditionContributorLink = {
+  role: string | null;
+  contributor?: {
+    id: number;
+    name: string;
+    wiki_link: string | null;
+  } | null;
+};
+
 export type EditionWithRelations = Edition & {
   work?: Work & {
     work_authors?: {
@@ -72,4 +88,5 @@ export type EditionWithRelations = Edition & {
   series?: Series | null;
   photos?: Photo[];
   sub_editions?: Edition[];
+  contributors?: EditionContributorLink[];
 };

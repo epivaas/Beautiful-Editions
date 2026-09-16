@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { getMainPhoto, getAuthorName, getEditionInfo } from "./lib/editionUtils";
+import { supabaseUrl } from "@/utils/supabase";
 
 interface Photo {
   id: number;
@@ -118,12 +120,12 @@ export default function Home() {
                 >
                   {photo ? (
                     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                      <img
-                        src={`https://avqqokcmdcilngoqsegf.supabase.co/storage/v1/object/public/Book-photos/${photo.storage_path}`}
+                      <Image
+                        fill
+                        src={`${supabaseUrl}/storage/v1/object/public/Book-photos/${photo.storage_path}`}
                         alt={edition.title}
+                        sizes="(max-width: 768px) 100vw, 25vw"
                         style={{
-                          width: '100%',
-                          height: '100%',
                           objectFit: 'cover'
                         }}
                       />

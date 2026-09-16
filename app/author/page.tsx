@@ -6,7 +6,6 @@ interface AuthorSummary {
   id: number;
   name: string;
   work_count: number;
-  edition_count: number;
 }
 
 function getLastName(name?: string | null) {
@@ -47,14 +46,6 @@ async function getAuthors(): Promise<AuthorSummary[]> {
     console.error("Error fetching work authors:", workAuthorsError);
   }
 
-  const { data: editionsData, error: editionsError } = await supabase
-    .from("editions")
-    .select("work_id");
-
-  if (editionsError) {
-    console.error("Error fetching editions:", editionsError);
-  }
-
   const worksByAuthor = new Map<number, Set<number>>();
   (workAuthorsData || []).forEach(({ author_id, work_id }) => {
     if (!worksByAuthor.has(author_id)) {
@@ -63,22 +54,13 @@ async function getAuthors(): Promise<AuthorSummary[]> {
     worksByAuthor.get(author_id)?.add(work_id);
   });
 
-  const editionCountsByWork = new Map<number, number>();
-  (editionsData || []).forEach(({ work_id }) => {
-    editionCountsByWork.set(work_id, (editionCountsByWork.get(work_id) || 0) + 1);
-  });
-
   return (authorsData || []).map((author) => {
     const workIds = worksByAuthor.get(author.id) || new Set<number>();
-    const editionCount = Array.from(workIds).reduce((total, workId) => {
-      return total + (editionCountsByWork.get(workId) || 0);
-    }, 0);
 
     return {
       id: author.id,
       name: author.name,
       work_count: workIds.size,
-      edition_count: editionCount,
     };
   });
 }
@@ -115,7 +97,7 @@ export default async function AuthorsPage() {
             All Authors ({authors.length})
           </h2>
           <p className="mt-2 text-sm text-[#6b6b6b]">
-            Grouped by surname with the number of works and editions.
+            Grouped by surname with the number of works.
           </p>
         </div>
 
@@ -144,7 +126,7 @@ export default async function AuthorsPage() {
                           </Link>
                         </div>
                         <div className="text-sm text-[#6b6b6b]">
-                          {author.work_count} title{author.work_count !== 1 ? "s" : ""}, {author.edition_count} edition{author.edition_count !== 1 ? "s" : ""}
+                          {author.work_count} title{author.work_count !== 1 ? "s" : ""}
                         </div>
                       </li>
                     ))}
