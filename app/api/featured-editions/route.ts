@@ -21,13 +21,15 @@ export async function GET() {
         title,
         publisher_id,
         series_id,
-        work_id,
         photos (
           id,
           storage_path,
           sort_order,
           copyright_statement,
           is_main
+        ),
+        work_editions (
+          work_id
         )
       `)
       .limit(100);
@@ -41,7 +43,14 @@ export async function GET() {
     }
 
     // Get work IDs from editions
-    const workIds = [...new Set((editions || []).map((e: any) => e.work_id).filter(Boolean))];
+    const workIds = [
+      ...new Set(
+        (editions || [])
+          .flatMap((e: any) => e.work_editions || [])
+          .map((link: any) => link.work_id)
+          .filter(Boolean)
+      ),
+    ];
     const publisherIds = [...new Set((editions || []).map((e: any) => e.publisher_id).filter(Boolean))];
     const seriesIds = [...new Set((editions || []).map((e: any) => e.series_id).filter(Boolean))];
 
@@ -103,7 +112,7 @@ export async function GET() {
     const enrichedEditions = (editions || [])
       .map((e: any) => ({
         ...e,
-        work: works[e.work_id],
+        work: works[e.work_editions?.[0]?.work_id],
         publisher: publishers[e.publisher_id],
         series: series[e.series_id],
       }))
