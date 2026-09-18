@@ -8,14 +8,11 @@ import Image from "next/image";
 
 interface SubEdition {
   id: number;
-  edition_id: number;
   impression_label?: string | null;
-  sequence_number?: number | null;
   publication_year?: number | null;
   catalogue_number?: string | null;
   is_limited_edition?: boolean | null;
   limited_edition_count?: number | null;
-  publisher_url?: string | null;
 }
 
 function getPhotoUrl(storagePath: string) {
@@ -207,7 +204,14 @@ async function getSubEditions(parentId: number): Promise<SubEdition[]> {
   // Query `sub_editions` for rows where `edition_id` = parentId and return them.
   const { data, error } = await supabase
     .from("sub_editions")
-    .select(`*`)
+    .select(`
+      id,
+      impression_label,
+      publication_year,
+      catalogue_number,
+      is_limited_edition,
+      limited_edition_count
+    `)
     .eq("edition_id", parentId)
     .order("sequence_number", { ascending: true });
 
@@ -492,64 +496,38 @@ export default async function EditionDetailPage({
         {subEditions && subEditions.length > 0 && (
           <div className="bg-white border border-[#e0ddd0] rounded p-8 mt-8">
             <h2 className="text-2xl font-serif text-[#8b6f47] mb-4">Sub-editions</h2>
-            <div className="grid gap-4">
-              {subEditions.map((sub) => (
-                <div
-                  key={sub.id}
-                  className="p-4 border border-[#e9e7dd] rounded hover:shadow-sm"
-                >
-                  <div className="flex flex-col gap-2">
-                    <div className="text-[#8b6f47] font-medium text-lg">
-                      {sub.impression_label ? sub.impression_label : `Variant ${formatValue(sub.sequence_number || sub.id)}`}
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <h3 className="font-semibold text-[#8b6f47] mb-1">Sub-edition ID</h3>
-                        <p className="text-[#6b6b6b]">{formatValue(sub.id)}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-[#8b6f47] mb-1">Edition ID</h3>
-                        <p className="text-[#6b6b6b]">{formatValue(sub.edition_id)}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-[#8b6f47] mb-1">Sequence Number</h3>
-                        <p className="text-[#6b6b6b]">{formatValue(sub.sequence_number)}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-[#8b6f47] mb-1">Publication Year</h3>
-                        <p className="text-[#6b6b6b]">{formatValue(sub.publication_year)}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-[#8b6f47] mb-1">Catalogue Number</h3>
-                        <p className="text-[#6b6b6b]">{formatValue(sub.catalogue_number)}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-[#8b6f47] mb-1">Limited Edition</h3>
-                        <p className="text-[#6b6b6b]">{formatValue(sub.is_limited_edition)}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-[#8b6f47] mb-1">Limited Edition Count</h3>
-                        <p className="text-[#6b6b6b]">{formatValue(sub.limited_edition_count)}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-[#8b6f47] mb-1">Publisher URL</h3>
-                        {sub.publisher_url ? (
-                          <a
-                            href={sub.publisher_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#8b6f47] hover:underline"
-                          >
-                            {formatValue(sub.publisher_url)}
-                          </a>
-                        ) : (
-                          <p className="text-[#6b6b6b]">{formatValue(sub.publisher_url)}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <thead className="border-b border-[#e0ddd0] text-xs uppercase tracking-[0.12em] text-[#8b6f47]">
+                  <tr>
+                    <th className="px-4 py-3 font-semibold">id</th>
+                    <th className="px-4 py-3 font-semibold">impression_label</th>
+                    <th className="px-4 py-3 font-semibold">publication_year</th>
+                    <th className="px-4 py-3 font-semibold">catalogue_number</th>
+                    <th className="px-4 py-3 font-semibold">is_limited_edition</th>
+                    <th className="px-4 py-3 font-semibold">limited_edition_count</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subEditions.map((sub) => (
+                    <tr key={sub.id} className="border-b border-[#f0eee4] last:border-b-0">
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/sub-editions/${sub.id}`}
+                          className="text-[#8b6f47] hover:underline"
+                        >
+                          {formatValue(sub.id)}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3 text-[#6b6b6b]">{formatValue(sub.impression_label)}</td>
+                      <td className="px-4 py-3 text-[#6b6b6b]">{formatValue(sub.publication_year)}</td>
+                      <td className="px-4 py-3 text-[#6b6b6b]">{formatValue(sub.catalogue_number)}</td>
+                      <td className="px-4 py-3 text-[#6b6b6b]">{formatValue(sub.is_limited_edition)}</td>
+                      <td className="px-4 py-3 text-[#6b6b6b]">{formatValue(sub.limited_edition_count)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

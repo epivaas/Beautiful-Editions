@@ -2,29 +2,43 @@ import { supabase } from "@/utils/supabase";
 import ImageCarousel from "@/components/ImageCarousel";
 import { notFound } from "next/navigation";
 
+function formatValue(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return "NULL";
+  }
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+  return String(value);
+}
+
 function getPhotoUrl(storagePath: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Book-photos/${storagePath}`;
 }
 
-async function getSubEdition(id: number) {
-  const { data, error } = await supabase
+async function getSubEdition(id: string) {
+  const { data: subEdition, error: subEditionError } = await supabase
     .from("sub_editions")
-    .select(`
-      *,
-      edition:editions (
-        id,
-        title,
-        publication_year,
-        publisher:publishers(id,name),
-        work:works(id,original_title,english_title),
-        photos:photos(id,storage_path,sort_order,caption)
-      )
-    `)
+    .select("*")
     .eq("id", id)
     .single();
 
-  if (error || !data) return null;
-  return data;
+  if (subEditionError || !subEdition) return null;
+
+  const { data: edition } = await supabase
+    .from("editions")
+    .select(`
+      id,
+      title,
+      publication_year,
+      publisher:publishers(id,name),
+      work:works(id,original_title,english_title),
+      photos:photos(id,storage_path,sort_order,caption)
+    `)
+    .eq("id", subEdition.edition_id)
+    .single();
+
+  return { ...subEdition, edition };
 }
 
 export default async function SubEditionPage({
@@ -33,8 +47,7 @@ export default async function SubEditionPage({
   params: Promise<{ id: string }> | { id: string };
 }) {
   const resolvedParams = params instanceof Promise ? await params : params;
-  const id = parseInt(resolvedParams.id, 10);
-  const sub = await getSubEdition(id);
+  const sub = await getSubEdition(resolvedParams.id);
   if (!sub) notFound();
 
   const parent = sub.edition;
@@ -85,7 +98,7 @@ export default async function SubEditionPage({
             <div className="mt-6 p-4 bg-[#f9f8f0] border border-[#e9e7dd] rounded">
               <div className="text-sm text-[#8b6f47] font-medium">Sub-edition</div>
               <div className="text-base text-[#6b6b6b] mt-1">{sub.impression_label || `Variant ${sub.sequence_number || sub.id}`}</div>
-+            </div>
+            </div>
           </div>
 
           <div className="justify-self-end">
@@ -94,6 +107,21 @@ export default async function SubEditionPage({
             ) : (
               <div className="w-[220px] h-[220px] bg-[#f6f4ea] flex items-center justify-center text-sm text-[#9b9b9b]">No image</div>
             )}
+          </div>
+        </div>
+
+        <div className="border-t border-[#e0ddd0] pt-6">
+          <h3 className="text-xl font-serif text-[#8b6f47] mb-4">Sub-edition details</h3>
+          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4 text-sm text-[#6b6b6b]">
+            <div><strong>ID:</strong> {formatValue(sub.id)}</div>
+            <div><strong>Edition ID:</strong> {formatValue(sub.edition_id)}</div>
+            <div><strong>Impression label:</strong> {formatValue(sub.impression_label)}</div>
+            <div><strong>Sequence number:</strong> {formatValue(sub.sequence_number)}</div>
+            <div><strong>Publication year:</strong> {formatValue(sub.publication_year)}</div>
+            <div><strong>Catalogue number:</strong> {formatValue(sub.catalogue_number)}</div>
+            <div><strong>Limited edition:</strong> {formatValue(sub.is_limited_edition)}</div>
+            <div><strong>Limited edition count:</strong> {formatValue(sub.limited_edition_count)}</div>
+            <div className="sm:col-span-2"><strong>Publisher URL:</strong> {formatValue(sub.publisher_url)}</div>
           </div>
         </div>
 
