@@ -1,30 +1,35 @@
 import { supabase } from "@/utils/supabase";
 import { NextResponse } from "next/server";
+import { fetchAllRows } from "@/utils/supabasePagination";
 
 export async function GET() {
   try {
     // Fetch publishers
-    const { data: publishers, error: publishersError } = await supabase
-      .from("publishers")
-      .select("id, name")
-      .order("name", { ascending: true });
+    const { data: publishers, error: publishersError } = await fetchAllRows(() =>
+      supabase
+        .from("publishers")
+        .select("id, name")
+        .order("name", { ascending: true })
+    );
 
     if (publishersError) {
       console.error("Error fetching publishers:", publishersError);
     }
 
     // Fetch series with their publishers
-    const { data: series, error: seriesError } = await supabase
-      .from("series")
-      .select(`
-        id,
-        name,
-        publisher:publishers (
+    const { data: series, error: seriesError } = await fetchAllRows(() =>
+      supabase
+        .from("series")
+        .select(`
           id,
-          name
-        )
-      `)
-      .order("name", { ascending: true });
+          name,
+          publisher:publishers (
+            id,
+            name
+          )
+        `)
+        .order("name", { ascending: true })
+    );
 
     if (seriesError) {
       console.error("Error fetching series:", seriesError);

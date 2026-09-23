@@ -1,6 +1,7 @@
 import { supabase } from "@/utils/supabase";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { fetchAllRows } from "@/utils/supabasePagination";
 
 interface WorkSummary {
   id: number;
@@ -59,11 +60,13 @@ async function getSeries(id: number) {
 }
 
 async function getEditionsForPublisher(publisherId: number): Promise<EditionWithWorks[]> {
-  const { data: editionsData, error: editionsError } = await supabase
-    .from("editions")
-    .select("id, publication_year")
-    .eq("publisher_id", publisherId)
-    .order("publication_year", { ascending: false });
+  const { data: editionsData, error: editionsError } = await fetchAllRows(() =>
+    supabase
+      .from("editions")
+      .select("id, publication_year")
+      .eq("publisher_id", publisherId)
+      .order("publication_year", { ascending: false })
+  );
 
   if (editionsError) {
     console.error("Error fetching publisher editions:", editionsError);
@@ -76,10 +79,12 @@ async function getEditionsForPublisher(publisherId: number): Promise<EditionWith
     return [];
   }
 
-  const { data: linksData, error: linksError } = await supabase
-    .from("work_editions")
-    .select("edition_id, work_id")
-    .in("edition_id", editionIds);
+  const { data: linksData, error: linksError } = await fetchAllRows(() =>
+    supabase
+      .from("work_editions")
+      .select("edition_id, work_id")
+      .in("edition_id", editionIds)
+  );
 
   if (linksError) {
     console.error("Error fetching publisher work links:", linksError);
@@ -90,10 +95,12 @@ async function getEditionsForPublisher(publisherId: number): Promise<EditionWith
   let worksById: Record<number, WorkSummary> = {};
 
   if (workIds.length > 0) {
-    const { data: worksData, error: worksError } = await supabase
-      .from("works")
-      .select("id, original_title, english_title")
-      .in("id", workIds);
+    const { data: worksData, error: worksError } = await fetchAllRows(() =>
+      supabase
+        .from("works")
+        .select("id, original_title, english_title")
+        .in("id", workIds)
+    );
 
     if (worksError) {
       console.error("Error fetching publisher works:", worksError);
@@ -113,11 +120,13 @@ async function getEditionsForPublisher(publisherId: number): Promise<EditionWith
 }
 
 async function getEditionsForSeries(seriesId: number): Promise<EditionWithWorks[]> {
-  const { data: editionsData, error: editionsError } = await supabase
-    .from("editions")
-    .select("id, publication_year")
-    .eq("series_id", seriesId)
-    .order("publication_year", { ascending: false });
+  const { data: editionsData, error: editionsError } = await fetchAllRows(() =>
+    supabase
+      .from("editions")
+      .select("id, publication_year")
+      .eq("series_id", seriesId)
+      .order("publication_year", { ascending: false })
+  );
 
   if (editionsError) {
     console.error("Error fetching series editions:", editionsError);
@@ -130,10 +139,12 @@ async function getEditionsForSeries(seriesId: number): Promise<EditionWithWorks[
     return [];
   }
 
-  const { data: linksData, error: linksError } = await supabase
-    .from("work_editions")
-    .select("edition_id, work_id")
-    .in("edition_id", editionIds);
+  const { data: linksData, error: linksError } = await fetchAllRows(() =>
+    supabase
+      .from("work_editions")
+      .select("edition_id, work_id")
+      .in("edition_id", editionIds)
+  );
 
   if (linksError) {
     console.error("Error fetching series work links:", linksError);
@@ -144,10 +155,12 @@ async function getEditionsForSeries(seriesId: number): Promise<EditionWithWorks[
   let worksById: Record<number, WorkSummary> = {};
 
   if (workIds.length > 0) {
-    const { data: worksData, error: worksError } = await supabase
-      .from("works")
-      .select("id, original_title, english_title")
-      .in("id", workIds);
+    const { data: worksData, error: worksError } = await fetchAllRows(() =>
+      supabase
+        .from("works")
+        .select("id, original_title, english_title")
+        .in("id", workIds)
+    );
 
     if (worksError) {
       console.error("Error fetching series works:", worksError);

@@ -1,4 +1,5 @@
 import { supabase } from "@/utils/supabase";
+import { fetchAllRows } from "@/utils/supabasePagination";
 import Link from "next/link";
 
 interface PublisherSummary {
@@ -13,10 +14,12 @@ interface SeriesSummary {
 }
 
 async function getPublishers(): Promise<PublisherSummary[]> {
-  const { data, error } = await supabase
-    .from("publishers")
-    .select("id, name")
-    .order("name", { ascending: true });
+  const { data, error } = await fetchAllRows(() =>
+    supabase
+      .from("publishers")
+      .select("id, name")
+      .order("name", { ascending: true })
+  );
 
   if (error) {
     console.error("Error fetching publishers:", error);
@@ -27,17 +30,19 @@ async function getPublishers(): Promise<PublisherSummary[]> {
 }
 
 async function getSeries(): Promise<SeriesSummary[]> {
-  const { data, error } = await supabase
-    .from("series")
-    .select(`
-      id,
-      name,
-      publisher:publishers (
+  const { data, error } = await fetchAllRows(() =>
+    supabase
+      .from("series")
+      .select(`
         id,
-        name
-      )
-    `)
-    .order("name", { ascending: true });
+        name,
+        publisher:publishers (
+          id,
+          name
+        )
+      `)
+      .order("name", { ascending: true })
+  );
 
   if (error) {
     console.error("Error fetching series:", error);

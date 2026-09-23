@@ -1,5 +1,6 @@
 import { supabase } from "@/utils/supabase";
 import { supabaseUrl } from "@/utils/supabase";
+import { fetchAllRows } from "@/utils/supabasePagination";
 import { EditionWithRelations } from "@/types/database";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -110,18 +111,20 @@ async function getEdition(id: number): Promise<EditionWithRelations | null> {
     return null;
   }
 
-  const { data: contributorsData, error: contributorsError } = await supabase
-    .from("edition_contributors")
-    .select(`
-      role,
-      contributor:contributors (
-        id,
-        name,
-        wiki_link
-      )
-    `)
-    .eq("edition_id", id)
-    .order("role", { ascending: true });
+  const { data: contributorsData, error: contributorsError } = await fetchAllRows(() =>
+    supabase
+      .from("edition_contributors")
+      .select(`
+        role,
+        contributor:contributors (
+          id,
+          name,
+          wiki_link
+        )
+      `)
+      .eq("edition_id", id)
+      .order("role", { ascending: true })
+  );
 
   if (contributorsError) {
     console.error("Error fetching edition contributors:", contributorsError);
@@ -202,18 +205,20 @@ async function getEdition(id: number): Promise<EditionWithRelations | null> {
 async function getSubEditions(parentId: number): Promise<SubEdition[]> {
   // The `sub_editions` table contains rows that reference `editions` via `edition_id`.
   // Query `sub_editions` for rows where `edition_id` = parentId and return them.
-  const { data, error } = await supabase
-    .from("sub_editions")
-    .select(`
-      id,
-      impression_label,
-      publication_year,
-      catalogue_number,
-      is_limited_edition,
-      limited_edition_count
-    `)
-    .eq("edition_id", parentId)
-    .order("sequence_number", { ascending: true });
+  const { data, error } = await fetchAllRows(() =>
+    supabase
+      .from("sub_editions")
+      .select(`
+        id,
+        impression_label,
+        publication_year,
+        catalogue_number,
+        is_limited_edition,
+        limited_edition_count
+      `)
+      .eq("edition_id", parentId)
+      .order("sequence_number", { ascending: true })
+  );
 
   if (error || !data) return [];
   return data;
@@ -449,12 +454,15 @@ export default async function EditionDetailPage({
             <div className="grid gap-3">
               {edition.contributors.map((entry, index) => (
                 <div key={`${entry.contributor?.id || index}-${entry.role || "role"}`} className="flex flex-wrap items-center gap-2 border-b border-[#f0eee4] pb-3 last:border-b-0 last:pb-0">
-                  <span className="font-medium text-[#4f4a3d]">
-                    {entry.contributor?.name || "Unknown contributor"}
+                  <span className="text-sm text-[#6b6b6b]">
+                    ID: {formatValue(entry.contributor?.id)}
                   </span>
-                  {entry.role && (
-                    <span className="text-sm text-[#6b6b6b]">({entry.role})</span>
-                  )}
+                  <span className="font-medium text-[#4f4a3d]">
+                    Name: {entry.contributor?.name || "Unknown contributor"}
+                  </span>
+                  <span className="text-sm text-[#6b6b6b]">
+                    Role: {formatValue(entry.role)}
+                  </span>
                 </div>
               ))}
             </div>

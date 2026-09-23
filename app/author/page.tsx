@@ -1,4 +1,5 @@
 import { supabase } from "@/utils/supabase";
+import { fetchAllRows } from "@/utils/supabasePagination";
 import Link from "next/link";
 import SearchBox from "@/components/SearchBox";
 
@@ -25,10 +26,12 @@ function getLastName(name?: string | null) {
 }
 
 async function getAuthors(): Promise<AuthorSummary[]> {
-  const { data: authorsData, error: authorsError } = await supabase
-    .from("authors")
-    .select("id, name")
-    .order("name", { ascending: true });
+  const { data: authorsData, error: authorsError } = await fetchAllRows(() =>
+    supabase
+      .from("authors")
+      .select("id, name")
+      .order("name", { ascending: true })
+  );
 
   if (authorsError) {
     console.error("Error fetching authors:", authorsError);
@@ -37,10 +40,12 @@ async function getAuthors(): Promise<AuthorSummary[]> {
 
   const authorIds = (authorsData || []).map((author) => author.id);
 
-  const { data: workAuthorsData, error: workAuthorsError } = await supabase
-    .from("work_authors")
-    .select("author_id, work_id")
-    .in("author_id", authorIds);
+  const { data: workAuthorsData, error: workAuthorsError } = await fetchAllRows(() =>
+    supabase
+      .from("work_authors")
+      .select("author_id, work_id")
+      .in("author_id", authorIds)
+  );
 
   if (workAuthorsError) {
     console.error("Error fetching work authors:", workAuthorsError);

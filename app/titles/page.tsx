@@ -1,5 +1,6 @@
 import { supabase } from "@/utils/supabase";
 import { Work } from "@/types/database";
+import { fetchAllRows } from "@/utils/supabasePagination";
 import Link from "next/link";
 import SearchBox from "@/components/SearchBox";
 
@@ -18,22 +19,23 @@ type TitleWorkWithCount = TitleWork & {
 
 async function getWorks(): Promise<TitleWorkWithCount[]> {
   // Get works
-  const { data: worksData, error: worksError } = await supabase
-    .from("works")
-    .select(`
-      *,
-      work_authors (
-        author:authors (
-          id,
-          name
+  const { data: worksData, error: worksError } = await fetchAllRows(() =>
+    supabase
+      .from("works")
+      .select(`
+        *,
+        work_authors (
+          author:authors (
+            id,
+            name
+          )
         )
-      )
-    `)
-    .order("sort_title", {
-      ascending: true,
-      nullsFirst: false,
-    })
-    .limit(1000);
+      `)
+      .order("sort_title", {
+        ascending: true,
+        nullsFirst: false,
+      })
+  );
 
   if (worksError) {
     console.error("Error fetching works:", worksError);
@@ -43,10 +45,12 @@ async function getWorks(): Promise<TitleWorkWithCount[]> {
   // Get edition counts through the junction table
   const fetchedWorks = (worksData || []) as TitleWork[];
   const workIds = fetchedWorks.map((work) => work.id);
-  const { data: countsData, error: countsError } = await supabase
-    .from("work_editions")
-    .select("work_id")
-    .in("work_id", workIds);
+  const { data: countsData, error: countsError } = await fetchAllRows(() =>
+    supabase
+      .from("work_editions")
+      .select("work_id")
+      .in("work_id", workIds)
+  );
 
   if (countsError) {
     console.error("Error fetching edition counts:", countsError);

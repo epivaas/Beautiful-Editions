@@ -1,6 +1,7 @@
 import { supabase } from "@/utils/supabase";
 import ImageCarousel from "@/components/ImageCarousel";
 import { notFound } from "next/navigation";
+import { fetchAllRows } from "@/utils/supabasePagination";
 
 function formatValue(value: unknown) {
   if (value === null || value === undefined || value === "") {
@@ -56,11 +57,13 @@ export default async function SubEditionPage({
   const basePhoto = parentPhotos[0];
 
   // Photos specifically attached to this sub-edition
-  const { data: subPhotos } = await supabase
-    .from("photos")
-    .select("id,storage_path,sort_order,caption")
-    .eq("sub_edition_id", sub.id)
-    .order("sort_order", { ascending: true });
+  const { data: subPhotos } = await fetchAllRows(() =>
+    supabase
+      .from("photos")
+      .select("id,storage_path,sort_order,caption")
+      .eq("sub_edition_id", sub.id)
+      .order("sort_order", { ascending: true })
+  );
   const photos = (subPhotos || [])
     .sort((a: any, b: any) => a.sort_order - b.sort_order)
     .map((p: any) => ({

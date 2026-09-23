@@ -1,6 +1,7 @@
 import { supabase } from "@/utils/supabase";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { fetchAllRows } from "@/utils/supabasePagination";
 
 async function getAuthor(id: number) {
   const { data, error } = await supabase
@@ -17,10 +18,12 @@ async function getAuthor(id: number) {
 }
 
 async function getWorksByAuthor(authorId: number) {
-  const { data: workAuthors, error: workAuthorsError } = await supabase
-    .from("work_authors")
-    .select("work_id")
-    .eq("author_id", authorId);
+  const { data: workAuthors, error: workAuthorsError } = await fetchAllRows(() =>
+    supabase
+      .from("work_authors")
+      .select("work_id")
+      .eq("author_id", authorId)
+  );
 
   if (workAuthorsError || !workAuthors || workAuthors.length === 0) {
     if (workAuthorsError) {
@@ -31,36 +34,40 @@ async function getWorksByAuthor(authorId: number) {
 
   const workIds = workAuthors.map((wa) => wa.work_id);
 
-  const { data: works, error: worksError } = await supabase
-    .from("works")
-    .select(`
-      id,
-      original_title,
-      english_title,
-      original_publication_year,
-      original_language
-    `)
-    .in("id", workIds)
-    .order("original_title", { ascending: true });
+  const { data: works, error: worksError } = await fetchAllRows(() =>
+    supabase
+      .from("works")
+      .select(`
+        id,
+        original_title,
+        english_title,
+        original_publication_year,
+        original_language
+      `)
+      .in("id", workIds)
+      .order("original_title", { ascending: true })
+  );
 
   if (worksError) {
     console.error("Error fetching works:", worksError);
     return [];
   }
 
-  const { data: workEditions, error: editionsError } = await supabase
-    .from("work_editions")
-    .select(`
-      work_id,
-      edition:editions (
-        id,
-        title,
-        publication_year,
-        publisher:publishers (id, name),
-        series:series (id, name)
-      )
-    `)
-    .in("work_id", workIds);
+  const { data: workEditions, error: editionsError } = await fetchAllRows(() =>
+    supabase
+      .from("work_editions")
+      .select(`
+        work_id,
+        edition:editions (
+          id,
+          title,
+          publication_year,
+          publisher:publishers (id, name),
+          series:series (id, name)
+        )
+      `)
+      .in("work_id", workIds)
+  );
 
   if (editionsError) {
     console.error("Error fetching editions:", editionsError);

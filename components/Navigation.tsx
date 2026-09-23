@@ -2,39 +2,40 @@
 
 import Link from "next/link";
 import SearchBox from "./SearchBox";
+import { usePathname } from "next/navigation";
 
 export default function Navigation() {
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+
   return (
     <nav className="sticky top-0 z-50">
       {/* Header with title - Black background */}
-      <div style={{ backgroundColor: '#000000', paddingTop: '3rem', paddingBottom: '3rem' }}>
+      <div style={{ backgroundColor: '#000000', paddingTop: isHomePage ? '3rem' : '1rem', paddingBottom: isHomePage ? '2rem' : '1rem' }}>
         <div className="mx-auto px-4 max-w-7xl">
           <Link href="/" className="block text-center no-underline">
-            <h1 style={{ fontSize: '4.5rem', color: 'white', fontFamily: 'sans-serif', fontWeight: '700', letterSpacing: '0.02em', marginBottom: '1rem' }}>
+            <h1 style={{ fontSize: isHomePage ? '4.5rem' : '2.25rem', color: 'white', fontFamily: 'sans-serif', fontWeight: '700', letterSpacing: '0.02em', marginBottom: 0 }}>
               Beautiful Editions
             </h1>
-            <p style={{ fontSize: '1.125rem', color: '#c0c0c0', fontFamily: 'sans-serif', maxWidth: '900px', margin: '0 auto' }}>
-              Discover the world's most exquisite book craftsmanship. Find the perfect edition for your collection.
-            </p>
           </Link>
         </div>
       </div>
 
       {/* Search Box */}
-      <div style={{ backgroundColor: '#000000', paddingTop: '1rem', paddingBottom: '1rem' }}>
+      <div style={{ backgroundColor: '#000000', paddingTop: isHomePage ? '1rem' : '0.5rem', paddingBottom: isHomePage ? '1rem' : '0.5rem' }}>
         <div style={{ maxWidth: '28rem', margin: '0 auto', paddingLeft: '1rem', paddingRight: '1rem' }}>
           <SearchBox />
         </div>
       </div>
 
       {/* Browse Cards Menu */}
-      <div style={{ backgroundColor: '#000000', paddingTop: '1.5rem', paddingBottom: '4rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '6rem' }}>
+      <div style={{ backgroundColor: '#000000', paddingTop: isHomePage ? '1.5rem' : '0.75rem', paddingBottom: isHomePage ? '4rem' : '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: isHomePage ? '6rem' : '1rem', flexWrap: 'wrap' }}>
           {/* Browse by Title */}
           <Link
             href="/titles"
             className="no-underline"
-            style={{ display: 'block', padding: '1.5rem', border: '1px solid #e0ddd0', borderRadius: '0.5rem', width: '16rem', transition: 'background-color 0.3s' }}
+            style={{ display: 'block', padding: isHomePage ? '1.5rem' : '0.75rem', border: '1px solid #e0ddd0', borderRadius: '0.5rem', width: isHomePage ? '16rem' : '12rem', transition: 'background-color 0.3s' }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2a2a2a'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
@@ -46,7 +47,6 @@ export default function Navigation() {
               </div>
               <div>
                 <h3 style={{ color: 'white', fontFamily: 'sans-serif', fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>Browse by Title</h3>
-                <p style={{ color: '#b0b0b0', fontFamily: 'sans-serif', fontSize: '0.875rem' }}>Explore works alphabetically</p>
               </div>
             </div>
           </Link>
@@ -55,7 +55,7 @@ export default function Navigation() {
           <Link
             href="/author"
             className="no-underline"
-            style={{ display: 'block', padding: '1.5rem', border: '1px solid #e0ddd0', borderRadius: '0.5rem', width: '16rem', transition: 'background-color 0.3s' }}
+            style={{ display: 'block', padding: isHomePage ? '1.5rem' : '0.75rem', border: '1px solid #e0ddd0', borderRadius: '0.5rem', width: isHomePage ? '16rem' : '12rem', transition: 'background-color 0.3s' }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2a2a2a'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
@@ -67,7 +67,6 @@ export default function Navigation() {
               </div>
               <div>
                 <h3 style={{ color: 'white', fontFamily: 'sans-serif', fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>Browse by Author</h3>
-                <p style={{ color: '#b0b0b0', fontFamily: 'sans-serif', fontSize: '0.875rem' }}>Discover by creator</p>
               </div>
             </div>
           </Link>
@@ -76,7 +75,7 @@ export default function Navigation() {
           <Link
             href="/publishers-series"
             className="no-underline"
-            style={{ display: 'block', padding: '1.5rem', border: '1px solid #e0ddd0', borderRadius: '0.5rem', width: '16rem', transition: 'background-color 0.3s' }}
+            style={{ display: 'block', padding: isHomePage ? '1.5rem' : '0.75rem', border: '1px solid #e0ddd0', borderRadius: '0.5rem', width: isHomePage ? '16rem' : '12rem', transition: 'background-color 0.3s' }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2a2a2a'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
@@ -88,7 +87,6 @@ export default function Navigation() {
               </div>
               <div>
                 <h3 style={{ color: 'white', fontFamily: 'sans-serif', fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>Publishers & Series</h3>
-                <p style={{ color: '#b0b0b0', fontFamily: 'sans-serif', fontSize: '0.875rem' }}>Browse by publisher</p>
               </div>
             </div>
           </Link>
