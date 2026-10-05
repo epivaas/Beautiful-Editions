@@ -31,3 +31,24 @@ export async function fetchAllRows<T>(
     offset += page.length;
   }
 }
+
+export async function fetchAllRowsInChunks<T, I>(
+  ids: I[],
+  createQuery: (chunk: I[]) => PagedQuery<T>,
+  chunkSize = 500
+): Promise<{ data: T[]; error: { message: string } | null }> {
+  const rows: T[] = [];
+
+  for (let index = 0; index < ids.length; index += chunkSize) {
+    const chunk = ids.slice(index, index + chunkSize);
+    const result = await fetchAllRows(() => createQuery(chunk));
+
+    if (result.error) {
+      return { data: rows, error: result.error };
+    }
+
+    rows.push(...result.data);
+  }
+
+  return { data: rows, error: null };
+}

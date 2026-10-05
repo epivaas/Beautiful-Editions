@@ -34,34 +34,6 @@ function formatValue(value: unknown) {
   return String(value);
 }
 
-function hasValidString(value: unknown) {
-  return (
-    typeof value === "string" &&
-    value.trim() !== "" &&
-    value.trim().toUpperCase() !== "NULL"
-  );
-}
-
-function renderField(label: string, value: unknown, opts?: { link?: boolean }) {
-  return (
-    <div className="mb-4">
-      <h3 className="font-semibold text-[#8b6f47] mb-2">{label}</h3>
-      {opts?.link && hasValidString(value) ? (
-        <a
-          href={String(value)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#8b6f47] hover:underline"
-        >
-          {String(value)}
-        </a>
-      ) : (
-        <p className="text-[#6b6b6b]">{formatValue(value)}</p>
-      )}
-    </div>
-  );
-}
-
 async function getEdition(id: number): Promise<EditionWithRelations | null> {
   const { data: editionData, error: editionError } = await supabase
     .from("editions")
@@ -246,7 +218,7 @@ export default async function EditionDetailPage({
   return (
     <div className="py-8">
       <div className="max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-[1.4fr_420px] gap-8 items-start mb-8">
+        <div className="edition-hero gap-8 items-start mb-8">
           <div>
             <h1 className="text-4xl md:text-5xl font-serif text-[#8b6f47] mb-4 leading-tight">
               {edition.title}
@@ -264,9 +236,7 @@ export default async function EditionDetailPage({
                   English title: {edition.work.english_title}
                 </p>
               )}
-          </div>
 
-          <div className="lg:justify-self-end w-full max-w-[280px]">
             {edition.publisher && (
               <div className="mb-4">
                 <p className="text-xs uppercase tracking-[0.18em] text-[#8b6f47] mb-1">
@@ -303,9 +273,9 @@ export default async function EditionDetailPage({
             )}
           </div>
 
-          {featuredPhoto && (
-            <div className="lg:justify-self-end">
-              <div className="relative bg-white border border-[#e0ddd0] rounded p-3 shadow-sm w-full max-w-[240px] h-[244px]">
+          <div className="lg:justify-self-end w-full max-w-[280px]">
+            {featuredPhoto && (
+              <div className="relative bg-white border border-[#e0ddd0] rounded p-3 shadow-sm w-full max-w-[240px] h-[244px] ml-auto">
                 <Image
                   fill
                   src={getPhotoUrl(featuredPhoto.storage_path)}
@@ -314,12 +284,13 @@ export default async function EditionDetailPage({
                   className="w-full h-[220px] object-contain rounded mx-auto"
                 />
               </div>
-            </div>
-          )}
+            )}
+          </div>
+
         </div>
 
         {/* Edition Details */}
-        <div className="bg-white border border-[#e0ddd0] rounded p-8 mb-8">
+        <div className="edition-details-fields bg-white border border-[#e0ddd0] rounded p-8 mb-8">
           <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">
             Edition Details
           </h2>
@@ -478,27 +449,6 @@ export default async function EditionDetailPage({
             <ImageCarousel photos={secondaryPhotos} />
           </div>
         )}
-
-        {/* Work Information */}
-        <div className="bg-white border border-[#e0ddd0] rounded p-8">
-          <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">
-            Work Information
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              {renderField("Work ID", edition.work?.id)}
-              {renderField("Original Title", edition.work?.original_title)}
-              {renderField("English Title", edition.work?.english_title)}
-              {renderField("Original Publication Year", edition.work?.original_publication_year)}
-            </div>
-            <div>
-              {renderField("Original Language", edition.work?.original_language)}
-              {renderField("Reference", edition.work?.wiki_link, { link: true })}
-              {renderField("Sort Title", edition.work?.sort_title)}
-              {renderField("Work Notes", edition.work?.notes)}
-            </div>
-          </div>
-        </div>
 
         {/* Sub-editions */}
         {subEditions && subEditions.length > 0 && (

@@ -10,7 +10,7 @@ interface PublisherSummary {
 interface SeriesSummary {
   id: number;
   name: string;
-  publisher: { id: number; name: string }[] | null;
+  publisher: { id: number; name: string } | { id: number; name: string }[] | null;
 }
 
 async function getPublishers(): Promise<PublisherSummary[]> {
@@ -92,8 +92,9 @@ export default async function PublishersSeriesPage() {
           ) : (
             <ul className="space-y-3">
               {series.map((item) => {
-                const publisherList = Array.isArray(item.publisher) ? item.publisher : [];
-                const publisherName = publisherList[0]?.name || null;
+                const publisherName = Array.isArray(item.publisher)
+                  ? item.publisher[0]?.name
+                  : item.publisher?.name;
 
                 return (
                   <li key={item.id}>

@@ -16,6 +16,13 @@ type EditionPhoto = NonNullable<EditionWithRelations["photos"]>[number] & {
   is_main?: boolean;
 };
 
+function formatValue(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return "NULL";
+  }
+  return String(value);
+}
+
 async function getWork(id: number): Promise<WorkWithAuthors | null> {
   const { data, error } = await supabase
     .from("works")
@@ -182,9 +189,65 @@ export default async function TitleDetailPage({
           )}
         </div>
 
+        {/* Work Details */}
+        <div className="edition-details-fields bg-white border border-[#e0ddd0] rounded p-8 mb-8">
+          <h2 className="text-2xl font-serif text-[#8b6f47] mb-6">
+            Work Details
+          </h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">ID</h3>
+                <p className="text-[#6b6b6b]">{formatValue(work.id)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Original Title</h3>
+                <p className="text-[#6b6b6b]">{formatValue(work.original_title)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">English Title</h3>
+                <p className="text-[#6b6b6b]">{formatValue(work.english_title)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Original Publication Year</h3>
+                <p className="text-[#6b6b6b]">{formatValue(work.original_publication_year)}</p>
+              </div>
+            </div>
+            <div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Original Language</h3>
+                <p className="text-[#6b6b6b]">{formatValue(work.original_language)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Wiki Link</h3>
+                {work.wiki_link ? (
+                  <a
+                    href={work.wiki_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#8b6f47] hover:underline"
+                  >
+                    {work.wiki_link}
+                  </a>
+                ) : (
+                  <p className="text-[#6b6b6b]">{formatValue(work.wiki_link)}</p>
+                )}
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Sort Title</h3>
+                <p className="text-[#6b6b6b]">{formatValue(work.sort_title)}</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="font-semibold text-[#8b6f47] mb-2">Notes</h3>
+                <p className="text-[#6b6b6b] whitespace-pre-line">{formatValue(work.notes)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Editions List */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-serif text-[#8b6f47] mb-6">
+        <div className="mb-8 border-0">
+          <h2 className="text-3xl font-serif text-[#8b6f47] mb-6 border-0">
             Editions ({editions.length})
           </h2>
 
@@ -270,6 +333,7 @@ export default async function TitleDetailPage({
             </div>
           )}
         </div>
+
       </div>
     </div>
   );

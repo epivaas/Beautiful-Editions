@@ -55,6 +55,32 @@ body {
     gap: 2rem;
   }
 
+  .edition-details-fields h3 {
+    display: inline;
+    margin-right: 0.35rem;
+    margin-bottom: 0;
+  }
+
+  .edition-details-fields h3::after {
+    content: ":";
+  }
+
+  .edition-details-fields h3 + p,
+  .edition-details-fields h3 + a {
+    display: inline;
+  }
+
+  .edition-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 768px) {
+    .edition-hero {
+      grid-template-columns: minmax(0, 1fr) 280px;
+    }
+  }
+
   @media (min-width: 1024px) {
     .publisher-series-grid {
       flex-direction: row;
