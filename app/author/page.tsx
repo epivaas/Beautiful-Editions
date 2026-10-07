@@ -26,11 +26,15 @@ function getLastName(name?: string | null) {
 }
 
 async function getAuthors(): Promise<AuthorSummary[]> {
+  // Count titles in the same query. Filtering work_authors with .in() on every
+  // author id made the URL too long (HeadersOverflowError).
   const { data: authorsData, error: authorsError } = await fetchAllRows(() =>
     supabase
       .from("authors")
-      .select("id, name")
+      .select("id, name, work_authors ( count )")
       .order("name", { ascending: true })
+      // Unique tiebreaker so pagination never skips or repeats rows
+      .order("id", { ascending: true })
   );
 
   if (authorsError) {
@@ -38,36 +42,11 @@ async function getAuthors(): Promise<AuthorSummary[]> {
     return [];
   }
 
-  const authorIds = (authorsData || []).map((author) => author.id);
-
-  const { data: workAuthorsData, error: workAuthorsError } = await fetchAllRows(() =>
-    supabase
-      .from("work_authors")
-      .select("author_id, work_id")
-      .in("author_id", authorIds)
-  );
-
-  if (workAuthorsError) {
-    console.error("Error fetching work authors:", workAuthorsError);
-  }
-
-  const worksByAuthor = new Map<number, Set<number>>();
-  (workAuthorsData || []).forEach(({ author_id, work_id }) => {
-    if (!worksByAuthor.has(author_id)) {
-      worksByAuthor.set(author_id, new Set());
-    }
-    worksByAuthor.get(author_id)?.add(work_id);
-  });
-
-  return (authorsData || []).map((author) => {
-    const workIds = worksByAuthor.get(author.id) || new Set<number>();
-
-    return {
-      id: author.id,
-      name: author.name,
-      work_count: workIds.size,
-    };
-  });
+  return (authorsData || []).map((author) => ({
+    id: author.id,
+    name: author.name,
+    work_count: author.work_authors?.[0]?.count ?? 0,
+  }));
 }
 
 export default async function AuthorsPage() {

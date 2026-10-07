@@ -66,6 +66,8 @@ async function getEditionsForPublisher(publisherId: number): Promise<EditionWith
       .select("id, publication_year")
       .eq("publisher_id", publisherId)
       .order("publication_year", { ascending: false })
+      // Unique tiebreaker so pagination never skips or repeats rows
+      .order("id", { ascending: true })
   );
 
   if (editionsError) {
@@ -128,6 +130,8 @@ async function getEditionsForSeries(seriesId: number): Promise<EditionWithWorks[
       .select("id, publication_year")
       .eq("series_id", seriesId)
       .order("publication_year", { ascending: false })
+      // Unique tiebreaker so pagination never skips or repeats rows
+      .order("id", { ascending: true })
   );
 
   if (editionsError) {

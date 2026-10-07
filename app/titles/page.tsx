@@ -11,6 +11,7 @@ interface AuthorLink {
 
 type TitleWork = Work & {
   work_authors?: { author: AuthorLink }[];
+  work_editions?: { count: number }[];
 };
 
 type TitleWorkWithCount = TitleWork & {
@@ -18,7 +19,8 @@ type TitleWorkWithCount = TitleWork & {
 };
 
 async function getWorks(): Promise<TitleWorkWithCount[]> {
-  // Get works
+  // Get works with their edition count in one query. Filtering work_editions with
+  // .in() on every work id made the URL too long (HeadersOverflowError).
   const { data: worksData, error: worksError } = await fetchAllRows(() =>
     supabase
       .from("works")
@@ -29,12 +31,15 @@ async function getWorks(): Promise<TitleWorkWithCount[]> {
             id,
             name
           )
-        )
+        ),
+        work_editions ( count )
       `)
       .order("sort_title", {
         ascending: true,
         nullsFirst: false,
       })
+      // Unique tiebreaker so pagination never skips or repeats rows
+      .order("id", { ascending: true })
   );
 
   if (worksError) {
@@ -42,33 +47,12 @@ async function getWorks(): Promise<TitleWorkWithCount[]> {
     return [];
   }
 
-  // Get edition counts through the junction table
   const fetchedWorks = (worksData || []) as TitleWork[];
-  const workIds = fetchedWorks.map((work) => work.id);
-  const { data: countsData, error: countsError } = await fetchAllRows(() =>
-    supabase
-      .from("work_editions")
-      .select("work_id")
-      .in("work_id", workIds)
-  );
 
-  if (countsError) {
-    console.error("Error fetching edition counts:", countsError);
-  }
-
-  // Count editions per work
-  const editionCounts: Record<number, number> = {};
-  (countsData || []).forEach((link) => {
-    editionCounts[link.work_id] = (editionCounts[link.work_id] || 0) + 1;
-  });
-
-  // Add counts to works
-  const works: TitleWorkWithCount[] = fetchedWorks.map((work) => ({
+  return fetchedWorks.map(({ work_editions, ...work }) => ({
     ...work,
-    edition_count: editionCounts[work.id] || 0
+    edition_count: work_editions?.[0]?.count ?? 0,
   }));
-
-  return works;
 }
 
 export default async function TitlesPage() {
