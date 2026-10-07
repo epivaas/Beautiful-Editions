@@ -114,7 +114,7 @@ Gebaseerd op `types/database.ts`; controleer dit tegen het echte Supabase-schema
 
 - **Includes**: nu drie booleans (`slipcase`, `dustjacket`, `clamshell`). De gids wil een open lijst van gelijkwaardige items. Voorstel: een lijst of aparte tabel.
 - **Subedities**: nu `sub_editions` als edities. Nodig: een type (**variant** of **printing**), voor varianten een naam (Lettered, Numbered, Artist) en `limited_edition_count` als "Edition of N", voor printings een volgnummer, jaar en oplage. Regel: een editie heeft varianten of printings, niet beide.
-- **Foto's**: bestaan al per editie en subeditie. Toevoegen: maker/eigenaar, bron, bron-URL, licentie, afmetingen.
+- **Foto's**: bestaan al per editie en subeditie. De bronvermelding staat al in `photos.copyright_statement` en is voldoende voor de © knop. Afmetingen en een bron-URL zijn optioneel en pas later nodig.
 - **Series**: `publisher_id` en `sequence_number` bestaan. Toevoegen: een status "announced" (of een jaar in de toekomst).
 - **Auteurs**: `wiki_link` bestaat; geen rollen. Illustrators en vertalers zijn contributors per editie (bestaande `role`), meerdere toegestaan.
 - **Pagina's**: `pages_description` is vrije tekst ("Pp. [1–9] 10–280."). Binding mag leeg zijn.
