@@ -1,51 +1,69 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Remove underlines from all links */
-a {
-  text-decoration: none !important;
-}
+/*
+ * Shelfhound design tokens. Source of truth: docs/design/tokens.css.
+ * Only use these colours. No hex codes in components, no gradients.
+ */
+@theme {
+  /* Vlakken */
+  --color-cocoa: #3B332C;      /* pagina-achtergrond */
+  --color-oppervlak: #473E36;  /* kaarten, vlakken boven de pagina */
+  --color-lijn: #5C5147;       /* randen, scheidingslijnen */
+  --color-kop: #2A241F;        /* header, tabelkop, diepste vlak */
+  --color-mat: #A19E99;        /* studiogrijs: achtergrond van elke foto */
+  --color-rij-hover: #52483F;  /* hover op een tabelrij */
 
-:root {
-  --cream: #fdfcf0;
-  --paper: #f9f8f0;
-  --ink: #1a1a1a;
-  --accent: #8b6f47;
-}
+  /* Tekst */
+  --color-creme: #F5ECD7;      /* hoofdtekst op Cocoa */
+  --color-creme-gedempt: #D2C6AE; /* secundaire tekst */
+  --color-leeg: #A89C86;       /* "—" voor lege velden, uitgeschakeld */
+  --color-inkt: #1B1612;       /* tekst op Amber, Gloed en de grijze mat */
 
-body {
-  background-color: var(--cream);
-  color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  /* Accenten */
+  --color-amber: #FFB627;      /* links, primaire knoppen, gele band, geselecteerd */
+  --color-gloed: #FF6B3D;      /* schaars: aantallen en variantlabels. NOOIT als kleine tekst */
+
+  /* Lettertypes (geladen via next/font in app/layout.tsx) */
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  /* TODO: weg wanneer alle pagina's herwerkt zijn. Oude pagina's gebruiken nog font-serif; geen serif in Shelfhound. */
+  --font-serif: var(--font-archivo), system-ui, sans-serif;
+
+  /* Afrondingen */
+  --radius-ctl: 6px;   /* knoppen, chips, invoer */
+  --radius-card: 8px;  /* kaarten, tabellen, banden */
 }
 
 @layer base {
-  h1, h2, h3, h4, h5, h6 {
-    font-family: Georgia, 'Times New Roman', serif;
+  html { color-scheme: dark; }
+  body {
+    background: var(--color-cocoa);
+    color: var(--color-creme);
+    font-family: var(--font-sans);
     font-weight: 400;
+    -webkit-font-smoothing: antialiased;
   }
+  h1, h2, h3, h4 {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  a { text-decoration: none; }
+  /* Focusring: voorstel, nog niet getekend in de gids */
+  :focus-visible { outline: 2px solid var(--color-amber); outline-offset: 2px; }
+  ::selection { background: var(--color-amber); color: var(--color-inkt); }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .no-underline {
-    text-decoration: none !important;
-  }
-  
-  .bibliophilic-shadow {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  
+/*
+ * Legacy helpers, still used by pages that have not been restyled yet.
+ * Remove each one when its page moves to the new components.
+ */
+@layer components {
   .bibliophilic-hover {
     transition: all 0.3s ease;
   }
-  
+
   .bibliophilic-hover:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     transform: translateY(-2px);
   }
 

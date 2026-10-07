@@ -1,25 +1,25 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { Libre_Baskerville } from "next/font/google";
+import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
-import Navigation from "@/components/Navigation";
+import SiteHeader from "@/components/SiteHeader";
 
-const inter = Inter({
+const archivo = Archivo({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-archivo",
   display: "swap",
 });
 
-const libreBaskerville = Libre_Baskerville({
-  weight: ["400", "700"],
+const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-serif",
+  weight: ["400", "500"],
+  variable: "--font-plex-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Beautiful Editions - Bibliophilic Library",
-  description: "A curated collection of high-end book editions",
+  title: "Shelfhound",
+  description: "Find the edition worth owning",
 };
 
 export default function RootLayout({
@@ -28,9 +28,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${libreBaskerville.variable}`}>
-      <body className="min-h-screen bg-[#fdfcf0] text-[#1a1a1a] antialiased">
-        <Navigation />
+    <html lang="en" className={`${archivo.variable} ${plexMono.variable}`}>
+      <body className="min-h-screen bg-cocoa text-creme antialiased">
+        <SiteHeader />
         <main className="container mx-auto px-4 py-8 max-w-7xl">
           {children}
         </main>
