@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -29,11 +30,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${archivo.variable} ${plexMono.variable}`}>
-      <body className="min-h-screen bg-cocoa text-creme antialiased">
+      <body className="flex min-h-screen flex-col bg-cocoa text-creme antialiased">
         <SiteHeader />
-        <main className="container mx-auto px-4 py-8 max-w-7xl">
+        <main className="container mx-auto w-full max-w-7xl flex-1 px-4 py-8">
           {children}
         </main>
+        <SiteFooter />
       </body>
     </html>
   );

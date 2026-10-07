@@ -65,6 +65,8 @@ export type Photo = {
   storage_path: string;
   sort_order: number;
   caption: string | null;
+  /** Credit shown behind the © button. Optional because not every query selects it. */
+  copyright_statement?: string | null;
   edition_id: number | null;
   sub_edition_id: number | null;
 };

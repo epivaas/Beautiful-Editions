@@ -5,26 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo, Wordmark } from "./Logo";
 import HeaderSearch from "./HeaderSearch";
-
-type NavItem = {
-  label: string;
-  href: string;
-  /** Path prefixes that mark this item as active. */
-  match: string[];
-};
-
-// Publishers and Series share /publishers-series until the routes are split.
-const NAV: NavItem[] = [
-  { label: "Titles", href: "/titles", match: ["/titles", "/edition", "/sub-editions"] },
-  { label: "Authors", href: "/author", match: ["/author"] },
-  { label: "Publishers", href: "/publishers-series", match: ["/publishers-series"] },
-  { label: "Series", href: "/publishers-series", match: [] },
-  { label: "About", href: "/about", match: ["/about"] },
-];
-
-function isActive(item: NavItem, pathname: string) {
-  return item.match.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-}
+import { NAV, isActive } from "./nav";
 
 export default function SiteHeader() {
   const pathname = usePathname() ?? "/";

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import YellowBand from "@/components/YellowBand";
 
 export const metadata: Metadata = {
   title: "About · Shelfhound",
@@ -6,13 +7,24 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="flex flex-col gap-8">
-      <section className="rounded-card bg-amber px-8 py-10 text-inkt">
-        <h1 className="text-5xl leading-none tracking-[-0.03em] sm:text-6xl">About</h1>
-        <p className="mt-5 text-xl font-semibold">A reference for beautifully illustrated editions</p>
-        <p className="mt-1 text-lg">Find the edition worth owning</p>
-      </section>
+    <div className="flex flex-col gap-10">
+      <YellowBand
+        size="md"
+        title="About"
+        subtitle="A reference for beautifully illustrated editions"
+        meta="Find the edition worth owning"
+      />
       <p className="text-creme-gedempt">This page is coming soon.</p>
+
+      {/* Anchors for the footer links; filled in when FAQ and suggestions are built */}
+      <section id="faq" className="scroll-mt-24">
+        <h2 className="text-[32px] leading-9">FAQ</h2>
+        <p className="mt-2 text-creme-gedempt">Coming soon.</p>
+      </section>
+      <section id="suggest" className="scroll-mt-24">
+        <h2 className="text-[32px] leading-9">Suggest a change</h2>
+        <p className="mt-2 text-creme-gedempt">Coming soon.</p>
+      </section>
     </div>
   );
 }

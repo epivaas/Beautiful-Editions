@@ -2,7 +2,7 @@ export interface Photo {
   id: number;
   storage_path: string;
   sort_order: number;
-  copyright_statement?: string;
+  copyright_statement?: string | null;
   is_main?: boolean;
 }
 
@@ -38,6 +38,10 @@ export interface Edition {
   publisher?: Publisher;
   series?: Series;
 }
+
+/** Public URL of a photo in the Book-photos storage bucket. */
+export const getPhotoUrl = (storagePath: string) =>
+  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Book-photos/${storagePath}`;
 
 export const getMainPhoto = (photos?: Photo[]) => {
   if (!photos || photos.length === 0) return null;

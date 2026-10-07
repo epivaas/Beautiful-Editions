@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import { Logo, Wordmark } from "@/components/Logo";
 import HeaderSearch from "@/components/HeaderSearch";
+import { Button, TextLink } from "@/components/Button";
+import { ActiveFilter, FilterChip, IncludesChip, VariantLabel } from "@/components/Chip";
+import PhotoTile from "@/components/PhotoTile";
+import EditionCard from "@/components/EditionCard";
+import YellowBand from "@/components/YellowBand";
+import DataTable, { type Column } from "@/components/DataTable";
+import Pagination from "@/components/Pagination";
+import { supabase } from "@/utils/supabase";
+import { getPhotoUrl } from "@/app/lib/editionUtils";
 
 export const metadata: Metadata = {
   title: "Styleguide · Shelfhound",
@@ -23,11 +32,55 @@ const COLORS = [
   { name: "gloed", swatch: "bg-gloed", use: "Counts, variant labels (no small text)" },
 ];
 
+// Real photos only: the guide forbids placeholder or palette-coloured images.
+export const revalidate = 3600;
+
+type SamplePhoto = { src: string; credit: string | null; alt: string };
+
+async function getSamplePhotos(): Promise<SamplePhoto[]> {
+  const { data, error } = await supabase
+    .from("photos")
+    .select("id, storage_path, caption, copyright_statement")
+    .not("copyright_statement", "is", null)
+    .order("id", { ascending: true })
+    .limit(3);
+
+  if (error || !data) {
+    console.error("Styleguide: error fetching sample photos:", error);
+    return [];
+  }
+
+  return data.map((p) => ({
+    src: getPhotoUrl(p.storage_path),
+    credit: p.copyright_statement,
+    alt: p.caption || "Sample photograph",
+  }));
+}
+
+type SampleTitle = { id: number; title: string; original: string | null; first: string | null; editions: number; publishers: string | null };
+
+const SAMPLE_TITLES: SampleTitle[] = [
+  { id: 1, title: "The Iliad", original: "Iliás", first: "c. 8th c. BC", editions: 5, publishers: "Folio Society, Suntup" },
+  { id: 2, title: "The Odyssey", original: "Odýsseia", first: "c. 8th c. BC", editions: 6, publishers: "Folio Society, Suntup, Curious King Books" },
+  { id: 3, title: "Heart of Darkness", original: null, first: "1899", editions: 5, publishers: "" },
+];
+
+const TITLE_COLUMNS: Column<SampleTitle>[] = [
+  { key: "title", label: "Title", width: "26%", render: (r) => <TextLink href="#">{r.title}</TextLink> },
+  { key: "original", label: "Original title", width: "20%" },
+  { key: "first", label: "First published", width: "16%", mono: true },
+  { key: "editions", label: "Editions", width: "10%", mono: true, align: "right" },
+  { key: "publishers", label: "Publishers" },
+];
+
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <div className="font-mono text-[13px] uppercase tracking-[0.08em] text-amber">{children}</div>;
 }
 
-export default function StyleguidePage() {
+export default async function StyleguidePage() {
+  const photos = await getSamplePhotos();
+  const [first, second, third] = photos;
+
   return (
     <div className="flex flex-col gap-14">
       <header className="flex flex-col gap-4">
@@ -84,6 +137,96 @@ export default function StyleguidePage() {
           </div>
           <Logo size={16} />
         </div>
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <Eyebrow>Buttons and links</Eyebrow>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button href="#">View edition</Button>
+          <Button variant="secondary">Source</Button>
+          <Button disabled>Disabled</Button>
+          <TextLink href="#">Text link</TextLink>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <Eyebrow>Chips and labels</Eyebrow>
+        <div className="flex flex-wrap gap-2">
+          <FilterChip count={4}>Folio Society</FilterChip>
+          <FilterChip count={3} selected>Suntup Editions</FilterChip>
+          <FilterChip count={0} disabled>Curious King Books</FilterChip>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <ActiveFilter removeHref="#">Suntup Editions</ActiveFilter>
+          <ActiveFilter removeHref="#">1990–2010</ActiveFilter>
+          <TextLink href="#" standalone className="text-sm">Clear all</TextLink>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <IncludesChip>Slipcase</IncludesChip>
+          <IncludesChip>Dust jacket</IncludesChip>
+          <IncludesChip>Clamshell box</IncludesChip>
+          <VariantLabel>Edition of 26</VariantLabel>
+          <VariantLabel>Numbered 250</VariantLabel>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <Eyebrow>Photo tiles</Eyebrow>
+        <div className="flex flex-wrap gap-6">
+          <PhotoTile src={first?.src} alt={first?.alt ?? ""} credit={first?.credit} padding={16} className="h-[340px] w-[260px] max-w-full" />
+          <PhotoTile src={second?.src} alt={second?.alt ?? ""} credit={null} padding={16} className="h-[340px] w-[260px] max-w-full" />
+          <PhotoTile alt="" padding={16} className="h-[340px] w-[260px] max-w-full" />
+        </div>
+        <p className="text-[13px] text-creme-gedempt">With credit, without credit (no © button), no photograph.</p>
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <Eyebrow>Edition cards</Eyebrow>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <EditionCard
+            href="#"
+            title="The Odyssey"
+            publisher="Suntup Editions"
+            year={2018}
+            binding="Full leather"
+            variants={["Lettered 26", "Numbered 250"]}
+            photo={first ? { src: first.src, credit: first.credit } : null}
+          />
+          <EditionCard
+            href="#"
+            title="Heart of Darkness"
+            publisher="Folio Society"
+            year={1997}
+            photo={third ? { src: third.src, credit: third.credit } : null}
+          />
+          <EditionCard href="#" title="Aucassin and Nicolette" publisher="Folio Society" binding="Quarter cloth" />
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <Eyebrow>Yellow band</Eyebrow>
+        <YellowBand
+          as="h2"
+          publisher="Suntup Editions"
+          title="The Odyssey"
+          subtitle="Lettered edition"
+          subtitleNote="2018"
+          meta="by Homer · illustrated by Illustrator D"
+          count={{ label: "Edition of", value: 26, note: "Lettered A–Z" }}
+        />
+        <YellowBand as="h2" size="lg" title="Homer" meta="Greek · c. 8th century BC · Wikipedia" />
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <Eyebrow>Table</Eyebrow>
+        <DataTable caption="Titles by Homer" columns={TITLE_COLUMNS} rows={SAMPLE_TITLES} getRowKey={(r) => r.id} />
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <Eyebrow>Pagination</Eyebrow>
+        <Pagination page={1} totalPages={20} hrefFor={(p) => `?page=${p}`} />
+        <Pagination page={7} totalPages={20} hrefFor={(p) => `?page=${p}`} />
+        <Pagination page={20} totalPages={20} hrefFor={(p) => `?page=${p}`} />
       </section>
 
       <section className="flex flex-col gap-5">
