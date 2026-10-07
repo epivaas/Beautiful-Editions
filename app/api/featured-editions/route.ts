@@ -1,6 +1,32 @@
 import { supabase } from "@/utils/supabase";
 import { NextResponse } from "next/server";
 
+type FeaturedPhoto = {
+  id: number;
+  storage_path: string;
+  sort_order: number;
+  copyright_statement: string | null;
+  is_main: boolean;
+};
+
+type FeaturedEditionRow = {
+  id: number;
+  title: string;
+  publisher_id: number;
+  series_id: number | null;
+  photos: FeaturedPhoto[] | null;
+  work_editions: { work_id: number | null }[] | null;
+};
+
+type FeaturedWork = {
+  id: number;
+  original_title: string;
+  work_authors: { author: { id: number; name: string } | { id: number; name: string }[] | null }[] | null;
+};
+
+type FeaturedPublisher = { id: number; name: string };
+type FeaturedSeries = { id: number; name: string; publisher_id: number | null };
+
 // Fisher-Yates shuffle for random selection
 function shuffle<T>(array: T[]): T[] {
   const arr = [...array];
@@ -43,19 +69,20 @@ export async function GET() {
     }
 
     // Get work IDs from editions
+    const editionRows = (editions || []) as FeaturedEditionRow[];
     const workIds = [
       ...new Set(
-        (editions || [])
-          .flatMap((e: any) => e.work_editions || [])
-          .map((link: any) => link.work_id)
-          .filter(Boolean)
+        editionRows
+          .flatMap((edition) => edition.work_editions || [])
+          .map((link) => link.work_id)
+          .filter((id): id is number => id !== null)
       ),
     ];
-    const publisherIds = [...new Set((editions || []).map((e: any) => e.publisher_id).filter(Boolean))];
-    const seriesIds = [...new Set((editions || []).map((e: any) => e.series_id).filter(Boolean))];
+    const publisherIds = [...new Set(editionRows.map((edition) => edition.publisher_id))];
+    const seriesIds = [...new Set(editionRows.map((edition) => edition.series_id).filter((id): id is number => id !== null))];
 
     // Fetch works data
-    let works: any = {};
+    const works: Record<number, FeaturedWork> = {};
     if (workIds.length > 0) {
       const { data: worksData } = await supabase
         .from("works")
@@ -72,14 +99,14 @@ export async function GET() {
         .in("id", workIds);
 
       if (worksData) {
-        worksData.forEach((w: any) => {
+        (worksData as FeaturedWork[]).forEach((w) => {
           works[w.id] = w;
         });
       }
     }
 
     // Fetch publishers data
-    let publishers: any = {};
+    const publishers: Record<number, FeaturedPublisher> = {};
     if (publisherIds.length > 0) {
       const { data: publishersData } = await supabase
         .from("publishers")
@@ -87,14 +114,14 @@ export async function GET() {
         .in("id", publisherIds);
 
       if (publishersData) {
-        publishersData.forEach((p: any) => {
+        (publishersData as FeaturedPublisher[]).forEach((p) => {
           publishers[p.id] = p;
         });
       }
     }
 
     // Fetch series data
-    let series: any = {};
+    const series: Record<number, FeaturedSeries> = {};
     if (seriesIds.length > 0) {
       const { data: seriesData } = await supabase
         .from("series")
@@ -102,21 +129,23 @@ export async function GET() {
         .in("id", seriesIds);
 
       if (seriesData) {
-        seriesData.forEach((s: any) => {
+        (seriesData as FeaturedSeries[]).forEach((s) => {
           series[s.id] = s;
         });
       }
     }
 
     // Enrich editions with work, publisher, and series data
-    const enrichedEditions = (editions || [])
-      .map((e: any) => ({
+    const enrichedEditions = editionRows
+      .map((e) => ({
         ...e,
-        work: works[e.work_editions?.[0]?.work_id],
+        work: e.work_editions?.[0]?.work_id != null
+          ? works[e.work_editions[0].work_id]
+          : undefined,
         publisher: publishers[e.publisher_id],
-        series: series[e.series_id],
+        series: e.series_id != null ? series[e.series_id] : undefined,
       }))
-      .filter((e: any) => e.photos && e.photos.length > 0);
+      .filter((e) => e.photos && e.photos.length > 0);
 
     // Shuffle and select random 8 editions
     const randomEditions = shuffle(enrichedEditions).slice(0, 8);

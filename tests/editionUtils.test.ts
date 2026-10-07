@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getMainPhoto, getAuthorName, getEditionInfo, Photo, Edition, Work, Publisher, Series } from '../app/lib/editionUtils';
+import { getMainPhoto, getAuthorName, getEditionInfo, Photo, Edition, Work } from '../app/lib/editionUtils';
 
 describe('editionUtils', () => {
   it('getMainPhoto returns null for empty or undefined', () => {

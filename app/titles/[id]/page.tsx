@@ -2,6 +2,7 @@ import { supabase } from "@/utils/supabase";
 import { Author, Work, EditionWithRelations } from "@/types/database";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { fetchAllRows } from "@/utils/supabasePagination";
 
 type WorkWithAuthors = Work & {
@@ -319,9 +320,11 @@ export default async function TitleDetailPage({
                       </div>
                       {firstPhoto && (
                         <Link href={`/edition/${edition.id}`} className="flex-shrink-0">
-                          <img
+                          <Image
                             src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Book-photos/${firstPhoto.storage_path}`}
                             alt={edition.title}
+                            width={96}
+                            height={128}
                             className="w-24 h-32 object-cover rounded border border-[#e0ddd0]"
                           />
                         </Link>

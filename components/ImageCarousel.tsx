@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Photo } from "@/types/database";
+import Image from "next/image";
 
 function getPhotoUrl(storagePath: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Book-photos/${storagePath}`;
@@ -94,9 +95,11 @@ export default function ImageCarousel({ photos }: { photos: Photo[] }) {
               aria-label={`Open photo ${realIndex + 1}`}
               style={{ width: "100%", minHeight: 90, maxHeight: 90 }}
             >
-              <img
+              <Image
                 src={getPhotoUrl(photo.storage_path)}
                 alt={`Thumbnail ${realIndex + 1}`}
+                width={160}
+                height={90}
                 className="w-full h-full object-contain bg-[#f6f4ea] p-1"
                 style={{ objectPosition: 'center' }}
               />
@@ -123,9 +126,11 @@ export default function ImageCarousel({ photos }: { photos: Photo[] }) {
             >
               ✕
             </button>
-            <img
+            <Image
               src={imageUrl}
               alt={currentPhoto.caption || "Enlarged photo"}
+              width={1600}
+              height={1200}
               className="max-h-[80vh] w-full object-contain rounded"
             />
             {currentPhoto.caption && (

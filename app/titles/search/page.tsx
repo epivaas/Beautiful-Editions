@@ -3,7 +3,30 @@ import { Work } from "@/types/database";
 import Link from "next/link";
 import SearchBox from "@/components/SearchBox";
 
-async function searchWorks(searchQuery: string): Promise<Work[]> {
+type SearchWork = Work & {
+  work_authors?: { author: { id: number; name: string } | null }[] | null;
+};
+
+type SearchWorkRelation = Work & {
+  work_authors?: {
+    author: { id: number; name: string } | { id: number; name: string }[] | null;
+  }[] | null;
+};
+
+function firstRelation<T>(relation: T | T[] | null | undefined): T | null {
+  return Array.isArray(relation) ? relation[0] ?? null : relation ?? null;
+}
+
+function normalizeSearchWork(work: SearchWorkRelation): SearchWork {
+  return {
+    ...work,
+    work_authors: (work.work_authors || []).map((workAuthor) => ({
+      author: firstRelation(workAuthor.author),
+    })),
+  };
+}
+
+async function searchWorks(searchQuery: string): Promise<SearchWork[]> {
   // Search in original_title, english_title, and authors
   const searchTerm = `%${searchQuery}%`;
 
@@ -21,6 +44,9 @@ async function searchWorks(searchQuery: string): Promise<Work[]> {
     `)
     .or(`original_title.ilike.${searchTerm},english_title.ilike.${searchTerm}`)
     .limit(50);
+  if (titleError) {
+    console.error("Error searching works by title:", titleError);
+  }
 
   // Search by author name
   const { data: authors, error: authorError } = await supabase
@@ -28,8 +54,11 @@ async function searchWorks(searchQuery: string): Promise<Work[]> {
     .select("id")
     .ilike("name", searchTerm)
     .limit(10);
+  if (authorError) {
+    console.error("Error searching authors:", authorError);
+  }
 
-  let worksByAuthor: any[] = [];
+  let worksByAuthor: SearchWork[] = [];
   if (authors && authors.length > 0) {
     const authorIds = authors.map((a) => a.id);
     const { data, error } = await supabase
@@ -49,43 +78,64 @@ async function searchWorks(searchQuery: string): Promise<Work[]> {
       .in("author_id", authorIds)
       .limit(50);
 
-    if (!error && data) {
-      worksByAuthor = data.map((item: any) => item.work).filter(Boolean);
+    if (error) {
+      console.error("Error finding works by author:", error);
+    } else if (data) {
+      worksByAuthor = (data as { work: SearchWorkRelation | SearchWorkRelation[] | null }[])
+        .flatMap((item) => {
+          const work = firstRelation(item.work);
+          return work ? [normalizeSearchWork(work)] : [];
+        });
     }
   }
 
   // Search editions by title
   const { data: editions, error: editionError } = await supabase
     .from("editions")
-    .select("work_id")
+    .select("id")
     .ilike("title", searchTerm)
     .limit(20);
+  if (editionError) {
+    console.error("Error searching editions:", editionError);
+  }
 
-  let worksByEdition: any[] = [];
+  let worksByEdition: SearchWork[] = [];
   if (editions && editions.length > 0) {
-    const workIds = [...new Set(editions.map((e) => e.work_id))];
-    const { data, error } = await supabase
-      .from("works")
-      .select(`
-        *,
-        work_authors (
-          author:authors (
-            id,
-            name
-          )
-        )
-      `)
-      .in("id", workIds)
-      .limit(50);
+    const editionIds = editions.map((edition) => edition.id);
+    const { data: workEditionLinks, error: workEditionError } = await supabase
+      .from("work_editions")
+      .select("work_id")
+      .in("edition_id", editionIds);
 
-    if (!error && data) {
-      worksByEdition = data;
+    if (workEditionError) {
+      console.error("Error finding works for editions:", workEditionError);
+    } else if (workEditionLinks?.length) {
+      const workIds = [...new Set(workEditionLinks.map((link) => link.work_id))];
+      const { data, error } = await supabase
+        .from("works")
+        .select(`
+          *,
+          work_authors (
+            author:authors (
+              id,
+              name
+            )
+          )
+        `)
+        .in("id", workIds)
+        .limit(50);
+
+      if (error) {
+        console.error("Error fetching works for editions:", error);
+      } else if (data) {
+        worksByEdition = (data as SearchWorkRelation[]).map(normalizeSearchWork);
+      }
     }
   }
 
   // Combine and deduplicate by work id
   const allWorks = [
-    ...(worksByTitle || []),
+    ...((worksByTitle || []) as SearchWorkRelation[]).map(normalizeSearchWork),
     ...worksByAuthor,
     ...worksByEdition,
   ];
@@ -94,7 +144,7 @@ async function searchWorks(searchQuery: string): Promise<Work[]> {
     new Map(allWorks.map((work) => [work.id, work])).values()
   ).slice(0, 50);
 
-  return uniqueWorks as Work[];
+  return uniqueWorks;
 }
 
 export default async function SearchPage({
@@ -130,8 +180,10 @@ export default async function SearchPage({
           <div className="divide-y divide-[#e0ddd0]">
             {works.map((work) => {
               const authors =
-                (work as any).work_authors?.map((wa: any) => wa.author.name).join(", ") ||
-                "Unknown";
+                work.work_authors
+                  ?.map((workAuthor) => workAuthor.author?.name)
+                  .filter((name): name is string => Boolean(name))
+                  .join(", ") || "Unknown";
 
               return (
                 <Link

@@ -2,6 +2,36 @@ import { supabase } from "@/utils/supabase";
 import ImageCarousel from "@/components/ImageCarousel";
 import { notFound } from "next/navigation";
 import { fetchAllRows } from "@/utils/supabasePagination";
+import Image from "next/image";
+
+type ParentPhoto = {
+  id: number;
+  storage_path: string;
+  sort_order: number;
+  caption: string | null;
+};
+
+type ParentEdition = {
+  id: number;
+  title: string;
+  publication_year: number | null;
+  publisher: { id: number; name: string } | null;
+  work: { id: number; original_title: string | null; english_title: string | null } | null;
+  photos: ParentPhoto[] | null;
+};
+
+type SubEditionRecord = {
+  id: number;
+  edition_id: number;
+  impression_label: string | null;
+  sequence_number: number | null;
+  publication_year: number | null;
+  catalogue_number: string | null;
+  is_limited_edition: boolean | null;
+  limited_edition_count: number | null;
+  publisher_url: string | null;
+  edition: ParentEdition | null;
+};
 
 function formatValue(value: unknown) {
   if (value === null || value === undefined || value === "") {
@@ -39,7 +69,7 @@ async function getSubEdition(id: string) {
     .eq("id", subEdition.edition_id)
     .single();
 
-  return { ...subEdition, edition };
+  return { ...subEdition, edition: edition as ParentEdition | null } as SubEditionRecord;
 }
 
 export default async function SubEditionPage({
@@ -53,7 +83,7 @@ export default async function SubEditionPage({
 
   const parent = sub.edition;
   const work = parent?.work;
-  const parentPhotos = (parent?.photos || []).sort((a: any, b: any) => a.sort_order - b.sort_order);
+  const parentPhotos = [...(parent?.photos || [])].sort((a, b) => a.sort_order - b.sort_order);
   const basePhoto = parentPhotos[0];
 
   // Photos specifically attached to this sub-edition
@@ -64,9 +94,9 @@ export default async function SubEditionPage({
       .eq("sub_edition_id", sub.id)
       .order("sort_order", { ascending: true })
   );
-  const photos = (subPhotos || [])
-    .sort((a: any, b: any) => a.sort_order - b.sort_order)
-    .map((p: any) => ({
+  const photos = ((subPhotos || []) as ParentPhoto[])
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((p) => ({
       id: p.id,
       storage_path: p.storage_path,
       sort_order: p.sort_order,
@@ -106,7 +136,13 @@ export default async function SubEditionPage({
 
           <div className="justify-self-end">
             {basePhoto ? (
-              <img src={getPhotoUrl(basePhoto.storage_path)} alt={basePhoto.caption || 'Base photo'} className="w-[220px] h-[220px] object-contain rounded" />
+              <Image
+                src={getPhotoUrl(basePhoto.storage_path)}
+                alt={basePhoto.caption || "Base photo"}
+                width={220}
+                height={220}
+                className="w-[220px] h-[220px] object-contain rounded"
+              />
             ) : (
               <div className="w-[220px] h-[220px] bg-[#f6f4ea] flex items-center justify-center text-sm text-[#9b9b9b]">No image</div>
             )}

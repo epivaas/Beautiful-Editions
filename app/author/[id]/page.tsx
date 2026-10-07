@@ -3,6 +3,32 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { fetchAllRows } from "@/utils/supabasePagination";
 
+type AuthorEdition = {
+  id: number;
+  title: string;
+  publication_year: number | null;
+  publisher: { id: number; name: string } | null;
+  series: { id: number; name: string } | null;
+};
+
+type AuthorEditionRelation = Omit<AuthorEdition, "publisher" | "series"> & {
+  publisher: AuthorEdition["publisher"] | NonNullable<AuthorEdition["publisher"]>[];
+  series: AuthorEdition["series"] | NonNullable<AuthorEdition["series"]>[];
+};
+
+function firstRelation<T>(relation: T | T[] | null | undefined): T | null {
+  return Array.isArray(relation) ? relation[0] ?? null : relation ?? null;
+}
+
+type AuthorWorkSummary = {
+  id: number;
+  original_title: string;
+  english_title: string | null;
+  original_publication_year: string | null;
+  original_language: string | null;
+  editions: AuthorEdition[];
+};
+
 async function getAuthor(id: number) {
   const { data, error } = await supabase
     .from("authors")
@@ -17,7 +43,7 @@ async function getAuthor(id: number) {
   return data;
 }
 
-async function getWorksByAuthor(authorId: number) {
+async function getWorksByAuthor(authorId: number): Promise<AuthorWorkSummary[]> {
   const { data: workAuthors, error: workAuthorsError } = await fetchAllRows(() =>
     supabase
       .from("work_authors")
@@ -73,26 +99,31 @@ async function getWorksByAuthor(authorId: number) {
     console.error("Error fetching editions:", editionsError);
   }
 
-  const editionsByWork = new Map<number, any[]>();
-  (workEditions || []).forEach((workEdition: any) => {
-    if (!workEdition.edition) {
+  const editionsByWork = new Map<number, AuthorEdition[]>();
+  (workEditions || []).forEach((workEdition) => {
+    const edition = firstRelation(workEdition.edition as AuthorEditionRelation | AuthorEditionRelation[] | null);
+    if (!edition) {
       return;
     }
 
     if (!editionsByWork.has(workEdition.work_id)) {
       editionsByWork.set(workEdition.work_id, []);
     }
-    editionsByWork.get(workEdition.work_id)?.push(workEdition.edition);
+    editionsByWork.get(workEdition.work_id)?.push({
+      ...edition,
+      publisher: firstRelation(edition.publisher),
+      series: firstRelation(edition.series),
+    });
   });
 
   editionsByWork.forEach((editions) => {
     editions.sort((a, b) => (b.publication_year || 0) - (a.publication_year || 0));
   });
 
-  return (works || []).map((work: any) => ({
+  return (works || []).map((work) => ({
     ...work,
     editions: editionsByWork.get(work.id) || [],
-  }));
+  })) as AuthorWorkSummary[];
 }
 
 export default async function AuthorPage({
@@ -142,7 +173,7 @@ export default async function AuthorPage({
             </div>
           ) : (
             <div className="space-y-6">
-              {works.map((work: any, index: number) => (
+              {works.map((work, index) => (
                 <div key={work.id} className="pt-2">
                   {index > 0 && <div className="border-t-2 border-[#d8cfbe] mb-6" />}
                   <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between mb-3">
@@ -177,7 +208,7 @@ export default async function AuthorPage({
                     </div>
                   ) : (
                     <div className="pl-3 md:pl-4 border-l border-[#e0ddd0] space-y-2">
-                      {work.editions.map((edition: any) => (
+                      {work.editions.map((edition) => (
                         <div key={edition.id} className="py-2">
                           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
