@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Menu en zoeken</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}a{color:#FFB627}</style>
+</helmet>
+<div style="width: 1280px; min-height: 2300px; box-sizing: border-box; padding: 72px 80px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif; display: flex; flex-direction: column; gap: 56px">
+
+  <header style="display: flex; flex-direction: column; gap: 20px; max-width: 900px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Shelfhound · Designgids v0.3 · deel 6</div>
+    <h1 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.03em">Menu en zoeken</h1>
+    <p style="margin: 0; font-size: 19px; line-height: 29px; color: #D2C6AE">Vijf menu-items en één zoekveld dat op elke pagina staat. Het zoekveld geeft meteen resultaten per soort, met een link naar het gedetailleerde zoeken.</p>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Kop met zoeken en live resultaten</div>
+    <div style="border: 1px solid #5C5147; border-radius: 10px; overflow: hidden; background: #3B332C; position: relative; height: 520px">
+      <div style="display: flex; align-items: center; gap: 28px; padding: 14px 28px; background: #2A241F; border-bottom: 1px solid #5C5147">
+        <span style="font-weight: 800; font-size: 22px; letter-spacing: -0.04em">Shelf<span style="color: #FFB627">hound</span></span>
+        <nav style="display: flex; gap: 22px; font-size: 14px"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><a href="#" style="{{n.style}}">{{n.l}}</a></sc-for></nav>
+        <div style="margin-left: auto; width: 380px; box-sizing: border-box; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #473E36; border: 2px solid #FFB627; border-radius: 6px; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5ECD7" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span style="flex: 1 1 auto">hom</span><span style="font-size: 12px; font-weight: 600; color: #FFB627">Detailed</span></div>
+      </div>
+      <div style="position: absolute; right: 28px; top: 62px; width: 540px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 8px 0; box-shadow: none">
+        <div style="padding: 8px 18px 4px; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Authors</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 18px; background: #52483F"><span style="display: flex; align-items: center; gap: 10px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #FF6B3D"></span><span style="font-weight: 700; font-size: 16px"><span style="background: #FF6B3D; color: #1B1612; padding: 0 2px; border-radius: 3px">Hom</span>er</span></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">2 titles</span></div>
+        <div style="padding: 12px 18px 4px; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Titles</div>
+        <div style="display: flex; justify-content: space-between; padding: 8px 18px"><span style="font-size: 15px">Odýsseia <span style="color: #D2C6AE">· The Odyssey, <span style="background: #FF6B3D; color: #1B1612; padding: 0 2px; border-radius: 3px">Hom</span>er</span></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">9 editions</span></div>
+        <div style="display: flex; justify-content: space-between; padding: 8px 18px"><span style="font-size: 15px">Ilias <span style="color: #D2C6AE">· The Iliad, <span style="background: #FF6B3D; color: #1B1612; padding: 0 2px; border-radius: 3px">Hom</span>er</span></span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">8 editions</span></div>
+        <div style="padding: 12px 18px 4px; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Publishers</div>
+        <div style="padding: 8px 18px; font-size: 15px; color: #D2C6AE">No matches</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; margin-top: 6px; border-top: 1px solid #5C5147; font-size: 14px"><span style="color: #D2C6AE">Press Enter for all 14 results</span><a href="#" style="font-weight: 700">Detailed search →</a></div>
+      </div>
+      <div style="position: absolute; left: 32px; top: 100px; max-width: 420px; font-size: 14px; line-height: 21px; color: #D2C6AE">Resultaten verschijnen vanaf het tweede teken en zijn gegroepeerd per soort. De getypte letters zijn Gloed met Inkt-tekst. Pijltjestoetsen en Enter werken. Het veld heeft een Amber rand zodra je erin typt.</div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Gedetailleerd zoeken</div>
+    <div style="border: 1px solid #5C5147; border-radius: 10px; overflow: hidden; background: #3B332C">
+      <div style="display: flex; align-items: center; gap: 28px; padding: 14px 28px; background: #2A241F; border-bottom: 1px solid #5C5147">
+        <span style="font-weight: 800; font-size: 22px; letter-spacing: -0.04em">Shelf<span style="color: #FFB627">hound</span></span>
+        <nav style="display: flex; gap: 22px; font-size: 14px"><sc-for list="{{nav}}" as="n" hint-placeholder-count="5"><a href="#" style="{{n.style}}">{{n.l}}</a></sc-for></nav>
+        <div style="margin-left: auto; width: 300px; box-sizing: border-box; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #3B332C; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span style="flex: 1 1 auto">Search</span><span style="font-size: 12px; font-weight: 600; color: #FFB627">Detailed</span></div>
+      </div>
+      <div style="padding: 32px 32px 40px; display: flex; flex-direction: column; gap: 24px">
+        <h2 style="margin: 0; font-weight: 800; font-size: 48px; line-height: 52px; letter-spacing: -0.03em">Detailed search</h2>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 24px">
+          <sc-for list="{{fields}}" as="f" hint-placeholder-count="9">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">{{f.l}}</label>
+            <div style="box-sizing: border-box; height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 14px; background: #473E36; border: 1px solid #A89C86; border-radius: 6px; font-size: 15px; color: #D2C6AE"><span>{{f.p}}</span><span style="{{f.arrow}}">▾</span></div>
+          </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; align-items: center; gap: 32px">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 15px"><span style="width: 20px; height: 20px; box-sizing: border-box; border: 2px solid #F5ECD7; border-radius: 4px"></span>Limited editions only</div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 15px"><span style="width: 20px; height: 20px; box-sizing: border-box; border: 2px solid #F5ECD7; border-radius: 4px"></span>With slipcase</div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 15px"><span style="width: 20px; height: 20px; box-sizing: border-box; border: 2px solid #F5ECD7; border-radius: 4px"></span>With photos</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px">
+          <button type="button" style="min-height: 44px; padding: 0 22px; border-radius: 6px; border: 1px solid #FFB627; background: #FFB627; color: #1B1612; font: 700 15px 'Archivo', system-ui, sans-serif">Show 312 editions</button>
+          <a href="#" style="font-size: 15px; font-weight: 600">Clear all</a>
+          <span style="margin-left: auto; font-size: 13px; color: #D2C6AE">Het aantal bovenaan de knop wordt bijgewerkt bij elke keuze. De resultaten verschijnen als de edities-tabel.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Telefoon</div>
+    <div style="display: flex; gap: 32px; align-items: flex-start">
+      <div style="flex: 0 0 360px; border: 1px solid #5C5147; border-radius: 10px; overflow: hidden; background: #3B332C">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #2A241F; border-bottom: 1px solid #5C5147">
+          <span style="font-weight: 800; font-size: 20px; letter-spacing: -0.04em">Shelf<span style="color: #FFB627">hound</span></span>
+          <div style="margin-left: auto; flex: 0 0 auto; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F5ECD7" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg></div>
+          <div style="flex: 0 0 auto; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F5ECD7" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></div>
+        </div>
+        <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 6px">
+          <sc-for list="{{mobileNav}}" as="m" hint-placeholder-count="5"><div style="display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid #5C5147; font-weight: 700; font-size: 18px">{{m}}</div></sc-for>
+        </div>
+      </div>
+      <div style="flex: 1 1 0; max-width: 520px; font-size: 15px; line-height: 23px; color: #D2C6AE">Onder 640 px verdwijnt het zoekveld achter een zoekicoon (44 px aanraakdoel) en klapt het menu in. Tabellen scrollen horizontaal binnen hun eigen vak en houden de eerste kolom vast. Op de editie- en titelpagina zijn foto's één per rij en schuift de gegevensraster naar twee kolommen.</div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const items = ["Titles", "Authors", "Publishers", "Series", "About"];
+    const nav = items.map((l) => ({
+      l: l,
+      style: "color:" + (l === "Authors" ? "#F5ECD7" : "#D2C6AE") + ";text-decoration:none;font-weight:600;padding-bottom:4px;border-bottom:3px solid " + (l === "Authors" ? "#FFB627" : "transparent")
+    }));
+    const a = "font-size:12px;color:#D2C6AE";
+    const fields = [
+      { l: "Title", p: "Any title" },
+      { l: "Author", p: "Any author", arrow: a },
+      { l: "Publisher", p: "Any publisher", arrow: a },
+      { l: "Series", p: "Any series", arrow: a },
+      { l: "Illustrator", p: "Any illustrator", arrow: a },
+      { l: "Binding", p: "Any binding", arrow: a },
+      { l: "Year from", p: "1947", arrow: a },
+      { l: "Year to", p: "2026", arrow: a },
+      { l: "Language", p: "Any language", arrow: a }
+    ].map((f) => Object.assign({ arrow: "display:none" }, f));
+    return { nav, fields, mobileNav: items };
+  }
+}
+</script>
+</body>
+</html>

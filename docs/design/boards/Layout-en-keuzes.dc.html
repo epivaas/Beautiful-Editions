@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Layout en ontwerpkeuzes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1280px; height: 2500px; box-sizing: border-box; padding: 72px 80px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif; display: flex; flex-direction: column; gap: 56px">
+
+  <header style="display: flex; flex-direction: column; gap: 20px; max-width: 880px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Shelfhound · Designgids v0.2 · deel 2</div>
+    <h1 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.03em">Layout en ontwerpkeuzes</h1>
+    <p style="margin: 0; font-size: 19px; line-height: 29px; color: #D2C6AE">Drie principes, een vast raster, en een vertaling van je commentaar op LibraryThing, Beautiful Books en Lazy Book Collector naar concrete keuzes.</p>
+  </header>
+
+  <section style="display: flex; gap: 24px">
+    <sc-for list="{{principles}}" as="p" hint-placeholder-count="3">
+    <div style="flex: 1 1 0; min-width: 0; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 28px; display: flex; flex-direction: column; gap: 14px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #FFB627">{{p.num}}</div>
+      <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 32px; letter-spacing: -0.02em">{{p.title}}</h2>
+      <div style="width: 48px; height: 4px; background: #FFB627"></div>
+      <p style="margin: 0; font-size: 15px; line-height: 23px; color: #D2C6AE">{{p.text}}</p>
+    </div>
+    </sc-for>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 24px">
+    <h2 style="margin: 0; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Raster en ruimte</h2>
+    <div style="display: flex; gap: 48px; align-items: flex-start">
+      <div style="flex: 1.35 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px">
+          <sc-for list="{{cols}}" as="c" hint-placeholder-count="12">
+          <div style="height: 120px; background: #473E36; border-radius: 4px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D2C6AE">{{c}}</div>
+          </sc-for>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px">
+          <div style="grid-column: span 12; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 20px"><strong style="font-weight: 700">Eén kolom, 12 kolommen breed</strong><br><span style="color: #D2C6AE">Tabellen, foto's en tekst gebruiken de volle breedte. Filters staan boven de tabel, feiten in een raster onder de kop.</span></div>
+        </div>
+        <p style="margin: 4px 0 0; font-size: 14px; line-height: 21px; color: #D2C6AE">Geen vaste zijbalk. Op de overzichten zou die toch leeg of overbodig zijn, en op de detailpagina's staat de belangrijkste informatie liever naast niets dan naast een smalle kolom. Tekstblokken blijven wel op maximaal 68 tekens, zodat ze comfortabel lezen. Tabellen scrollen binnen hun eigen vak, nooit de hele pagina.</p>
+      </div>
+      <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column">
+        <sc-for list="{{specs}}" as="s" hint-placeholder-count="7">
+        <div style="display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid #5C5147; font-size: 14px; line-height: 20px">
+          <span style="color: #D2C6AE">{{s.k}}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right">{{s.v}}</span>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Eén vaste hiërarchie</h2>
+      <p style="margin: 0; max-width: 840px; font-size: 15px; line-height: 23px; color: #D2C6AE">Op LibraryThing vond je het onduidelijk wat een work of een book is. Hier heeft elk niveau een eigen naam, een eigen label in kleine hoofdletters boven de titel en een plek in de broodkruimel.</p>
+    </div>
+    <div style="display: flex; align-items: stretch; gap: 16px">
+      <div style="flex: 1 1 0; min-width: 0; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 8px">
+        <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #FFB627">Title</div>
+        <div style="font-weight: 800; font-size: 28px; line-height: 32px; letter-spacing: -0.02em">The Odyssey</div>
+        <div style="font-size: 14px; line-height: 21px; color: #D2C6AE">Het werk zelf, los van wie het uitgaf.</div>
+      </div>
+      <div aria-hidden="true" style="flex: 0 0 24px; align-self: center; font-size: 22px; color: #FFB627; text-align: center">→</div>
+      <div style="flex: 1 1 0; min-width: 0; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 8px">
+        <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #FFB627">Edition</div>
+        <div style="font-weight: 800; font-size: 28px; line-height: 32px; letter-spacing: -0.02em">Folio Society, standard</div>
+        <div style="font-size: 14px; line-height: 21px; color: #D2C6AE">Eén uitgever, één opmaak, één ontwerp.</div>
+      </div>
+      <div aria-hidden="true" style="flex: 0 0 24px; align-self: center; font-size: 22px; color: #FFB627; text-align: center">→</div>
+      <div style="flex: 1 1 0; min-width: 0; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 8px">
+        <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #FFB627">Printing</div>
+        <div style="font-weight: 800; font-size: 28px; line-height: 32px; letter-spacing: -0.02em">Second printing</div>
+        <div style="font-size: 14px; line-height: 21px; color: #D2C6AE">Kleine verschillen binnen dezelfde editie.</div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 16px">
+    <h2 style="margin: 0 0 8px; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Wat je zei, wat ik deed</h2>
+    <sc-for list="{{choices}}" as="c" hint-placeholder-count="7">
+    <div style="display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 40px; padding: 16px 0; border-top: 1px solid #5C5147">
+      <div style="font-size: 14px; line-height: 21px; color: #D2C6AE"><strong style="display: block; font-weight: 700; color: #F5ECD7">{{c.site}}</strong>{{c.said}}</div>
+      <div style="font-size: 15px; line-height: 23px">{{c.did}}</div>
+    </div>
+    </sc-for>
+  </section>
+
+  <section style="display: flex; gap: 40px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 32px">
+    <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 32px; letter-spacing: -0.02em">Nog open: een licht thema</h2>
+      <p style="margin: 0; font-size: 15px; line-height: 23px; color: #D2C6AE">Cocoa is nu het enige thema. Een lichte variant (met een schakelaar) is mogelijk, maar is dan een tweede palet dat we apart moeten ontwerpen en onderhouden. Zand bleek te vlak. Ik stel voor eerst met Cocoa alleen te bouwen en dit pas te heroverwegen als bezoekers erom vragen.</p>
+    </div>
+    <div style="flex: 0 0 360px; display: flex; flex-direction: column; gap: 12px; font-size: 14px; line-height: 21px">
+      <div style="display: flex; gap: 12px; align-items: center"><span style="flex: 0 0 18px; height: 18px; border-radius: 9px; background: #FFB627"></span><span>Cocoa: Crème op Cocoa 10,5:1, in lijn met je keuze</span></div>
+      <div style="display: flex; gap: 12px; align-items: center"><span style="flex: 0 0 18px; height: 18px; border-radius: 9px; background: #A19E99"></span><span>De foto-mat blijft grijs, ook in een later licht thema</span></div>
+      <div style="display: flex; gap: 12px; align-items: center"><span style="flex: 0 0 18px; height: 18px; border-radius: 9px; background: #FF6B3D"></span><span>Gloed blijft een vlak, ook daar</span></div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const principles = [
+      { num: "01", title: "Het boek is de held", text: "Foto's staan op een grijze mat en worden nooit bijgesneden of opgeschaald. De interface treedt terug: weinig kleur, geen decoratie die met de covers concurreert." },
+      { num: "02", title: "Naslagwerk eerst", text: "Overzichten zijn tabellen, want titels, auteurs en edities zijn er veel en ze hebben zelden foto's. Foto's staan op de titel- en editiepagina, daar waar ze er echt zijn. Details staan in vaste velden met vaste labels." },
+      { num: "03", title: "Altijd leesbaar", text: "Minstens 4,5:1 contrast overal, en alle gewone tekst op Cocoa haalt 7:1 of meer. Geen verblindend wit, en niets dat bij weinig licht onleesbaar wordt." }
+    ];
+    const cols = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    const specs = [
+      { k: "Container", v: "max 1200 px" },
+      { k: "Kolommen", v: "12 · gutter 24 px" },
+      { k: "Ruimteschaal", v: "4 · 8 · 16 · 24 · 32 · 48 · 72" },
+      { k: "Hoeken", v: "kaarten 8 px · knoppen 6 px · foto's 0" },
+      { k: "Lijnen", v: "1 px Lijn, geen schaduwen" },
+      { k: "Breakpoints", v: "640 · 960 · 1280" },
+      { k: "Aanraakdoel", v: "min 44 px hoog" }
+    ];
+    const choices = [
+      { site: "LibraryThing", said: "Lelijke kleuren en een lelijk koplettertype.",
+        did: "Eén warm palet: Cocoa, Crème, Amber en Gloed, allemaal effen. Koppen in Archivo 800: een stevig lettertype zonder serif." },
+      { site: "LibraryThing", said: "Overvol en een moeilijke menustructuur.",
+        did: "Vijf menu-items: Titles, Authors, Publishers, Series, About. Zoeken staat altijd zichtbaar. De rijkdom zit op de detailpagina, niet in de navigatie." },
+      { site: "LibraryThing", said: "Onduidelijk wat work of book is.",
+        did: "De vaste hiërarchie Title, Edition, Printing hierboven, op elke pagina met hetzelfde label en dezelfde broodkruimel." },
+      { site: "Beautiful Books", said: "Mooie foto-layout, maar veel wit en te standaard.",
+        did: "Geen wit, maar warm donkerbruin met een amberband. Foto's op een grijze mat, in hun eigen verhouding. Een justified fotorij op de detailpagina." },
+      { site: "Lazy Book Collector", said: "Donkere deel slecht leesbaar bij weinig licht. Zoeken is niet dynamisch.",
+        did: "Donker, maar Cocoa in plaats van bijna-zwart, met Crème op 10,5:1. Zoeken en filters reageren meteen en tonen het aantal resultaten per facet, zodat je kunt doorboren." },
+      { site: "Jouw eigen pagina's", said: "Veel meer velden en overzichtspagina's dan de voorbeelden.",
+        did: "Twee dichtheden: Ontdekken (ruim, grote foto's) en Naslag (compacte tabel, sorteerbaar). Een A tot Z-balk bovenaan elk overzicht." },
+      { site: "Jouw feedback op het palet", said: "Te braaf, te flets, geen karakter. Geen verlopen.",
+        did: "Amber als huiskleur en Gloed als schaarse tweede kleur, beide in effen vlakken. Geen kleurverloop en geen kleurfilter op foto's." }
+    ];
+    return { principles, cols, specs, choices };
+  }
+}
+</script>
+</body>
+</html>

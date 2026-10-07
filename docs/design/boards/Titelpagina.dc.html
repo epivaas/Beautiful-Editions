@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Odyssey, titelpagina</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#FFB627}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #FF6B3D;outline-offset:3px}
+</style>
+</helmet>
+<div style="min-height: 2050px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif">
+
+  <div style="background: #5C5147; padding: 8px 24px; text-align: center; font-size: 13px; line-height: 19px; color: #F5ECD7">Ontwerpvoorbeeld met voorbeeldgegevens. Uitgevers zijn de jouwe, de rest is placeholder, en de foto's zijn je vijf testfoto's: ze horen niet bij deze titel. Probeer de filters en de weergave.</div>
+
+  <header style="background: #2A241F; border-bottom: 1px solid #5C5147">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px">
+      <a href="#" style="font-weight: 800; font-size: 26px; line-height: 30px; letter-spacing: -0.03em; color: #F5ECD7; text-decoration: none">Shelfhound</a>
+      <nav aria-label="Main" style="display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 15px; font-weight: 600">
+        <a href="#" style="color: #F5ECD7; text-decoration: none; border-bottom: 3px solid #FFB627; padding-bottom: 4px">Titles</a>
+        <a href="#" style="color: #D2C6AE; text-decoration: none; padding-bottom: 4px">Authors</a>
+        <a href="#" style="color: #D2C6AE; text-decoration: none; padding-bottom: 4px">Publishers</a>
+        <a href="#" style="color: #D2C6AE; text-decoration: none; padding-bottom: 4px">Series</a>
+        <a href="#" style="color: #D2C6AE; text-decoration: none; padding-bottom: 4px">About</a>
+      </nav>
+      <div style="margin-left: auto; flex: 1 1 240px; max-width: 320px; box-sizing: border-box; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px; background: #3B332C; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 15px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+        <span>Search</span>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width: 1200px; margin: 0 auto; padding: 32px 24px 72px; display: flex; flex-direction: column; gap: 48px">
+
+    <nav aria-label="Breadcrumb" style="font-size: 14px; color: #D2C6AE; display: flex; flex-wrap: wrap; gap: 8px"><a href="#">Titles</a><span aria-hidden="true">/</span><a href="#">O</a><span aria-hidden="true">/</span><span>The Odyssey</span></nav>
+
+    <section style="display: flex; flex-wrap: wrap; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+      <div style="flex: 2 1 480px; min-width: 0; padding: 40px 40px 44px; display: flex; flex-direction: column; gap: 14px">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #2A1D0C">Title</div>
+        <h1 style="margin: 0; font-weight: 800; font-size: 88px; line-height: 88px; letter-spacing: -0.035em">The Odyssey</h1>
+        <div style="font-size: 22px; line-height: 30px; font-weight: 500">by Homer</div>
+        <p style="margin: 6px 0 0; max-width: 620px; font-size: 17px; line-height: 27px; color: #2A1D0C">Epic poem attributed to Homer, composed in ancient Greek: the story of Odysseus's ten-year voyage home from Troy. [Korte redactionele beschrijving van de titel en welke vertalingen in de edities voorkomen.]</p>
+      </div>
+      <div style="flex: 1 1 280px; max-width: 380px; background: #FF6B3D; padding: 40px 32px; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px">
+        <div style="font-weight: 800; font-size: 150px; line-height: 0.8; letter-spacing: -0.04em">{{facts.editions}}</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">editions</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 22px">{{facts.publishers}} publishers<br>{{facts.years}}<br>English</div>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 16px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+        <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 34px; letter-spacing: -0.02em">Photographs</h2>
+        <span style="font-size: 14px; color: #D2C6AE">Photo credits show on hover.</span>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: flex-end">
+        <sc-for list="{{gallery}}" as="p" hint-placeholder-count="5">
+        <div style="{{p.style}}">
+          <img src="{{p.src}}" alt="{{p.alt}}" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%">
+          <button type="button" aria-label="Photo credit" style="position: absolute; right: 6px; bottom: 6px; width: 28px; height: 28px; border-radius: 14px; border: 0; background: rgba(27, 22, 18, 0.85); color: #F5ECD7; font: 600 14px 'Archivo', system-ui, sans-serif">©</button>
+        </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 20px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px">
+        <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 34px; letter-spacing: -0.02em">Editions</h2>
+        <span aria-live="polite" style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">{{resultLabel}}</span>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px">
+        <div role="group" aria-label="Filter by publisher" style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
+          <button type="button" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}" style="{{c.style}}"><span>{{c.label}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{c.count}}</span></button>
+          </sc-for>
+        </div>
+        <div role="group" aria-label="View" style="display: flex; gap: 0">
+          <button type="button" aria-pressed="{{isTable}}" onClick="{{showTable}}" style="{{tableBtnStyle}}">Table</button>
+          <button type="button" aria-pressed="{{isGrid}}" onClick="{{showGrid}}" style="{{gridBtnStyle}}">Grid</button>
+        </div>
+      </div>
+
+      <sc-if value="{{isTable}}" hint-placeholder-val="{{ true }}">
+      <div style="overflow-x: auto; background: #473E36; border: 1px solid #5C5147; border-radius: 8px">
+        <div role="table" aria-label="Editions of The Odyssey" style="min-width: 780px">
+          <div role="row" style="display: grid; grid-template-columns: 64px minmax(200px, 2.2fr) 70px minmax(120px, 1.3fr) minmax(150px, 1.5fr) 90px; gap: 16px; padding: 10px 16px; background: #2A241F; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">
+            <span role="columnheader"></span><span role="columnheader">Edition</span><span role="columnheader">Year</span><span role="columnheader">Illustrator</span><span role="columnheader">Binding</span><span role="columnheader">Printings</span>
+          </div>
+          <sc-for list="{{rows}}" as="e" hint-placeholder-count="9">
+          <div role="row" style="display: grid; grid-template-columns: 64px minmax(200px, 2.2fr) 70px minmax(120px, 1.3fr) minmax(150px, 1.5fr) 90px; gap: 16px; align-items: center; padding: 12px 16px; border-top: 1px solid #5C5147">
+            <div role="cell" style="box-sizing: border-box; width: 48px; height: 64px; padding: 3px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="{{e.img}}" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div>
+            <div role="cell"><div style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">{{e.pub}}</div><a href="#" style="font-weight: 700; font-size: 18px; line-height: 24px; color: #F5ECD7; text-decoration: none">{{e.name}}</a></div>
+            <div role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">{{e.year}}</div>
+            <div role="cell" style="font-size: 14px">{{e.illus}}</div>
+            <div role="cell" style="font-size: 14px">{{e.binding}}</div>
+            <div role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">{{e.printings}}</div>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{isGrid}}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px">
+        <sc-for list="{{rows}}" as="e" hint-placeholder-count="9">
+        <div style="display: flex; flex-direction: column; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden">
+          <div style="box-sizing: border-box; height: 220px; padding: 12px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="{{e.img}}" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div>
+          <div style="padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">{{e.pub}}</div>
+            <a href="#" style="font-weight: 800; font-size: 20px; line-height: 25px; letter-spacing: -0.02em; color: #F5ECD7; text-decoration: none">{{e.name}}</a>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">{{e.year}} · {{e.binding}}</div>
+          </div>
+        </div>
+        </sc-for>
+      </div>
+      </sc-if>
+    </section>
+
+  </main>
+
+  <footer style="background: #2A241F; border-top: 1px solid #5C5147">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 32px 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; font-size: 14px; line-height: 21px; color: #D2C6AE">
+      <div style="max-width: 520px">Shelfhound is een referentiewerk van Dust BV. Gegevens en foto's worden met hun bron vermeld; bij elke foto staat de eigenaar.</div>
+      <nav aria-label="Footer" style="display: flex; gap: 24px"><a href="#">About</a><a href="#">FAQ</a><a href="#">Contact</a></nav>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":2050}}'>
+class Component extends DCLogic {
+  constructor(...args) {
+    super(...args);
+    this.state = { pub: "All", view: "table" };
+  }
+  renderVals() {
+    const imgs = [
+      "/_blob/de2eb2ef1e67c63572db96a9a968f96b",
+      "/_blob/7eeb527f7aeba08cb6788c268c78c873",
+      "/_blob/88977a7b0f7e9b0052ebc707ed89d620",
+      "/_blob/992190712ebbb08aa522dded27f19a39",
+      "/_blob/dbcf6a4fe243cb86fee07070bef8319a"
+    ];
+    const all = [
+      { pub: "Folio Society", name: "Standard edition", year: "1983", illus: "Illustrator A", binding: "Quarter cloth", printings: "3" },
+      { pub: "Folio Society", name: "Illustrated edition", year: "1996", illus: "Illustrator B", binding: "Full cloth, slipcase", printings: "2" },
+      { pub: "Folio Society", name: "Revised edition", year: "2008", illus: "Illustrator B", binding: "Quarter buckram, case", printings: "1" },
+      { pub: "Folio Society", name: "Anniversary edition", year: "2019", illus: "Illustrator C", binding: "Full cloth, slipcase", printings: "1" },
+      { pub: "Suntup Editions", name: "Numbered edition", year: "2018", illus: "Illustrator D", binding: "Full leather", printings: "1" },
+      { pub: "Suntup Editions", name: "Lettered edition", year: "2018", illus: "Illustrator D", binding: "Leather, clamshell box", printings: "1" },
+      { pub: "Suntup Editions", name: "Standard edition", year: "2020", illus: "Illustrator D", binding: "Cloth", printings: "2" },
+      { pub: "Curious King Books", name: "Standard edition", year: "2021", illus: "Illustrator E", binding: "Full cloth", printings: "1" },
+      { pub: "Curious King Books", name: "Limited edition", year: "2022", illus: "Illustrator E", binding: "Full leather, slipcase", printings: "1" }
+    ].map((e, i) => Object.assign({ img: imgs[i % imgs.length] }, e));
+    const pubs = ["All", "Folio Society", "Suntup Editions", "Curious King Books"];
+    const st = this.state;
+    const rows = st.pub === "All" ? all : all.filter((e) => e.pub === st.pub);
+
+    const chipBase = "min-height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;border-radius:6px;font:500 14px 'Archivo',system-ui,sans-serif;cursor:pointer;";
+    const chips = pubs.map((p) => {
+      const n = p === "All" ? all.length : all.filter((e) => e.pub === p).length;
+      const on = st.pub === p;
+      return {
+        label: p,
+        count: n,
+        pressed: on,
+        style: chipBase + (on ? "background:#FFB627;color:#1B1612;border:1px solid #FFB627;font-weight:700;" : "background:#473E36;color:#F5ECD7;border:1px solid #5C5147;"),
+        pick: () => this.setState({ pub: p })
+      };
+    });
+
+    const vBase = "min-height:44px;padding:0 18px;font:600 14px 'Archivo',system-ui,sans-serif;cursor:pointer;border:1px solid #F5ECD7;";
+    const isTable = st.view === "table";
+    const isGrid = st.view === "grid";
+    const tableBtnStyle = vBase + "border-radius:6px 0 0 6px;" + (isTable ? "background:#F5ECD7;color:#1B1612;" : "background:transparent;color:#F5ECD7;");
+    const gridBtnStyle = vBase + "border-radius:0 6px 6px 0;margin-left:-1px;" + (isGrid ? "background:#F5ECD7;color:#1B1612;" : "background:transparent;color:#F5ECD7;");
+
+    const years = all.map((e) => Number(e.year));
+    const facts = {
+      editions: String(all.length),
+      publishers: String(pubs.length - 1),
+      years: Math.min.apply(null, years) + " to " + Math.max.apply(null, years)
+    };
+
+    const g = [
+      { src: imgs[0], alt: "The Obelisk Gate", ar: 1.11 },
+      { src: imgs[1], alt: "Twee Gemmell-banden", ar: 1.8 },
+      { src: imgs[2], alt: "Don Quichot, titelpagina", ar: 0.468 },
+      { src: imgs[3], alt: "Aucassin en Nicolette", ar: 0.678 },
+      { src: imgs[4], alt: "The Parson's Daughter of Oxney Colne", ar: 1.29 }
+    ];
+    const gallery = g.map((p) => ({
+      src: p.src, alt: p.alt,
+      style: "position:relative;flex:" + p.ar + " 1 0px;min-width:0;height:200px;background:#A19E99;display:flex;align-items:center;justify-content:center;overflow:hidden"
+    }));
+
+    return {
+      rows, chips, facts, gallery, isTable, isGrid, tableBtnStyle, gridBtnStyle,
+      showTable: () => this.setState({ view: "table" }),
+      showGrid: () => this.setState({ view: "grid" }),
+      resultLabel: rows.length + " of " + all.length + " editions"
+    };
+  }
+}
+</script>
+</body>
+</html>

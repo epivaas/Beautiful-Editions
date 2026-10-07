@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Kleur en typografie</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1280px; height: 2760px; box-sizing: border-box; padding: 72px 80px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif; display: flex; flex-direction: column; gap: 56px">
+
+  <header style="display: flex; flex-direction: column; gap: 20px; max-width: 880px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Shelfhound · Designgids v0.2 · deel 1</div>
+    <h1 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.03em">Kleur en typografie</h1>
+    <p style="margin: 0; font-size: 19px; line-height: 29px; color: #D2C6AE">Cocoa als ondergrond, een amberband als herkenningsteken en Gloed als schaarse tweede kleur. Alle vlakken zijn effen: geen verlopen. De covers en foto's brengen zelf al genoeg kleur mee, en ze staan altijd op een neutrale grijze mat.</p>
+  </header>
+
+  <section style="display: flex; flex-direction: column; gap: 20px">
+    <h2 style="margin: 0; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Ondergronden en mat</h2>
+    <div style="display: flex; gap: 16px">
+      <sc-for list="{{grounds}}" as="s" hint-placeholder-count="5">
+      <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden; background: #473E36">
+        <div style="height: 104px; border-bottom: 1px solid #5C5147; background: {{s.hex}}"></div>
+        <div style="padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 4px">
+          <div style="font-weight: 700; font-size: 18px; line-height: 24px">{{s.name}}</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">{{s.hex}}</div>
+          <div style="font-size: 14px; line-height: 20px; margin-top: 4px">{{s.role}}</div>
+          <div style="font-size: 13px; line-height: 18px; color: #D2C6AE">{{s.note}}</div>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 20px">
+    <h2 style="margin: 0; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Tekst en kleuren</h2>
+    <div style="display: flex; gap: 16px">
+      <sc-for list="{{colours}}" as="s" hint-placeholder-count="5">
+      <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden; background: #473E36">
+        <div style="height: 104px; border-bottom: 1px solid #5C5147; background: {{s.hex}}"></div>
+        <div style="padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 4px">
+          <div style="font-weight: 700; font-size: 18px; line-height: 24px">{{s.name}}</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">{{s.hex}}</div>
+          <div style="font-size: 14px; line-height: 20px; margin-top: 4px">{{s.role}}</div>
+          <div style="font-size: 13px; line-height: 18px; color: #D2C6AE">{{s.note}}</div>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 16px; background: #473E36; border-radius: 10px; padding: 28px 32px">
+    <h2 style="margin: 0; font-weight: 800; font-size: 24px; line-height: 30px; letter-spacing: -0.02em">Regels voor kleur</h2>
+    <div style="display: flex; gap: 32px">
+      <sc-for list="{{rules}}" as="r" hint-placeholder-count="4">
+      <div style="flex: 1 1 0; min-width: 0; font-size: 14px; line-height: 21px"><strong style="font-weight: 700">{{r.head}}</strong> {{r.body}}</div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Twee lettertypen, geen serif</h2>
+      <p style="margin: 0; max-width: 840px; font-size: 15px; line-height: 23px; color: #D2C6AE">Beide gratis via Google Fonts. Archivo doet koppen, lopende tekst en interface: bij gewicht 800 is het stevig en een beetje eigenzinnig, bij 400 is het rustig en goed leesbaar op donker. Plex Mono is er voor catalogusgegevens die uitgelijnd moeten staan.</p>
+    </div>
+    <div style="display: flex; gap: 16px">
+      <div style="flex: 1 1 0; min-width: 0; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 10px">
+        <div style="font-weight: 800; font-size: 120px; line-height: 120px; letter-spacing: -0.04em">Aa</div>
+        <div style="font-weight: 800; font-size: 26px; line-height: 32px; letter-spacing: -0.01em">Archivo</div>
+        <div style="font-size: 14px; line-height: 21px; color: #D2C6AE">Koppen (800 en 700), lopende tekst en commentaren (400), interface en labels (500 en 600). Eén familie voor alles behalve de cijfers.</div>
+        <div style="font-size: 22px; line-height: 30px; margin-top: 6px"><span style="font-weight: 400">Aa Bb Cc</span> <span style="font-weight: 500">Aa Bb Cc</span> <span style="font-weight: 700">Aa Bb Cc</span> <span style="font-weight: 800">Aa Bb Cc</span></div>
+      </div>
+      <div style="flex: 1 1 0; min-width: 0; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 10px">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 112px; line-height: 120px; letter-spacing: -0.05em">Aa</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-weight: 500; font-size: 24px; line-height: 32px">IBM Plex Mono</div>
+        <div style="font-size: 14px; line-height: 21px; color: #D2C6AE">Gegevens in kolommen: oplage, formaat, jaartal, paginatal, ISBN. Gewichten 400 en 500. Nooit voor lopende tekst.</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; line-height: 26px; margin-top: 6px">1,500 copies<br>24 × 16 cm<br>412 pp. · 1998</div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 8px">
+    <h2 style="margin: 0 0 12px; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Typografische schaal</h2>
+    <sc-for list="{{scale}}" as="t" hint-placeholder-count="8">
+    <div style="display: grid; grid-template-columns: 130px 270px minmax(0, 1fr); gap: 24px; align-items: baseline; padding: 14px 0; border-top: 1px solid #5C5147">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">{{t.label}}</div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 19px; color: #D2C6AE">{{t.spec}}</div>
+      <div style="{{t.style}}">{{t.sample}}</div>
+    </div>
+    </sc-for>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const grounds = [
+      { name: "Cocoa", hex: "#3B332C", role: "Pagina-ondergrond", note: "Tekst erop: Crème 10,5:1" },
+      { name: "Oppervlak", hex: "#473E36", role: "Kaarten, tabellen, invoervelden", note: "Crème 8,9:1" },
+      { name: "Lijn", hex: "#5C5147", role: "Haarlijnen en kaders, 1 px", note: "Alleen als lijn" },
+      { name: "Kop", hex: "#2A241F", role: "Navigatiebalk bovenaan", note: "Donkerder dan de pagina" },
+      { name: "Studiogrijs", hex: "#A19E99", role: "Mat achter elke foto", note: "Altijd, voor alle foto's. Inkt erop: 6,7:1" }
+    ];
+    const colours = [
+      { name: "Crème", hex: "#F5ECD7", role: "Tekst en koppen", note: "10,5:1 op Cocoa" },
+      { name: "Gedempte crème", hex: "#D2C6AE", role: "Secundaire tekst", note: "7,3:1 op Cocoa, 6,2:1 op Oppervlak" },
+      { name: "Amber", hex: "#FFB627", role: "Band, knoppen, links, actieve tab", note: "7,1:1 op Cocoa: ook als tekst bruikbaar" },
+      { name: "Gloed", hex: "#FF6B3D", role: "Schaarse tweede kleur: vlakken en lijnen", note: "4,4:1 op Cocoa, maar 3,7:1 op Oppervlak. Dus geen kleine tekst" },
+      { name: "Inkt", hex: "#1B1612", role: "Tekst op Amber, Gloed en Studiogrijs", note: "10,2:1 op Amber, 6,3:1 op Gloed" }
+    ];
+    const rules = [
+      { head: "Effen vlakken.", body: "Geen verlopen, ook niet subtiel. Een kleurvlak is één kleur. Twee kleuren naast elkaar zijn twee vlakken." },
+      { head: "Amber is de huiskleur.", body: "Band, primaire knop, links en actieve tab. Het is het enige accent dat je ook als tekst mag gebruiken." },
+      { head: "Gloed is schaars.", body: "Beperkte oplage, zoekmarkering, geselecteerde rij, focusring. Maximaal één Gloed-element per scherm blok." },
+      { head: "Nooit op de foto.", body: "Geen kleurfilters, geen overlays in kleur op foto's. De mat is grijs, de foto blijft zoals hij is." }
+    ];
+    const f = "font-family:'Archivo',system-ui,sans-serif;";
+    const scale = [
+      { label: "Display", spec: "Archivo 800 · 56/58 · -0,03em", sample: "The Obelisk Gate",
+        style: f + "font-weight:800;font-size:56px;line-height:58px;letter-spacing:-0.03em" },
+      { label: "H1", spec: "Archivo 800 · 40/44 · -0,02em", sample: "Folio Society editions",
+        style: f + "font-weight:800;font-size:40px;line-height:44px;letter-spacing:-0.02em" },
+      { label: "H2", spec: "Archivo 700 · 28/34 · -0,01em", sample: "Printings and variants",
+        style: f + "font-weight:700;font-size:28px;line-height:34px;letter-spacing:-0.01em" },
+      { label: "H3", spec: "Archivo 700 · 20/26", sample: "Binding and slipcase",
+        style: f + "font-weight:700;font-size:20px;line-height:26px" },
+      { label: "Lopende tekst", spec: "Archivo 400 · 17/27 · max 68 tekens", sample: "Bound in quarter cloth with a printed paper slipcase. The illustrations are reproduced in colour throughout.",
+        style: f + "font-weight:400;font-size:17px;line-height:27px;max-width:560px;color:#F5ECD7" },
+      { label: "Interface", spec: "Archivo 500 · 15/22", sample: "Filter by publisher, illustrator or binding",
+        style: f + "font-weight:500;font-size:15px;line-height:22px" },
+      { label: "Label", spec: "Archivo 600 · 12/16 · hoofdletters +9%", sample: "PUBLISHER · BINDING · YEAR",
+        style: f + "font-weight:600;font-size:12px;line-height:16px;letter-spacing:0.09em;color:#D2C6AE" },
+      { label: "Gegevens", spec: "IBM Plex Mono 400 · 14/20", sample: "1,500 copies · 24 × 16 cm · 412 pp.",
+        style: "font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:14px;line-height:20px" }
+    ];
+    return { grounds, colours, rules, scale };
+  }
+}
+</script>
+</body>
+</html>

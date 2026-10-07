@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Titel- en editiepagina</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}a{color:#FFB627}</style>
+</helmet>
+<div style="width: 1280px; min-height: 7900px; box-sizing: border-box; padding: 72px 80px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif; display: flex; flex-direction: column; gap: 64px">
+
+  <header style="display: flex; flex-direction: column; gap: 20px; max-width: 900px">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Shelfhound · Designgids v0.3 · deel 5</div>
+    <h1 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.03em">Titel- en editiepagina</h1>
+    <p style="margin: 0; font-size: 19px; line-height: 29px; color: #D2C6AE">Hier komen de foto's en de details samen, in drie niveaus: de titelpagina met een samenvatting per editie, de editiepagina met alle details, de varianten (lettered, numbered) met een eigen pagina, en de printings als uitklapbare tabel. Alle voorbeeldfoto's zijn je testfoto's; titels, uitgevers en teksten zijn placeholders.</p>
+  </header>
+
+  <!-- ===== TITLE PAGE ===== -->
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Titelpagina · edities als kaarten</div>
+      <div style="font-size: 14px; color: #D2C6AE">Per editie: foto's, de vijf belangrijkste gegevens en een ingekorte nota.</div>
+    </div>
+    <div style="border: 1px solid #5C5147; border-radius: 10px; overflow: hidden; background: #3B332C">
+      <div style="display: flex; align-items: center; gap: 28px; padding: 14px 28px; background: #2A241F; border-bottom: 1px solid #5C5147">
+        <span style="font-weight: 800; font-size: 22px; letter-spacing: -0.04em">Shelf<span style="color: #FFB627">hound</span></span>
+        <nav style="display: flex; gap: 22px; font-size: 14px"><sc-for list="{{navTitles}}" as="n" hint-placeholder-count="5"><a href="#" style="{{n.style}}">{{n.l}}</a></sc-for></nav>
+        <div style="margin-left: auto; width: 300px; box-sizing: border-box; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #3B332C; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span style="flex: 1 1 auto">Search</span><span style="font-size: 12px; font-weight: 600; color: #FFB627">Detailed</span></div>
+      </div>
+      <div style="padding: 24px 32px 40px; display: flex; flex-direction: column; gap: 28px">
+        <nav style="font-size: 14px; color: #D2C6AE; display: flex; gap: 8px"><a href="#">Titles</a><span aria-hidden="true">/</span><a href="#">O</a><span aria-hidden="true">/</span><span>Odýsseia</span></nav>
+
+        <div style="display: flex; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+          <div style="flex: 1 1 0; min-width: 0; padding: 36px 36px 40px; display: flex; flex-direction: column; gap: 12px">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #2A1D0C">Title</div>
+            <h2 style="margin: 0; font-weight: 800; font-size: 80px; line-height: 80px; letter-spacing: -0.035em">Odýsseia</h2>
+            <div style="font-size: 22px; line-height: 30px; font-weight: 500">The Odyssey</div>
+            <div style="font-size: 16px; line-height: 24px; color: #2A1D0C">by Homer · first published c. 700 BC</div>
+          </div>
+          <div style="flex: 0 0 280px; background: #FF6B3D; padding: 36px 32px; display: flex; flex-direction: column; justify-content: flex-end; gap: 12px">
+            <div style="font-weight: 800; font-size: 130px; line-height: 0.8; letter-spacing: -0.04em">9</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">editions</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 22px">3 publishers<br>1983 to 2022</div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px">
+          <h3 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 34px; letter-spacing: -0.02em">Editions</h3>
+          <div style="display: flex; align-items: center; gap: 16px">
+            <span style="font-size: 13px; color: #D2C6AE">Sort by</span>
+            <span style="display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid #F5ECD7; border-radius: 6px; font-size: 14px; font-weight: 600">Year ▾</span>
+            <div style="display: flex">
+              <span style="min-height: 40px; padding: 0 18px; display: inline-flex; align-items: center; border: 1px solid #F5ECD7; border-radius: 6px 0 0 6px; background: #F5ECD7; color: #1B1612; font-size: 14px; font-weight: 600">Cards</span>
+              <span style="min-height: 40px; padding: 0 18px; display: inline-flex; align-items: center; border: 1px solid #F5ECD7; border-radius: 0 6px 6px 0; margin-left: -1px; font-size: 14px; font-weight: 600">Compare</span>
+            </div>
+          </div>
+        </div>
+
+        <article style="display: flex; gap: 28px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 20px">
+          <div style="flex: 0 0 360px; display: flex; flex-direction: column; gap: 8px">
+            <div style="position: relative; box-sizing: border-box; height: 260px; padding: 12px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/de2eb2ef1e67c63572db96a9a968f96b" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"><button type="button" aria-label="Photo credit" style="position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 14px; border: 0; background: rgba(27, 22, 18, 0.85); color: #F5ECD7; font: 600 14px 'Archivo', system-ui, sans-serif">©</button></div>
+            <div style="display: flex; gap: 8px"><div style="box-sizing: border-box; flex: 1 1 0; height: 78px; padding: 6px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/7eeb527f7aeba08cb6788c268c78c873" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div><div style="box-sizing: border-box; flex: 1 1 0; height: 78px; padding: 6px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/992190712ebbb08aa522dded27f19a39" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div><div style="box-sizing: border-box; flex: 1 1 0; height: 78px; padding: 6px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/dbcf6a4fe243cb86fee07070bef8319a" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div><div style="box-sizing: border-box; flex: 1 1 0; height: 78px; background: #5C5147; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500">+14</div></div>
+          </div>
+          <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+            <span style="font-weight: 800; font-size: 18px; line-height: 22px; letter-spacing: -0.01em; color: #FFB627">Suntup Editions</span>
+            <h4 style="margin: 0; font-weight: 800; font-size: 30px; line-height: 34px; letter-spacing: -0.02em">The Odyssey</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px 32px"><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Year</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 20px; margin-top: 3px">2018</div></div><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Pages</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 20px; margin-top: 3px">Pp. [1–9] 10–388</div></div><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Illustrators</div><div style="; font-size: 14px; line-height: 20px; margin-top: 3px">Illustrator D, Illustrator F</div></div></div>
+            <div style="display: flex; gap: 14px; align-items: center"><span style="flex: 0 0 76px; font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Includes</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #5C5147; border-radius: 6px; font-size: 13px; font-weight: 600">Slipcase</span><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #5C5147; border-radius: 6px; font-size: 13px; font-weight: 600">Clamshell box</span><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #5C5147; border-radius: 6px; font-size: 13px; font-weight: 600">Dust jacket</span></div></div><div style="display: flex; gap: 14px; align-items: center"><span style="flex: 0 0 76px; font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Variants</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #FF6B3D; color: #1B1612; border-radius: 6px; font-size: 13px; font-weight: 700">Lettered<span style="font-family: \'IBM Plex Mono\', monospace; font-size: 12px; font-weight: 500; color: #1B1612">26</span></span><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #FF6B3D; color: #1B1612; border-radius: 6px; font-size: 13px; font-weight: 700">Numbered<span style="font-family: \'IBM Plex Mono\', monospace; font-size: 12px; font-weight: 500; color: #1B1612">250</span></span><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #FF6B3D; color: #1B1612; border-radius: 6px; font-size: 13px; font-weight: 700">Artist<span style="font-family: \'IBM Plex Mono\', monospace; font-size: 12px; font-weight: 500; color: #1B1612">50</span></span></div></div>
+            <p style="margin: 0; font-size: 15px; line-height: 23px; color: #D2C6AE; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden">[Redactionele nota, kan van enkele woorden tot tientallen regels lopen. Hier worden de eerste drie regels getoond en de rest ingekort, zodat elke kaart even hoog blijft. Tekst over het papier, de vertaling, de gravures en eventuele afwijkingen komt hier te staan en loopt door in de volledige nota.]</p>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">3 variants · 18 photos</span>
+              <button type="button" style="min-height: 44px; padding: 0 20px; border-radius: 6px; border: 1px solid #FFB627; background: #FFB627; color: #1B1612; font: 700 15px 'Archivo', system-ui, sans-serif">View edition</button>
+            </div>
+          </div>
+        </article>
+        <article style="display: flex; gap: 28px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 20px">
+          <div style="flex: 0 0 360px; display: flex; flex-direction: column; gap: 8px">
+            <div style="position: relative; box-sizing: border-box; height: 260px; padding: 12px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/7eeb527f7aeba08cb6788c268c78c873" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"><button type="button" aria-label="Photo credit" style="position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 14px; border: 0; background: rgba(27, 22, 18, 0.85); color: #F5ECD7; font: 600 14px 'Archivo', system-ui, sans-serif">©</button></div>
+            <div style="display: flex; gap: 8px"><div style="box-sizing: border-box; flex: 1 1 0; height: 78px; padding: 6px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/de2eb2ef1e67c63572db96a9a968f96b" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div><div style="box-sizing: border-box; flex: 1 1 0; height: 78px; padding: 6px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/88977a7b0f7e9b0052ebc707ed89d620" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div><div style="box-sizing: border-box; flex: 1 1 0; height: 78px; background: #5C5147; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500">+4</div></div>
+          </div>
+          <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+            <span style="font-weight: 800; font-size: 18px; line-height: 22px; letter-spacing: -0.01em; color: #FFB627">Folio Society</span>
+            <h4 style="margin: 0; font-weight: 800; font-size: 30px; line-height: 34px; letter-spacing: -0.02em">The Odyssey, illustrated edition</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px 32px"><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Year</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 20px; margin-top: 3px">1996</div></div><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Binding</div><div style="; font-size: 14px; line-height: 20px; margin-top: 3px">Full cloth</div></div><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Pages</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 20px; margin-top: 3px">Pp. [1–8] 9–412</div></div><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Illustrator</div><div style="; font-size: 14px; line-height: 20px; margin-top: 3px">Illustrator B</div></div></div>
+            <div style="display: flex; gap: 14px; align-items: center"><span style="flex: 0 0 76px; font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Includes</span><div style="display: flex; flex-wrap: wrap; gap: 6px"><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #5C5147; border-radius: 6px; font-size: 13px; font-weight: 600">Slipcase</span></div></div>
+            <p style="margin: 0; font-size: 15px; line-height: 23px; color: #D2C6AE; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden">[Korte nota van twee regels.]</p>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">3 printings · 6 photos</span>
+              <button type="button" style="min-height: 44px; padding: 0 20px; border-radius: 6px; border: 1px solid #FFB627; background: #FFB627; color: #1B1612; font: 700 15px 'Archivo', system-ui, sans-serif">View edition</button>
+            </div>
+          </div>
+        </article>
+        <article style="display: flex; gap: 28px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 20px">
+          <div style="flex: 0 0 360px; display: flex; flex-direction: column; gap: 8px">
+            <div style="position: relative; box-sizing: border-box; height: 260px; padding: 12px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/dbcf6a4fe243cb86fee07070bef8319a" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"><button type="button" aria-label="Photo credit" style="position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 14px; border: 0; background: rgba(27, 22, 18, 0.85); color: #F5ECD7; font: 600 14px 'Archivo', system-ui, sans-serif">©</button></div>
+            
+          </div>
+          <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+            <span style="font-weight: 800; font-size: 18px; line-height: 22px; letter-spacing: -0.01em; color: #FFB627">Curious King Books</span>
+            <h4 style="margin: 0; font-weight: 800; font-size: 30px; line-height: 34px; letter-spacing: -0.02em">The Odyssey, standard edition</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px 32px"><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Year</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 20px; margin-top: 3px">2021</div></div><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Pages</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 20px; margin-top: 3px">412 pp.</div></div><div style="min-width: 90px"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Illustrator</div><div style="; font-size: 14px; line-height: 20px; margin-top: 3px">Illustrator E</div></div></div>
+            
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">1 printing · 1 photo</span>
+              <button type="button" style="min-height: 44px; padding: 0 20px; border-radius: 6px; border: 1px solid #FFB627; background: #FFB627; color: #1B1612; font: 700 15px 'Archivo', system-ui, sans-serif">View edition</button>
+            </div>
+          </div>
+        </article>
+        <div style="font-size: 13px; line-height: 19px; color: #D2C6AE">Lege velden (zoals de binding bij de eerste en derde editie) verdwijnen op de kaart, zodat er geen "unknown" staat. Extra's als slipcase, stofomslag en clamshell box zijn gelijkwaardige labels, en limited, numbered en lettered staan als varianten van de editie. De pagina-aanduiding is vrije tekst. Meerdere illustratoren staan gewoon achter elkaar.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TITLE PAGE: COMPARE ===== -->
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Titelpagina · weergave "Compare"</div>
+      <div style="font-size: 14px; color: #D2C6AE">Dezelfde edities als tabel, voor wie wil vergelijken. De schakelaar verschijnt pas vanaf vier edities en de standaard blijft "Cards". Varianten staan hier zonder oplage. Een leeg veld toont een grijs streepje.</div>
+    </div>
+    <div style="border: 1px solid #5C5147; border-radius: 10px; overflow: hidden; background: #3B332C; padding: 28px 32px 32px; display: flex; flex-direction: column; gap: 18px">
+      <div style="background: #473E36; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden">
+        <div style="display: grid; grid-template-columns: 60px minmax(0, 2fr) 60px minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(0, 1.5fr) minmax(0, 1.4fr) minmax(0, 1.3fr) 70px; gap: 14px; padding: 10px 16px; background: #2A241F; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">
+          <span></span><span>Edition</span><span>Year <span style="color: #FFB627">▲</span></span><span>Binding</span><span>Pages</span><span>Includes</span><span>Illustrators</span><span>Variants or printings</span><span></span>
+        </div>
+        <sc-for list="{{compare}}" as="e" hint-placeholder-count="6">
+        <div style="display: grid; grid-template-columns: 60px minmax(0, 2fr) 60px minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(0, 1.5fr) minmax(0, 1.4fr) minmax(0, 1.3fr) 70px; gap: 14px; align-items: center; padding: 8px 16px; min-height: 64px; box-sizing: border-box; border-top: 1px solid #5C5147">
+          <div style="box-sizing: border-box; width: 48px; height: 52px; padding: 3px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="{{e.img}}" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div>
+          <div><div style="font-weight: 800; font-size: 14px; line-height: 18px; color: #FFB627">{{e.pub}}</div><a href="#" style="font-weight: 700; font-size: 16px; color: #F5ECD7; text-decoration: none">{{e.name}}</a></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{e.year}}</span>
+          <span style="{{e.bindStyle}}">{{e.binding}}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 17px">{{e.pages}}</span>
+          <span style="{{e.incStyle}}">{{e.inc}}</span>
+          <span style="font-size: 14px; line-height: 19px; color: #D2C6AE">{{e.illus}}</span>
+          <span style="display: flex; flex-wrap: wrap; gap: 4px; grid-column: span 2"><span style="{{e.v1s}}">{{e.v1}}</span><span style="{{e.v2s}}">{{e.v2}}</span><span style="{{e.v3s}}">{{e.v3}}</span><span style="{{e.pStyle}}">{{e.prints}}</span></span>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== EDITION PAGE ===== -->
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Editiepagina</div>
+      <div style="font-size: 14px; color: #D2C6AE">Alle details, volledige nota, foto's en de printings in één lange pagina.</div>
+    </div>
+    <div style="border: 1px solid #5C5147; border-radius: 10px; overflow: hidden; background: #3B332C">
+      <div style="display: flex; align-items: center; gap: 28px; padding: 14px 28px; background: #2A241F; border-bottom: 1px solid #5C5147">
+        <span style="font-weight: 800; font-size: 22px; letter-spacing: -0.04em">Shelf<span style="color: #FFB627">hound</span></span>
+        <nav style="display: flex; gap: 22px; font-size: 14px"><sc-for list="{{navTitles}}" as="n" hint-placeholder-count="5"><a href="#" style="{{n.style}}">{{n.l}}</a></sc-for></nav>
+        <div style="margin-left: auto; width: 300px; box-sizing: border-box; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #3B332C; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span style="flex: 1 1 auto">Search</span><span style="font-size: 12px; font-weight: 600; color: #FFB627">Detailed</span></div>
+      </div>
+      <div style="padding: 24px 32px 48px; display: flex; flex-direction: column; gap: 36px">
+        <nav style="font-size: 14px; color: #D2C6AE; display: flex; gap: 8px"><a href="#">Titles</a><span aria-hidden="true">/</span><a href="#">O</a><span aria-hidden="true">/</span><a href="#">Odýsseia</a><span aria-hidden="true">/</span><span>Suntup Editions, 2018</span></nav>
+
+        <div style="display: flex; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+          <div style="flex: 1 1 0; min-width: 0; padding: 36px 36px 40px; display: flex; flex-direction: column; gap: 12px">
+            <div><span style="display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; background: #1B1612; color: #FFB627; border-radius: 6px; font-weight: 800; font-size: 20px; letter-spacing: -0.01em">Suntup Editions</span></div>
+            <h2 style="margin: 0; font-weight: 800; font-size: 64px; line-height: 66px; letter-spacing: -0.035em">The Odyssey</h2>
+            <div style="font-size: 22px; line-height: 30px; font-weight: 500">2018</div>
+            <div style="font-size: 16px; line-height: 24px; color: #2A1D0C">by Homer · translated by [translator] · illustrated by Illustrator D and Illustrator F</div>
+          </div>
+          <div style="flex: 0 0 280px; background: #FF6B3D; padding: 36px 32px; display: flex; flex-direction: column; justify-content: flex-end; gap: 12px">
+            <div style="font-weight: 800; font-size: 130px; line-height: 0.8; letter-spacing: -0.04em">3</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">variants</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 22px">18 photos</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div style="display: flex; gap: 10px; align-items: flex-end">
+            <div style="position: relative; flex: 0 0 auto; width: 329px; height: 296px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/de2eb2ef1e67c63572db96a9a968f96b" alt="" style="display: block; width: 100%; height: 100%; object-fit: contain"><button type="button" aria-label="Photo credit" style="position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 14px; border: 0; background: rgba(27, 22, 18, 0.85); color: #F5ECD7; font: 600 14px 'Archivo', system-ui, sans-serif">©</button></div>
+            <div style="position: relative; flex: 0 0 auto; width: 533px; height: 296px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/7eeb527f7aeba08cb6788c268c78c873" alt="" style="display: block; width: 100%; height: 100%; object-fit: contain"><div style="position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; padding: 10px 14px; background: rgba(27, 22, 18, 0.92); font-size: 13px; line-height: 19px">Photo © [owner] · via <span style="text-decoration: underline">[source]</span> · View original</div></div>
+            <div style="position: relative; flex: 0 0 auto; width: 139px; height: 296px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/88977a7b0f7e9b0052ebc707ed89d620" alt="" style="display: block; width: 100%; height: 100%; object-fit: contain"><button type="button" aria-label="Photo credit" style="position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 14px; border: 0; background: rgba(27, 22, 18, 0.85); color: #F5ECD7; font: 600 14px 'Archivo', system-ui, sans-serif">©</button></div>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: flex-end">
+            <div style="position: relative; flex: 0 0 auto; width: 136px; height: 200px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/992190712ebbb08aa522dded27f19a39" alt="" style="display: block; width: 100%; height: 100%; object-fit: contain"></div>
+            <div style="position: relative; flex: 0 0 auto; width: 258px; height: 200px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/dbcf6a4fe243cb86fee07070bef8319a" alt="" style="display: block; width: 100%; height: 100%; object-fit: contain"></div>
+            <div style="flex: 1 1 0; min-width: 0; height: 200px; background: #473E36; border: 1px solid #5C5147; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px">Show all 18 photos</div>
+          </div>
+          <div style="font-size: 13px; line-height: 19px; color: #D2C6AE">Foto's staan in rijen met gelijke hoogte, op de grijze mat. Een klik opent een grote weergave. Zijn het er heel veel, dan toont de pagina twee rijen en een tegel naar de rest.</div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 28px">
+          <div style="display: flex; gap: 16px; align-items: center; padding: 14px 18px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px">
+            <span style="flex: 0 0 76px; font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Includes</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px"><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #5C5147; border-radius: 6px; font-size: 13px; font-weight: 600">Slipcase</span><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #5C5147; border-radius: 6px; font-size: 13px; font-weight: 600">Clamshell box</span><span style="display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 0 11px; background: #5C5147; border-radius: 6px; font-size: 13px; font-weight: 600">Dust jacket</span></div>
+            <span style="margin-left: auto; font-size: 13px; color: #D2C6AE">Alles wat bij de editie hoort, gelijkwaardig en in elke combinatie</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px">
+            <h3 style="margin: 0; font-weight: 800; font-size: 26px; line-height: 32px; letter-spacing: -0.02em">Publication</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 28px">
+              <sc-for list="{{factsPub}}" as="f" hint-placeholder-count="8">
+              <div style="padding: 12px 0; border-top: 1px solid #5C5147"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">{{f.k}}</div><div style="{{f.vs}}">{{f.v}}</div></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px">
+            <h3 style="margin: 0; font-weight: 800; font-size: 26px; line-height: 32px; letter-spacing: -0.02em">Physical description</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 28px">
+              <sc-for list="{{factsPhys}}" as="f" hint-placeholder-count="8">
+              <div style="padding: 12px 0; border-top: 1px solid #5C5147"><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">{{f.k}}</div><div style="{{f.vs}}">{{f.v}}</div></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 14px; max-width: 760px">
+            <h3 style="margin: 0; font-weight: 800; font-size: 26px; line-height: 32px; letter-spacing: -0.02em">Note</h3>
+            <p style="margin: 0; font-size: 17px; line-height: 27px">[Redactionele nota, volledig. Van een paar woorden tot enkele tientallen regels. De tekst staat in een smalle kolom van maximaal 68 tekens, zodat ze comfortabel leest op het donkere vlak. Eerste alinea: wat deze editie bijzonder maakt.]</p>
+            <p style="margin: 0; font-size: 17px; line-height: 27px">[Tweede alinea: vertaling, papier, gravures en afwijkende exemplaren. Verwijzingen naar bronnen komen onderaan, als kleine links in Amber.]</p>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 24px">
+            <h3 style="margin: 0; font-weight: 800; font-size: 26px; line-height: 32px; letter-spacing: -0.02em">Variants</h3>
+            <span style="font-size: 13px; color: #D2C6AE">Grote verschillen, zoals lettered of numbered. Elke variant heeft een eigen pagina.</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+            <sc-for list="{{variants}}" as="v" hint-placeholder-count="3">
+            <article style="display: flex; flex-direction: column; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden">
+              <div style="box-sizing: border-box; height: 190px; padding: 12px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="{{v.img}}" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div>
+              <div style="padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 10px; flex: 1 1 auto">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px"><span style="font-weight: 800; font-size: 24px; line-height: 28px; letter-spacing: -0.02em">{{v.name}}</span><span style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 10px; background: #FF6B3D; color: #1B1612; border-radius: 6px; font-size: 13px; font-weight: 700; white-space: nowrap">{{v.copies}}</span></div>
+                <div style="font-size: 14px; line-height: 21px; color: #D2C6AE">{{v.diff}}</div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 6px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">{{v.photos}}</span><button type="button" style="min-height: 44px; padding: 0 18px; border-radius: 6px; border: 1px solid #FFB627; background: #FFB627; color: #1B1612; font: 700 15px 'Archivo', system-ui, sans-serif">Open page →</button></div>
+              </div>
+            </article>
+            </sc-for>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== EDITION PAGE WITH PRINTINGS ===== -->
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Editiepagina · editie met printings</div>
+      <div style="font-size: 14px; color: #D2C6AE">Een editie heeft ofwel varianten ofwel printings, nooit allebei. Foto's, gegevens en nota zijn zoals hierboven.</div>
+    </div>
+    <div style="border: 1px solid #5C5147; border-radius: 10px; overflow: hidden; background: #3B332C">
+      <div style="display: flex; align-items: center; gap: 28px; padding: 14px 28px; background: #2A241F; border-bottom: 1px solid #5C5147">
+        <span style="font-weight: 800; font-size: 22px; letter-spacing: -0.04em">Shelf<span style="color: #FFB627">hound</span></span>
+        <nav style="display: flex; gap: 22px; font-size: 14px"><sc-for list="{{navTitles}}" as="n" hint-placeholder-count="5"><a href="#" style="{{n.style}}">{{n.l}}</a></sc-for></nav>
+      </div>
+      <div style="padding: 24px 32px 40px; display: flex; flex-direction: column; gap: 28px">
+        <nav style="font-size: 14px; color: #D2C6AE; display: flex; gap: 8px"><a href="#">Titles</a><span aria-hidden="true">/</span><a href="#">Odýsseia</a><span aria-hidden="true">/</span><span>Folio Society, illustrated edition</span></nav>
+        <div style="display: flex; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+          <div style="flex: 1 1 0; min-width: 0; padding: 28px 36px 32px; display: flex; flex-direction: column; gap: 10px">
+            <div><span style="display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; background: #1B1612; color: #FFB627; border-radius: 6px; font-weight: 800; font-size: 20px; letter-spacing: -0.01em">Folio Society</span></div>
+            <h2 style="margin: 0; font-weight: 800; font-size: 56px; line-height: 58px; letter-spacing: -0.035em">The Odyssey</h2>
+            <div style="font-size: 20px; line-height: 28px; font-weight: 500">Illustrated edition, 1996</div>
+          </div>
+          <div style="flex: 0 0 280px; background: #FF6B3D; padding: 28px 32px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px">
+            <div style="font-weight: 800; font-size: 110px; line-height: 0.8; letter-spacing: -0.04em">4</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">printings</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 22px">6 photos</div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: baseline; justify-content: space-between">
+            <h3 style="margin: 0; font-weight: 800; font-size: 26px; line-height: 32px; letter-spacing: -0.02em">Printings</h3>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">4 printings</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 13px; color: #D2C6AE">
+            <span><span style="color: #FFB627">▶</span> Klik voor details en foto's</span>
+            <span><span style="color: #FFB627">→</span> Heeft een eigen pagina</span>
+            <span>Geen teken: alles staat al in de rij</span>
+          </div>
+          <div style="background: #473E36; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden">
+            <div style="display: grid; grid-template-columns: 28px minmax(0, 1.5fr) 70px 90px minmax(0, 3fr) 70px; gap: 14px; padding: 10px 20px; background: #2A241F; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">
+              <span></span><span>Printing</span><span>Year</span><span style="text-align: right">Copies</span><span>Differences</span><span style="text-align: right">Photos</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 28px minmax(0, 1.5fr) 70px 90px minmax(0, 3fr) 70px; gap: 14px; align-items: center; padding: 0 20px; min-height: 48px; border-top: 1px solid #5C5147; background: #52483F">
+              <span style="display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #FF6B3D"></span><span aria-hidden="true" style="color: #FFB627; font-size: 12px">▼</span></span>
+              <a href="#" style="font-weight: 700; font-size: 15px; color: #F5ECD7; text-decoration: none">First printing</a>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">1996</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right">1,500</span>
+              <span style="font-size: 14px; color: #D2C6AE">Original binding, dark red cloth</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right">6</span>
+            </div>
+            <div style="display: flex; gap: 28px; padding: 18px 20px 22px 62px; background: #52483F; border-top: 1px solid #5C5147">
+              <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 20px">
+                  <div><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Colophon</div><div style="font-size: 14px; margin-top: 3px">Not numbered</div></div>
+                  <div><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Binding variant</div><div style="font-size: 14px; margin-top: 3px">Dark red cloth</div></div>
+                  <div><div style="font-weight: 600; font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Dust jacket</div><div style="font-size: 14px; margin-top: 3px">None</div></div>
+                </div>
+                <p style="margin: 0; font-size: 14px; line-height: 21px; color: #D2C6AE">[Nota bij deze printing. Alleen wat verschilt van de editie.]</p>
+              </div>
+              <div style="flex: 0 0 auto; display: flex; gap: 8px">
+                <div style="box-sizing: border-box; width: 120px; height: 100px; padding: 5px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/de2eb2ef1e67c63572db96a9a968f96b" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div>
+                <div style="box-sizing: border-box; width: 120px; height: 100px; padding: 5px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="/_blob/7eeb527f7aeba08cb6788c268c78c873" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div>
+              </div>
+            </div>
+            <sc-for list="{{printings}}" as="p" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: 28px minmax(0, 1.5fr) 70px 90px minmax(0, 3fr) 70px; gap: 14px; align-items: center; padding: 0 20px; min-height: 48px; border-top: 1px solid #5C5147">
+              <span aria-hidden="true" style="color: #FFB627; font-size: 12px; margin-left: 14px">{{p.marker}}</span>
+              <a href="#" style="{{p.nameStyle}}">{{p.name}}</a>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{p.year}}</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right">{{p.copies}}</span>
+              <span style="{{p.diffStyle}}">{{p.diff}}</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; text-align: right">{{p.photos}}</span>
+            </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 24px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 32px">
+    <h2 style="margin: 0; font-weight: 800; font-size: 28px; line-height: 34px; letter-spacing: -0.02em">Twee soorten subedities</h2>
+    <div style="display: flex; gap: 40px">
+      <div style="flex: 1 1 0; font-size: 15px; line-height: 23px"><strong style="font-weight: 700">Varianten krijgen een eigen pagina.</strong> Lettered, numbered, artist edition: het zijn echt andere uitgaven, met eigen oplage, binding, foto's en nota. Ze staan als kaarten bovenaan de editiepagina, met foto, oplage en wat ze anders maakt. Ze verschijnen ook als labels op de titelpagina (met hun oplage), zodat je ze ziet voor je doorklikt.</div>
+      <div style="flex: 1 1 0; font-size: 15px; line-height: 23px"><strong style="font-weight: 700">Printings staan in een tabel, en pas open als er iets te zien is.</strong> Een rij met een ▶ heeft extra gegevens of foto's en klapt open. Een rij zonder teken zegt alles al in de rij zelf. Een rij met een → heeft toch een eigen pagina, voor het uitzonderlijke geval van een printing met veel eigen materiaal.</div>
+      <div style="flex: 1 1 0; font-size: 15px; line-height: 23px"><strong style="font-weight: 700">Een editie heeft het één of het ander.</strong> Heeft ze varianten, dan zijn er geen printings en omgekeerd; de pagina toont maar één van de twee blokken. In de database is dit één veld: een subeditie heeft een type, variant of printing. Het type bepaalt de weergave, zodat het overal in de site hetzelfde werkt, en je kunt een printing later alsnog tot variant promoveren.</div>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":7900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const items = ["Titles", "Authors", "Publishers", "Series", "About"];
+    const nav = (active) => items.map((l) => ({
+      l: l,
+      style: "color:" + (l === active ? "#F5ECD7" : "#D2C6AE") + ";text-decoration:none;font-weight:600;padding-bottom:4px;border-bottom:3px solid " + (l === active ? "#FFB627" : "transparent")
+    }));
+    const img = {
+      o: "/_blob/de2eb2ef1e67c63572db96a9a968f96b",
+      g: "/_blob/7eeb527f7aeba08cb6788c268c78c873",
+      q: "/_blob/88977a7b0f7e9b0052ebc707ed89d620",
+      a: "/_blob/992190712ebbb08aa522dded27f19a39",
+      x: "/_blob/dbcf6a4fe243cb86fee07070bef8319a"
+    };
+    const dim = "font-size:14px;color:#A89C86";
+    const nrm = "font-size:14px;line-height:19px";
+    const rows0 = [
+      { img: img.a, pub: "Folio Society", name: "Standard edition", year: "1983", binding: "Quarter cloth", pages: "Pp. [1–8] 9–380", inc: "", illus: "Illustrator A", vars: "", prints: "3" },
+      { img: img.o, pub: "Folio Society", name: "Illustrated edition", year: "1996", binding: "Full cloth", pages: "Pp. [1–8] 9–412", inc: "Slipcase", illus: "Illustrator B", vars: "", prints: "3" },
+      { img: img.g, pub: "Folio Society", name: "Revised edition", year: "2008", binding: "", pages: "398 pp.", inc: "Slipcase", illus: "Illustrator B", vars: "", prints: "1" },
+      { img: img.q, pub: "Suntup Editions", name: "The Odyssey", year: "2018", binding: "", pages: "Pp. [1–9] 10–388", inc: "Slipcase, clamshell box, dust jacket", illus: "Illustrator D, Illustrator F", vars: "Lettered · Numbered · Artist", prints: "2" },
+      { img: img.x, pub: "Curious King Books", name: "Standard edition", year: "2021", binding: "Full cloth", pages: "412 pp.", inc: "", illus: "Illustrator E", vars: "", prints: "1" },
+      { img: img.o, pub: "Curious King Books", name: "Deluxe edition", year: "2022", binding: "Full leather", pages: "Pp. [1–10] 11–420", inc: "Slipcase, dust jacket", illus: "Illustrator E, Illustrator G", vars: "Deluxe · Collector", prints: "1" }
+    ];
+    const vchip = "display:inline-flex;align-items:center;min-height:24px;padding:0 8px;background:#FF6B3D;color:#1B1612;border-radius:6px;font-size:12px;font-weight:700;white-space:nowrap";
+    const none = "display:none";
+    const compare = rows0.map((e) => {
+      const vs = e.vars ? e.vars.split(" · ") : [];
+      const o = Object.assign({}, e, {
+        binding: e.binding || "—", bindStyle: e.binding ? nrm : dim,
+        inc: e.inc || "—", incStyle: e.inc ? nrm : dim,
+        v1: "", v2: "", v3: "", v1s: none, v2s: none, v3s: none,
+        pStyle: vs.length ? none : "font-family:'IBM Plex Mono',monospace;font-size:13px;color:#D2C6AE"
+      });
+      vs.forEach((v, i) => { o["v" + (i + 1)] = v; o["v" + (i + 1) + "s"] = vchip; });
+      o.prints = vs.length ? "" : e.prints + (e.prints === "1" ? " printing" : " printings");
+      return o;
+    });
+    const vn = "font-size:15px;line-height:22px;margin-top:3px";
+    const vd = "font-size:15px;line-height:22px;margin-top:3px;color:#A89C86";
+    const factsPub = [
+      { k: "Publisher", v: "Suntup Editions", vs: vn },
+      { k: "Year", v: "2018", vs: vn },
+      { k: "Author", v: "Homer", vs: vn },
+      { k: "Translator", v: "[Translator]", vs: vn },
+      { k: "Illustrators", v: "Illustrator D, Illustrator F", vs: vn },
+      { k: "Introduction", v: "[Name]", vs: vn },
+      { k: "Series", v: "—", vs: vd },
+      { k: "ISBN", v: "—", vs: vd }
+    ];
+    const factsPhys = [
+      { k: "Binding", v: "Not recorded", vs: vd },
+      { k: "Pages", v: "Pp. [1–9] 10–388", vs: vn + ";font-family:'IBM Plex Mono',monospace;font-size:14px" },
+      { k: "Format", v: "24 × 16 cm", vs: vn },
+      { k: "Paper", v: "[Paper]", vs: vn },
+      { k: "Printer", v: "[Printer]", vs: vn },
+      { k: "Illustrations", v: "Colour plates, 48", vs: vn },
+      { k: "Typeface", v: "—", vs: vd },
+      { k: "Weight", v: "—", vs: vd }
+    ];
+    const variants = [
+      { img: img.g, name: "Lettered edition", copies: "Edition of 26", diff: "Full leather, extra suite of plates, signed by the illustrator, in a clamshell box.", photos: "9 photos" },
+      { img: img.o, name: "Numbered edition", copies: "Edition of 250", diff: "Quarter leather with a slipcase. Numbered and signed.", photos: "6 photos" },
+      { img: img.x, name: "Artist edition", copies: "Edition of 50", diff: "Includes an original drawing and an extra print.", photos: "3 photos" }
+    ];
+    const pn = "font-weight:700;font-size:15px;color:#F5ECD7;text-decoration:none";
+    const printings = [
+      { marker: "▶", name: "Second printing", year: "1999", copies: "300", diff: "Binding in blue cloth", photos: "5", nameStyle: pn, diffStyle: "font-size:14px;color:#D2C6AE" },
+      { marker: "", name: "Third printing", year: "2004", copies: "300", diff: "No differences recorded", photos: "—", nameStyle: pn, diffStyle: "font-size:14px;color:#A89C86" },
+      { marker: "→", name: "Fourth printing", year: "2010", copies: "100", diff: "Own binding, own colophon, own plates", photos: "11", nameStyle: pn, diffStyle: "font-size:14px;color:#D2C6AE" }
+    ];
+    return { navTitles: nav("Titles"), compare, factsPub, factsPhys, variants, printings };
+  }
+}
+</script>
+</body>
+</html>

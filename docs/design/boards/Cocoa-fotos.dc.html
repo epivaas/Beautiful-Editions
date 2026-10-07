@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Cocoa met foto's</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..800&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1280px; height: 3150px; box-sizing: border-box; padding: 72px 80px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif; display: flex; flex-direction: column; gap: 56px">
+
+  <header style="display: flex; flex-direction: column; gap: 20px; max-width: 900px">
+    <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Shelfhound · Cocoa, ronde 4</div>
+    <h1 style="margin: 0; font-weight: 800; font-size: 64px; line-height: 66px; letter-spacing: -0.03em">Cocoa, met je foto's</h1>
+    <p style="margin: 0; font-size: 18px; line-height: 28px">Je vijf foto's staan hieronder in kaarten en in een fotorij. Wat opvalt: publishers fotograferen op grijs, de breedte loopt van 288 tot 1.800 px, en twee foto's (Don Quichot en Aucassin) hebben een doorschijnende rand. Daarom krijgt elke foto een studiogrijze mat. Daaronder staat een uitwerking van Gloed.</p>
+  </header>
+
+  <section style="display: flex; gap: 14px">
+    <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 5px"><div style="height: 56px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18); background: #3B332C"></div><div style="font-size: 13px; font-weight: 600">Cocoa</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D2C6AE">#3B332C · ondergrond</div></div>
+    <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 5px"><div style="height: 56px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18); background: #473E36"></div><div style="font-size: 13px; font-weight: 600">Oppervlak</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D2C6AE">#473E36 · kaarten</div></div>
+    <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 5px"><div style="height: 56px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18); background: #A19E99"></div><div style="font-size: 13px; font-weight: 600">Studiogrijs</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D2C6AE">#A19E99 · fotomat</div></div>
+    <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 5px"><div style="height: 56px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18); background: #F5ECD7"></div><div style="font-size: 13px; font-weight: 600">Crème</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D2C6AE">#F5ECD7 · tekst</div></div>
+    <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 5px"><div style="height: 56px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18); background: #FFB627"></div><div style="font-size: 13px; font-weight: 600">Amber</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D2C6AE">#FFB627 · primair</div></div>
+    <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 5px"><div style="height: 56px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.18); background: #FF6B3D"></div><div style="font-size: 13px; font-weight: 600">Gloed</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D2C6AE">#FF6B3D · accent</div></div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Op een studiogrijze mat</h2>
+      <p style="margin: 0; max-width: 820px; font-size: 15px; line-height: 23px; color: #D2C6AE">De foto staat nooit groter dan zijn eigen resolutie en wordt nooit bijgesneden. De mat is neutraal grijs, zoals de achtergrond van de meeste publisherfoto's, en geeft doorschijnende foto's een lichte basis.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px">
+      <sc-for list="{{photos}}" as="p" hint-placeholder-count="5">
+      <div style="background: #473E36; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column">
+        <div style="height: 270px; box-sizing: border-box; padding: 12px; background: #A19E99; display: flex; align-items: center; justify-content: center">
+          <img src="{{p.src}}" alt="{{p.alt}}" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%">
+        </div>
+        <div style="padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 5px">
+          <div style="font-weight: 700; font-size: 18px; line-height: 22px; letter-spacing: -0.01em">{{p.title}}</div>
+          <div style="font-size: 13px; line-height: 18px; color: #D2C6AE">{{p.meta}}</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 17px; color: #D2C6AE; margin-top: 4px">{{p.res}} px<br>{{p.remark}}</div>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Als de mat Cocoa-vlak is</h2>
+      <p style="margin: 0; max-width: 820px; font-size: 15px; line-height: 23px; color: #D2C6AE">Dezelfde kaarten met een mat in de kleur van het oppervlak. Het ziet er rustiger uit, maar foto's met een doorschijnende rand, zoals Don Quichot (donkere inkt) en Aucassin, hebben dan geen lichte ondergrond meer. Dat is het argument voor grijs.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px">
+      <sc-for list="{{photos}}" as="p" hint-placeholder-count="5">
+      <div style="background: #473E36; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column">
+        <div style="height: 270px; box-sizing: border-box; padding: 12px; background: #50463D; display: flex; align-items: center; justify-content: center">
+          <img src="{{p.src}}" alt="{{p.alt}}" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%">
+        </div>
+        <div style="padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 5px">
+          <div style="font-weight: 700; font-size: 18px; line-height: 22px; letter-spacing: -0.01em">{{p.title}}</div>
+        </div>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 16px">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Fotorij op een detailpagina</h2>
+      <p style="margin: 0; max-width: 820px; font-size: 15px; line-height: 23px; color: #D2C6AE">Gerechtvaardigde rij: één hoogte, de breedte volgt de verhouding van elke foto. Liggende spreads en staande ruggen staan naast elkaar zonder bijsnijden. Bij de eerste foto zie je de bronvermelding bij hover.</p>
+    </div>
+    <div style="display: flex; gap: 12px; height: 200px">
+      <sc-for list="{{photos}}" as="p" hint-placeholder-count="5">
+      <div style="{{p.sItem}}">
+        <img src="{{p.src}}" alt="{{p.alt}}" style="display: block; width: 100%; height: 100%; object-fit: contain">
+        <sc-if value="{{p.showCredit}}" hint-placeholder-val="{{ false }}">
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; padding: 10px 14px; background: rgba(27, 22, 18, 0.9); color: #F5ECD7; font-size: 13px; line-height: 19px">Photo © [owner] · via [source] · View original</div>
+        </sc-if>
+        <sc-if value="{{p.noCredit}}" hint-placeholder-val="{{ true }}">
+        <button type="button" aria-label="Photo credit" style="position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; border-radius: 14px; border: 0; background: rgba(27, 22, 18, 0.82); color: #F5ECD7; font: 600 14px 'Archivo', system-ui, sans-serif">©</button>
+        </sc-if>
+      </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 20px; padding-top: 40px; border-top: 1px solid #5C5147">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h2 style="margin: 0; font-weight: 800; font-size: 32px; line-height: 38px; letter-spacing: -0.02em">Meer doen met Gloed</h2>
+      <p style="margin: 0; max-width: 820px; font-size: 15px; line-height: 23px; color: #D2C6AE">Gloed deed tot nu toe bijna niets. Het wordt de kleur van alles wat warm of schaars is: het cijferblok naast de band (twee aparte, effen vlakken, geen verloop), beperkte oplages, de zoekmarkering, focus en een geselecteerde rij. Als vlak of lijn, nooit als kleine tekst: als tekst haalt Gloed 4,4:1 op Cocoa en maar 3,7:1 op Oppervlak.</p>
+    </div>
+
+    <div style="border-radius: 8px; display: flex; align-items: stretch; background: #FFB627; color: #1B1612; overflow: hidden">
+      <div style="flex: 1 1 0; padding: 40px 32px">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #2A1D0C">Title · N. K. Jemisin</div>
+        <div style="font-weight: 800; font-size: 96px; line-height: 0.95; letter-spacing: -0.035em; margin-top: 12px">The Obelisk Gate</div>
+        <div style="font-size: 18px; line-height: 26px; margin-top: 14px; color: #2A1D0C">Broken Earth Trilogy, part two</div>
+      </div>
+      <div style="flex: 0 0 260px; background: #FF6B3D; padding: 40px 32px; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end">
+        <div style="font-weight: 800; font-size: 150px; line-height: 0.8; letter-spacing: -0.04em">9</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 14px">editions</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+      <div style="background: #473E36; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; align-items: center; min-height: 40px"><span style="display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 6px; background: #FF6B3D; color: #1B1612; font-size: 13px; font-weight: 700">Limited · 1,500</span></div>
+        <div style="font-size: 13px; line-height: 19px; color: #D2C6AE">Beperkte of genummerde oplage. Gloed als vlak met donkere tekst: 6,1:1.</div>
+      </div>
+      <div style="background: #473E36; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; align-items: center; min-height: 40px; font-weight: 700; font-size: 22px; letter-spacing: -0.01em">The <span style="background: #FF6B3D; color: #1B1612; padding: 0 3px; border-radius: 3px">Obe</span>lisk Gate</div>
+        <div style="font-size: 13px; line-height: 19px; color: #D2C6AE">Zoekmarkering in de live resultaten: de letters die je typte.</div>
+      </div>
+      <div style="background: #473E36; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; align-items: center; min-height: 40px; gap: 10px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #FF6B3D; flex: 0 0 auto"></span><span style="font-weight: 700; font-size: 18px; letter-spacing: -0.01em">Lettered edition</span></div>
+        <div style="font-size: 13px; line-height: 19px; color: #D2C6AE">Geselecteerde of actieve rij: een stip, geen kader en geen kleur op de tekst.</div>
+      </div>
+      <div style="background: #473E36; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; align-items: center; min-height: 40px"><span style="display: inline-flex; align-items: center; min-height: 40px; padding: 0 18px; border-radius: 8px; background: #FFB627; color: #1B1612; font-size: 14px; font-weight: 700; outline: 2px solid #FF6B3D; outline-offset: 3px">View edition</span></div>
+        <div style="font-size: 13px; line-height: 19px; color: #D2C6AE">Focusring: twee pixel Gloed, drie pixel afstand, op elke knop en elke link.</div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; gap: 32px; background: #473E36; border-radius: 10px; padding: 28px 32px">
+    <div style="flex: 0 0 200px"><h2 style="margin: 0; font-weight: 800; font-size: 24px; line-height: 30px; letter-spacing: -0.02em">Regels voor foto's</h2></div>
+    <div style="flex: 1 1 0; font-size: 14px; line-height: 21px"><strong style="font-weight: 700">Nooit opschalen.</strong> Een foto wordt niet groter getoond dan zijn eigen resolutie. Aucassin is 288 px breed en blijft klein.</div>
+    <div style="flex: 1 1 0; font-size: 14px; line-height: 21px"><strong style="font-weight: 700">Resolutie en bron per foto.</strong> Eigen databasevelden. Een lage resolutie krijgt een discreet "Better photo?"-linkje, in lijn met je plan voor bijdragen van gebruikers.</div>
+    <div style="flex: 1 1 0; font-size: 14px; line-height: 21px"><strong style="font-weight: 700">Vorm volgt de foto.</strong> Spreads en brede foto's krijgen meer breedte in de rij, staande ruggen minder. Geen vast kader.</div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":3150}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const list = [
+      { src: "/_blob/de2eb2ef1e67c63572db96a9a968f96b", w: 888, h: 800, alt: "The Obelisk Gate, boekrug in marmerpapier met crèmekleurige cassette",
+        title: "The Obelisk Gate", meta: "N. K. Jemisin · Broken Earth Trilogy II", remark: "studiofoto op grijs" },
+      { src: "/_blob/7eeb527f7aeba08cb6788c268c78c873", w: 1800, h: 1000, alt: "Twee Gemmell-banden, rood en blauw leer met een bijl, op marmer",
+        title: "Gemmell", meta: "Twee banden naast elkaar", remark: "foto op marmer" },
+      { src: "/_blob/88977a7b0f7e9b0052ebc707ed89d620", w: 1600, h: 3418, alt: "Titelpagina Don Quichot van Cervantes met een gravure",
+        title: "Don Quichot", meta: "Cervantes · titelpagina en gravure", remark: "wazige rand, doorschijnend" },
+      { src: "/_blob/992190712ebbb08aa522dded27f19a39", w: 288, h: 425, alt: "Aucassin en Nicolette, blauwe band met lelies",
+        title: "Aucassin & Nicolette", meta: "Illustrated by Lettice Sandford", remark: "klein bestand, doorschijnend" },
+      { src: "/_blob/dbcf6a4fe243cb86fee07070bef8319a", w: 1034, h: 800, alt: "Titelpagina en eerste pagina van The Parson's Daughter of Oxney Colne met houtgravure",
+        title: "The Parson's Daughter of Oxney Colne", meta: "Anthony Trollope · titelpagina en tekst", remark: "scan van een spread" }
+    ];
+    const photos = list.map((p, i) => {
+      const ar = p.w / p.h;
+      return {
+        src: p.src, alt: p.alt, title: p.title, meta: p.meta, remark: p.remark,
+        res: p.w + " × " + p.h,
+        sItem: "position:relative;flex:" + ar.toFixed(3) + " 1 0px;min-width:0;height:200px;background:#A19E99;border-radius:4px;overflow:hidden",
+        showCredit: i === 0,
+        noCredit: i !== 0
+      };
+    });
+    return { photos };
+  }
+}
+</script>
+</body>
+</html>
