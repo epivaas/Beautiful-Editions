@@ -47,7 +47,7 @@ Contrasten (handmatig berekend): Crème op Cocoa 10,5; gedempte crème op Cocoa 
 Bestanden in `logo/`. Het merkteken is een hond waarvan het gezicht een open boek is: twee crème bladzijden met ogen, Gloed-kaften als hangende oren, een snuit onder het boek.
 
 - Woordmerk: "Shelfhound", Archivo 800, recht (geen italic), letterspatiëring -0.04em. "Shelf" in Crème, "hound" in Amber. Op Amber: alles Inkt.
-- Standaard: merkteken in een Amber tegel (hoekradius ongeveer 22 % van de zijde) links van het woordmerk. Op Amber: omgekeerd, Cocoa/Inkt-tegel. Eén kleur: Crème op Cocoa.
+- Standaard: merkteken in een Amber tegel (hoekradius schaalt mee met de grootte: in de header op 34 px is dat 8/64 = 12,5 % van de zijde, ongeveer 4 px; bij 64 px en groter 14/64 ≈ 22 %; zie de SVG's in `docs/design/logo/`) links van het woordmerk. Op Amber: omgekeerd, Cocoa/Inkt-tegel. Eén kleur: Crème op Cocoa.
 - Minimale grootte: tegel 16 px (favicon), horizontale opstelling 24 px hoog. Geen draaien, uitrekken, schaduw of verloop.
 - Dit is een eigen tekening; voor drukwerk is een door een ontwerper nagetekend vectorbestand aan te raden.
 

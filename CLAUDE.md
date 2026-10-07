@@ -29,3 +29,13 @@ De volledige gids staat in `docs/design/DESIGN.md`; tokens in `docs/design/token
 - Check het datamodel vóór je een pagina bouwt; sectie 7 van DESIGN.md noemt wat de gids veronderstelt (type variant of printing, Includes als open lijst, foto-bronnen, announced, spotlight en suggesties). Stel schemawijzigingen voor in plaats van ze door te voeren.
 - Gebruik plan-modus voor alles dat meer dan één bestand raakt. Draai `npm run lint` en `npm test` voor je klaar meldt.
 - Bestanden met niet-gecommitte wijzigingen van Eric: lees ze, maar overschrijf niets zonder het te vragen.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
