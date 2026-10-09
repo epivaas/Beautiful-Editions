@@ -23,7 +23,7 @@
   <div style="display: flex; gap: 32px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 24px 28px; font-size: 14px; line-height: 21px">
     <div style="flex: 0 0 160px; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #FFB627; padding-top: 2px">Eén tabelstijl</div>
     <div style="flex: 1 1 0"><strong style="font-weight: 700">Kop</strong><br><span style="color: #D2C6AE">Donkere rij, labels in kleine hoofdletters. De gesorteerde kolom heeft een Amber pijltje.</span></div>
-    <div style="flex: 1 1 0"><strong style="font-weight: 700">Rij</strong><br><span style="color: #D2C6AE">44 px hoog, haarlijn ertussen, geen zebra. De titel is de link, getallen staan in Plex Mono rechts uitgelijnd.</span></div>
+    <div style="flex: 1 1 0"><strong style="font-weight: 700">Rij</strong><br><span style="color: #D2C6AE">44 px hoog, haarlijn ertussen, geen zebra. De titel is de link, getallen staan in Plex Mono rechts uitgelijnd. Bij hover krijgt de rij #52483F en de titel een Amber onderlijn van 2 px (op de tweede rij hieronder: "The Obelisk Gate").</span></div>
     <div style="flex: 1 1 0"><strong style="font-weight: 700">Lange lijsten</strong><br><span style="color: #D2C6AE">Gepagineerd met een stabiele URL per pagina. Boven de tabel staat een filterveld dat alleen in déze lijst zoekt (anders dan het zoekveld in de kop), en bij titels en auteurs de A tot Z-balk.</span></div>
   </div>
 
@@ -124,7 +124,7 @@
           </div>
           <sc-for list="{{titles}}" as="t" hint-placeholder-count="12">
           <div style="{{t.sRow}}">
-            <span style="display: flex; align-items: center; gap: 10px; min-width: 0"><span style="{{t.dot}}"></span><a href="#" style="font-weight: 700; font-size: 15px; line-height: 20px; color: #F5ECD7; text-decoration: none">{{t.title}}</a></span>
+            <span style="display: flex; align-items: center; gap: 10px; min-width: 0"><a href="#" style="font-weight: 700; font-size: 15px; line-height: 20px; color: #F5ECD7; {{t.link}}">{{t.title}}</a></span>
             <span style="font-size: 14px; color: #D2C6AE">{{t.en}}</span>
             <a href="#" style="font-size: 14px">{{t.author}}</a>
             <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{t.year}}</span>
@@ -175,10 +175,7 @@
         </div>
       </div>
     </div>
-  </section>
-
-  <!-- ===== TITLES OF A PUBLISHER ===== -->
-  <section style="display: flex; flex-direction: column; gap: 14px">
+  </section><section style="display: flex; flex-direction: column; gap: 14px">
     <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px">
       <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Titles van een publisher</div>
       <div style="font-size: 14px; color: #D2C6AE">Tien tot duizend rijen, gegroepeerd per jaar. De jaarbalk is zowel overzicht als navigatie naar een jaar.</div>
@@ -240,6 +237,9 @@
     </div>
   </section>
 
+  <!-- ===== TITLES OF A PUBLISHER ===== -->
+  
+
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":5600}}'>
@@ -291,7 +291,7 @@ class Component extends DCLogic {
     titles.forEach((t) => {
       const sel = t.title === "The Obelisk Gate";
       t.sRow = rowBase + (sel ? "background:#52483F;" : "");
-      t.dot = sel ? "flex:0 0 auto;width:8px;height:8px;border-radius:4px;background:#FF6B3D" : "display:none";
+      t.link = sel ? "text-decoration:underline;text-decoration-color:#FFB627;text-decoration-thickness:2px;text-underline-offset:4px" : "text-decoration:none";
     });
     const authors = [
       { name: "Austen, Jane", titles: "6", eds: "14" },
