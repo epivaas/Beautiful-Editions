@@ -1,8 +1,8 @@
 import { supabase } from "@/utils/supabase";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import { fetchAllRows, fetchAllRowsInChunks } from "@/utils/supabasePagination";
-import { getPublisherList, getSeriesList } from "@/app/lib/overviewQueries";
+import { getPublisherList } from "@/app/lib/overviewQueries";
 import { activeSpan } from "@/app/lib/overview";
 import ListBand from "@/components/ListBand";
 import { TextLink } from "@/components/Button";
@@ -42,25 +42,10 @@ async function getPublisher(id: number) {
   return data;
 }
 
-async function getSeries(id: number) {
-  const { data, error } = await supabase
-    .from("series")
-    .select(`
-      id,
-      name,
-      publisher:publishers (
-        id,
-        name
-      )
-    `)
-    .eq("id", id)
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return data;
+/** Only whether a series exists: old links to a series used this route. */
+async function seriesExists(id: number) {
+  const { data } = await supabase.from("series").select("id").eq("id", id).maybeSingle();
+  return data !== null;
 }
 
 async function getEditionsForPublisher(publisherId: number): Promise<EditionWithWorks[]> {
@@ -127,70 +112,6 @@ async function getEditionsForPublisher(publisherId: number): Promise<EditionWith
   }));
 }
 
-async function getEditionsForSeries(seriesId: number): Promise<EditionWithWorks[]> {
-  const { data: editionsData, error: editionsError } = await fetchAllRows(() =>
-    supabase
-      .from("editions")
-      .select("id, publication_year")
-      .eq("series_id", seriesId)
-      .order("publication_year", { ascending: false })
-      // Unique tiebreaker so pagination never skips or repeats rows
-      .order("id", { ascending: true })
-  );
-
-  if (editionsError) {
-    console.error("Error fetching series editions:", editionsError);
-    return [];
-  }
-
-  const editionIds = (editionsData || []).map((edition) => edition.id).filter(Boolean);
-
-  if (editionIds.length === 0) {
-    return [];
-  }
-
-  const { data: linksData, error: linksError } = await fetchAllRowsInChunks(
-    editionIds,
-    (editionIdChunk) => supabase
-      .from("work_editions")
-      .select("edition_id, work_id")
-      .in("edition_id", editionIdChunk)
-  );
-
-  if (linksError) {
-    console.error("Error fetching series work links:", linksError);
-    return [];
-  }
-
-  const workIds = Array.from(new Set((linksData || []).map((link) => link.work_id).filter(Boolean)));
-  let worksById: Record<number, WorkSummary> = {};
-
-  if (workIds.length > 0) {
-    const { data: worksData, error: worksError } = await fetchAllRowsInChunks(
-      workIds,
-      (workIdChunk) => supabase
-        .from("works")
-        .select("id, original_title, english_title")
-        .in("id", workIdChunk)
-    );
-
-    if (worksError) {
-      console.error("Error fetching series works:", worksError);
-    } else {
-      worksById = Object.fromEntries((worksData || []).map((work) => [work.id, work]));
-    }
-  }
-
-  return (editionsData || []).map((edition) => ({
-    id: edition.id,
-    publication_year: edition.publication_year,
-    works: (linksData || [])
-      .filter((link) => link.edition_id === edition.id)
-      .map((link) => worksById[link.work_id])
-      .filter(Boolean),
-  }));
-}
-
 function groupByYear(editions: EditionWithWorks[]): GroupedYear[] {
   const grouped = new Map<string, Array<{ edition_id: number; original_title: string; english_title: string | null }>>();
 
@@ -234,45 +155,27 @@ export default async function PublisherSeriesDetailPage({
     notFound();
   }
 
-  // Publishers and series share ids; ?kind=series asks for the series explicitly
+  // Series have their own page now; ?kind=series was how the shared route asked for one
   const wantsSeries = (await searchParams).kind === "series";
   const publisher = wantsSeries ? null : await getPublisher(id);
-  const series = await getSeries(id);
-
-  if (!publisher && !series) {
+  if (!publisher) {
+    if (await seriesExists(id)) permanentRedirect(`/series/${id}`);
     notFound();
   }
 
-  const editions = publisher
-    ? await getEditionsForPublisher(publisher.id)
-    : series
-      ? await getEditionsForSeries(series.id)
-      : [];
-
+  const editions = await getEditionsForPublisher(publisher.id);
   const groupedYears = groupByYear(editions);
 
-  // Same numbers as on the Publishers and Series overviews (cached lists)
+  // Same numbers as on the Publishers overview (cached list)
   const now = new Date().getFullYear();
-  const seriesPublisher = Array.isArray(series?.publisher) ? series.publisher[0] : series?.publisher;
-  const listRow = publisher
-    ? (await getPublisherList()).find((p) => p.id === publisher.id)
-    : (await getSeriesList()).find((s) => s.id === series?.id);
+  const listRow = (await getPublisherList()).find((p) => p.id === publisher.id);
   const span = listRow ? activeSpan([listRow.firstYear, listRow.lastYear], now) : null;
-  const band = publisher
-    ? {
-        pill: "Publisher",
-        title: publisher.name.trim(),
-        sentence: ["Publisher", span].filter(Boolean).join(" · "),
-        back: { href: "/publishers", label: "Publishers" },
-      }
-    : {
-        pill: "Series",
-        title: series?.name.trim() || "Series",
-        sentence: [seriesPublisher?.name ? `Series of ${seriesPublisher.name.trim()}` : "Series", span]
-          .filter(Boolean)
-          .join(" · "),
-        back: { href: "/series", label: "Series" },
-      };
+  const band = {
+    pill: "Publisher",
+    title: publisher.name.trim(),
+    sentence: ["Publisher", span].filter(Boolean).join(" · "),
+    back: { href: "/publishers", label: "Publishers" },
+  };
 
   return (
     <div className="flex flex-col gap-8">
@@ -295,12 +198,12 @@ export default async function PublisherSeriesDetailPage({
         />
       </div>
 
-      {/* The list below is restyled in the step "Auteur en reeks" */}
+      {/* The list below is restyled in the step for the publisher page (year bar, board Overzichten) */}
       <div className="py-2">
       <div className="max-w-5xl mx-auto">
         {groupedYears.length === 0 ? (
           <div className="bg-white border border-[#e0ddd0] rounded p-8 text-center text-[#6b6b6b]">
-            No works found for this {publisher ? "publisher" : "series"}.
+            No works found for this publisher.
           </div>
         ) : (
           <div className="space-y-8">

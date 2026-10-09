@@ -29,9 +29,8 @@ function columns(q: string | null): Column<SeriesListRow>[] {
     label: "Series",
     sortKey: "name",
     render: (row) => (
-      // kind=series: the detail page shares ids between publishers and series
       <Link
-        href={`/publishers-series/${row.id}?kind=series`}
+        href={`/series/${row.id}`}
         className={`${CELL_LINK} ${ROW_TITLE} py-1 text-xl font-extrabold leading-[26px] tracking-[-0.02em]`}
       >
         <span>

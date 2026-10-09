@@ -81,7 +81,7 @@ Bestaande routes staan tussen haakjes. Elk bord in `boards/` hoort bij een pagin
 | Editiepagina (details en printings) | `/edition/[id]` | Titel- en editiepagina |
 | Variantpagina (lettered, numbered, artist) | `/sub-editions/[id]` | Variantpagina |
 | Authors, auteurspagina | `/author`, `/author/[id]` | Overzichtspagina's, Auteur en reeks |
-| Publishers, Series (nu samen op `/publishers-series`) | Publishers en Series zijn aparte menu-items | Overzichtspagina's, Auteur en reeks |
+| Publishers, Series | `/publishers`, `/series`; uitgever `/publishers-series/[id]`, reeks `/series/[id]` | Overzichtspagina's, Auteur en reeks |
 | Zoeken, gedetailleerd zoeken | `/titles/search` | Menu en zoeken |
 | About, FAQ, lege toestanden, 404 | nieuw (`app/not-found.tsx` bestaat) | About en randgevallen |
 | Foto's: strook, alle foto's, lightbox | nieuw | Foto's bekijken |
@@ -101,7 +101,7 @@ Bestaande routes staan tussen haakjes. Elk bord in `boards/` hoort bij een pagin
 
 **Auteurspagina.** Een auteur is een auteur, geen rollen. Band met naam, jaren, land en een link naar Wikipedia als die er is (`wiki_link`). "About" is optioneel. Tabel met titels; "Titles per publisher" (titels, niet edities). Filter en paginering pas vanaf ongeveer 25 titels.
 
-**Reeks.** Hoort bij één uitgever. Volgorde is publicatiedatum, met het nummer vooraan in mono. Aangekondigde titels staan onderaan met het label "Announced" en het verwachte jaar. Geen jaarhistogram, filter of sorteerknoppen bij enkele delen.
+**Reeks** (`/series/[id]`; oude links `/publishers-series/[id]?kind=series` sturen door). Hoort bij één uitgever. Volgorde is publicatiedatum. Geen kolom met een nummer, net als bij titels en uitgevers. Staat de reeksnaam vooraan in de titel ("The Letterpress Shakespeare: The Tempest"), dan valt die in de tabel weg. Aangekondigde titels staan onderaan met het label "Announced" en het verwachte jaar. Geen jaarhistogram, filter of sorteerknoppen bij enkele delen.
 
 **Foto's.** Strook op de pagina; een eigen pagina "Photographs" met rijen gelijke hoogte, filter per editie en variant en een knop "Show more"; een lightbox met donkere laag, pijlen en toetsen (← → Esc), miniaturenstrook, uitleg, editie en rechten (© maker, bron, licentie), geen zoom boven de bron en op de telefoon vegen.
 
