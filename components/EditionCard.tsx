@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PhotoTile from "./PhotoTile";
 import { IncludesChip, VariantLabel } from "./Chip";
+import AlsoContains from "./AlsoContains";
 
 type EditionCardProps = {
   href: string;
@@ -16,6 +17,8 @@ type EditionCardProps = {
   /** Number of non-limited sub-editions (printings). */
   printings?: number;
   photo?: { src: string; alt?: string; credit?: string | null } | null;
+  /** Other titles in this edition. */
+  otherTitles?: { id: number; title: string }[];
 };
 
 /** Edition as a compact grid card. Empty fields are hidden, never shown as "—". */
@@ -30,6 +33,7 @@ export default function EditionCard({
   variants = [],
   printings = 0,
   photo,
+  otherTitles = [],
 }: EditionCardProps) {
   const meta = [year, binding].filter((v) => v !== null && v !== undefined && v !== "").join(" · ");
 
@@ -44,6 +48,7 @@ export default function EditionCard({
             {title}
           </Link>
         </h3>
+        <AlsoContains titles={otherTitles} max={2} />
         {meta && <div className="font-mono text-[13px] text-creme-gedempt">{meta}</div>}
         {illustrators.length > 0 && (
           <div className="text-sm leading-[19px] text-creme-gedempt">{illustrators.join(", ")}</div>

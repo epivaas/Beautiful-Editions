@@ -36,6 +36,8 @@ export type TitleEditionRow = {
   photos: TitlePhotoRow[] | null;
   sub_editions: TitleSubEditionRow[] | null;
   edition_contributors: { role: string | null; contributor: { id: number; name: string } | null }[] | null;
+  /** All titles this edition contains (most editions have one). */
+  work_editions?: { id: number; work: { id: number; original_title: string } | null }[] | null;
 };
 
 export type TitleWorkRow = {
@@ -69,6 +71,8 @@ export type EditionRow = {
   /** Photos of the edition and its sub-editions, main photo first. */
   photos: TitlePhoto[];
   photoCount: number;
+  /** Other titles in the same edition, for "Also contains". */
+  otherTitles: { id: number; title: string }[];
 };
 
 export type SortKey = "year" | "publisher" | "name";
@@ -105,6 +109,21 @@ function photoAlt(photo: TitlePhotoRow, edition: TitleEditionRow) {
 }
 
 /** All photos of the editions and their sub-editions: main photos first, then newest edition, then sort order. */
+/** Photos of one (sub-)edition: main photo first, then sort order. Alt text is the caption or `fallbackAlt`. */
+export function toPhotos(rows: TitlePhotoRow[] | null, fallbackAlt: string): TitlePhoto[] {
+  return [...(rows ?? [])]
+    .sort(
+      (a, b) =>
+        Number(Boolean(b.is_main)) - Number(Boolean(a.is_main)) || a.sort_order - b.sort_order || a.id - b.id
+    )
+    .map((photo) => ({
+      id: photo.id,
+      src: getPhotoUrl(photo.storage_path),
+      alt: photo.caption || fallbackAlt,
+      credit: photo.copyright_statement,
+    }));
+}
+
 export function collectPhotos(editions: TitleEditionRow[]): TitlePhoto[] {
   const rows = editions.flatMap((edition) =>
     [...(edition.photos || []), ...(edition.sub_editions || []).flatMap((s) => s.photos || [])].map((photo) => ({
@@ -139,14 +158,25 @@ export function limitedLabel(kind: string | null | undefined, count: number | nu
   return n ? `Edition of ${n}` : "Limited edition";
 }
 
-const INCLUDES: [keyof TitleEditionRow, string][] = [
+export type IncludesFlags = {
+  slipcase?: boolean | null;
+  dustjacket?: boolean | null;
+  clamshell?: boolean | null;
+};
+
+/** What comes with an edition or sub-edition, in a fixed order: Slipcase, Clamshell box, Dust jacket. */
+export function includesOf(flags: IncludesFlags) {
+  return INCLUDES.filter(([field]) => flags[field] === true).map(([, label]) => label);
+}
+
+const INCLUDES: [keyof IncludesFlags, string][] = [
   ["slipcase", "Slipcase"],
   ["clamshell", "Clamshell box"],
   ["dustjacket", "Dust jacket"],
 ];
 
 /** One edition as shown on the Cards and Grid views. */
-export function toEditionRow(edition: TitleEditionRow): EditionRow {
+export function toEditionRow(edition: TitleEditionRow, currentWorkId?: number): EditionRow {
   const subs = edition.sub_editions || [];
   const limitedSubs = subs
     .filter((s) => s.is_limited_edition)
@@ -172,13 +202,18 @@ export function toEditionRow(edition: TitleEditionRow): EditionRow {
         .filter((c) => c.role === "Illustrator" && c.contributor)
         .map((c) => c.contributor!.name)
     ),
-    includes: INCLUDES.filter(([field]) => edition[field] === true).map(([, label]) => label),
+    includes: includesOf(edition),
     note,
     printings: subs.length - limitedSubs.length,
     variantCount: uniqueVariants.length,
     variants: uniqueVariants,
     photos,
     photoCount: photos.length,
+    otherTitles: [...(edition.work_editions ?? [])]
+      .sort((a, b) => a.id - b.id)
+      .map((link) => link.work)
+      .filter((w): w is { id: number; original_title: string } => w !== null && w.id !== currentWorkId)
+      .map((w) => ({ id: w.id, title: w.original_title })),
   };
 }
 

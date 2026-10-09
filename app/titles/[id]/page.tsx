@@ -63,7 +63,7 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
   const activePublisher = publishers.some((p) => p.id === publisherId) ? publisherId : null;
   const sort: SortKey = SORTS.some((o) => o.key === query.sort) ? (query.sort as SortKey) : "year";
   const dir: SortDir = query.dir === "desc" ? "desc" : "asc";
-  const editions = sortRows(filterByPublisher(allEditions, activePublisher).map(toEditionRow), sort, dir);
+  const editions = sortRows(filterByPublisher(allEditions, activePublisher).map((e) => toEditionRow(e, work.id)), sort, dir);
   const showToggle = allEditions.length >= TOGGLE_FROM;
   // Cards is the default; with fewer than four editions there is no switch and always Cards
   const view = showToggle && query.view === "grid" ? "grid" : "cards";
@@ -265,7 +265,7 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
                 {editions.map((e) => (
                   <EditionFeatureCard
                     key={e.id}
-                    href={`/edition/${e.id}`}
+                    href={`/edition/${e.id}?from=${work.id}`}
                     title={e.title}
                     publisher={e.publisher?.name}
                     year={e.year}
@@ -277,6 +277,7 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
                     note={e.note}
                     photos={e.photos}
                     counts={countLine(e)}
+                    otherTitles={e.otherTitles}
                   />
                 ))}
               </div>
@@ -285,7 +286,7 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
                 {editions.map((e) => (
                   <EditionCard
                     key={e.id}
-                    href={`/edition/${e.id}`}
+                    href={`/edition/${e.id}?from=${work.id}`}
                     title={e.title}
                     publisher={e.publisher?.name}
                     year={e.year}
@@ -295,6 +296,7 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
                     variants={e.variants}
                     printings={e.printings}
                     photo={e.photos[0] ?? null}
+                    otherTitles={e.otherTitles}
                   />
                 ))}
               </div>

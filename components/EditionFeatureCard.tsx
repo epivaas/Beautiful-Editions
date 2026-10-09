@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import PhotoTile from "./PhotoTile";
 import { Button } from "./Button";
 import { IncludesChip, VariantLabel } from "./Chip";
+import AlsoContains from "./AlsoContains";
 
 type FeaturePhoto = { id: number; src: string; alt: string; credit: string | null };
 
@@ -20,6 +21,8 @@ type EditionFeatureCardProps = {
   photos?: FeaturePhoto[];
   /** "2 variants · 3 printings · 18 photos" */
   counts?: string;
+  /** Other titles in this edition. */
+  otherTitles?: { id: number; title: string }[];
 };
 
 const THUMBS = 3;
@@ -57,6 +60,7 @@ export default function EditionFeatureCard({
   note,
   photos = [],
   counts,
+  otherTitles = [],
 }: EditionFeatureCardProps) {
   const [main, ...rest] = photos;
   const thumbs = rest.slice(0, THUMBS);
@@ -89,6 +93,7 @@ export default function EditionFeatureCard({
             {title}
           </Link>
         </h3>
+        <AlsoContains titles={otherTitles} max={3} />
 
         {(year || binding || pages || illustrators.length > 0) && (
           <div className="flex flex-wrap gap-x-8 gap-y-3">

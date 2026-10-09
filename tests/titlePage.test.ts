@@ -209,9 +209,33 @@ describe('toEditionRow card fields', () => {
 function row(id: number, extra: Partial<EditionRow> = {}): EditionRow {
   return {
     id, title: `Edition ${id}`, publisher: folio, year: 2000, binding: null, pages: null, illustrators: [],
-    includes: [], note: null, printings: 0, variantCount: 0, variants: [], photos: [], photoCount: 0, ...extra,
+    includes: [], note: null, printings: 0, variantCount: 0, variants: [], photos: [], photoCount: 0, otherTitles: [], ...extra,
   };
 }
+
+describe('toEditionRow otherTitles', () => {
+  it('lists the other titles of the edition in link order, without the current one', () => {
+    const r = toEditionRow(
+      edition(1, {
+        work_editions: [
+          { id: 30, work: { id: 9, original_title: 'Iliás' } },
+          { id: 10, work: { id: 7, original_title: 'Odýsseia' } },
+          { id: 20, work: { id: 8, original_title: 'Homeric Hymns' } },
+          { id: 40, work: null },
+        ],
+      }),
+      7
+    );
+    expect(r.otherTitles).toEqual([
+      { id: 8, title: 'Homeric Hymns' },
+      { id: 9, title: 'Iliás' },
+    ]);
+  });
+
+  it('is empty for an edition with one title', () => {
+    expect(toEditionRow(edition(1, { work_editions: [{ id: 1, work: { id: 7, original_title: 'X' } }] }), 7).otherTitles).toEqual([]);
+  });
+});
 
 describe('sortRows', () => {
   const rows = [

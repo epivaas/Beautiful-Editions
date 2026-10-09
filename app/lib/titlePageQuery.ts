@@ -18,7 +18,8 @@ const TITLE_SELECT = `
         limited_state:limited_states ( name, sort_order ),
         photos ( ${PHOTO} )
       ),
-      edition_contributors ( role, contributor:contributors ( id, name ) )
+      edition_contributors ( role, contributor:contributors ( id, name ) ),
+      work_editions ( id, work:works ( id, original_title ) )
     )
   )
 `;
