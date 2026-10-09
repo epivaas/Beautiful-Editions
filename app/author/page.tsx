@@ -1,125 +1,117 @@
-import { supabase } from "@/utils/supabase";
-import { fetchAllRows } from "@/utils/supabasePagination";
+import type { Metadata } from "next";
 import Link from "next/link";
-import SearchBox from "@/components/SearchBox";
+import { getAuthorList, type AuthorListRow } from "@/app/lib/overviewQueries";
+import {
+  firstLetter,
+  isLetterKey,
+  letterCounts,
+  matchesFilter,
+  overviewHref,
+  paginate,
+  sortBy,
+  type SortDir,
+} from "@/app/lib/overview";
+import ListBand from "@/components/ListBand";
+import AlphabetBar from "@/components/AlphabetBar";
+import ListFilter from "@/components/ListFilter";
+import DataTable, { CELL_LINK, ROW_TITLE, type Column } from "@/components/DataTable";
+import Highlight from "@/components/Highlight";
+import Pagination from "@/components/Pagination";
+import { TextLink } from "@/components/Button";
 
-interface AuthorSummary {
-  id: number;
-  name: string;
-  work_count: number;
+export const metadata: Metadata = { title: "Authors · Shelfhound" };
+
+const PAGE_SIZE = 50;
+const DEFAULTS = { sort: "name", dir: "asc" };
+
+type SortKey = "name" | "titles" | "editions";
+const SORT_VALUES: Record<SortKey, (row: AuthorListRow) => string | number> = {
+  name: (row) => row.name,
+  titles: (row) => row.titles,
+  editions: (row) => row.editions,
+};
+
+type PageProps = {
+  searchParams: Promise<{ letter?: string; q?: string; sort?: string; dir?: string; page?: string }>;
+};
+
+function columns(q: string | null): Column<AuthorListRow>[] {
+  return [
+  {
+    key: "name",
+    label: "Author",
+    sortKey: "name",
+    render: (row) => (
+      <Link href={`/author/${row.id}`} className={`${CELL_LINK} ${ROW_TITLE} font-bold`}>
+        <span>
+          <Highlight text={row.name} q={q} />
+        </span>
+      </Link>
+    ),
+  },
+  { key: "titles", label: "Titles", sortKey: "titles", width: "110px", mono: true, align: "right", render: (row) => row.titles.toLocaleString("en-US") },
+  { key: "editions", label: "Editions", sortKey: "editions", width: "110px", mono: true, align: "right", render: (row) => row.editions.toLocaleString("en-US") },
+  ];
 }
 
-function getLastName(name?: string | null) {
-  const trimmed = name?.trim() || "";
+export default async function AuthorsPage({ searchParams }: PageProps) {
+  const query = await searchParams;
+  const q = query.q?.trim() || null;
+  const sort: SortKey = query.sort && query.sort in SORT_VALUES ? (query.sort as SortKey) : "name";
+  const dir: SortDir = query.dir === "desc" ? "desc" : "asc";
 
-  if (!trimmed) {
-    return "";
-  }
+  const all = await getAuthorList();
+  const filtered = all.filter((row) => matchesFilter([row.name], q));
+  const counts = letterCounts(filtered, (row) => row.name);
+  const letter = isLetterKey(query.letter) ? query.letter : null;
+  const inLetter = letter ? filtered.filter((row) => firstLetter(row.name) === letter) : filtered;
+  const page = paginate(sortBy(inLetter, SORT_VALUES[sort], dir), Number(query.page ?? 1), PAGE_SIZE);
 
-  if (trimmed.includes(",")) {
-    const [surname] = trimmed.split(",").map((part) => part.trim());
-    return surname || trimmed;
-  }
-
-  const parts = trimmed.split(/\s+/);
-  return parts[parts.length - 1] || trimmed;
-}
-
-async function getAuthors(): Promise<AuthorSummary[]> {
-  // Count titles in the same query. Filtering work_authors with .in() on every
-  // author id made the URL too long (HeadersOverflowError).
-  const { data: authorsData, error: authorsError } = await fetchAllRows(() =>
-    supabase
-      .from("authors")
-      .select("id, name, work_authors ( count )")
-      .order("name", { ascending: true })
-      // Unique tiebreaker so pagination never skips or repeats rows
-      .order("id", { ascending: true })
-  );
-
-  if (authorsError) {
-    console.error("Error fetching authors:", authorsError);
-    return [];
-  }
-
-  return (authorsData || []).map((author) => ({
-    id: author.id,
-    name: author.name,
-    work_count: author.work_authors?.[0]?.count ?? 0,
-  }));
-}
-
-export default async function AuthorsPage() {
-  const authors = await getAuthors();
-
-  const groupedAuthors: Record<string, AuthorSummary[]> = {};
-
-  authors.forEach((author) => {
-    const lastName = getLastName(author.name);
-    const letter = (lastName.charAt(0) || "#").toUpperCase();
-
-    if (!groupedAuthors[letter]) {
-      groupedAuthors[letter] = [];
-    }
-
-    groupedAuthors[letter].push(author);
-  });
-
-  const sortedLetters = Object.keys(groupedAuthors).sort((a, b) => a.localeCompare(b));
+  const state = { letter, q, sort, dir, page: String(page.page) };
+  const href = (changes: Record<string, string | null>) => overviewHref("/author", state, changes, DEFAULTS);
 
   return (
-    <div className="py-8">
-      <h1 className="text-4xl font-serif text-[#8b6f47] mb-8">Authors</h1>
+    <div className="flex flex-col gap-5">
+      <ListBand
+        title="Authors"
+        sentence="The people behind the works, from A to Z."
+        count={all.length}
+        label={["author", "authors"]}
+      />
+      <AlphabetBar active={letter} counts={counts} hrefFor={(l) => href({ letter: l })} />
+      {/* A filter searches all authors, so it keeps only the sort order */}
+      <ListFilter
+        action="/author"
+        q={q}
+        keep={{ sort: sort === DEFAULTS.sort ? null : sort, dir: dir === DEFAULTS.dir ? null : dir }}
+      />
 
-      <div className="mb-8">
-        <SearchBox />
-      </div>
-
-      <div className="bg-white border border-[#e0ddd0] rounded overflow-hidden">
-        <div className="p-6 border-b border-[#e0ddd0]">
-          <h2 className="text-2xl font-serif text-[#8b6f47]">
-            All Authors ({authors.length})
-          </h2>
-          <p className="mt-2 text-sm text-[#6b6b6b]">
-            Grouped by surname with the number of works.
-          </p>
+      {page.total === 0 ? (
+        <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
+          <p className="text-[22px] font-extrabold leading-7 tracking-[-0.02em]">No authors match</p>
+          <p className="text-sm text-creme-gedempt">Check the spelling, try fewer words or another letter.</p>
+          <TextLink href="/author" standalone className="text-sm">
+            Clear filter
+          </TextLink>
         </div>
-
-        {authors.length === 0 ? (
-          <div className="p-8 text-center text-[#6b6b6b]">
-            No authors found
+      ) : (
+        <>
+          <DataTable
+            caption="Authors"
+            columns={columns(q)}
+            rows={page.rows}
+            getRowKey={(row) => row.id}
+            sort={{ key: sort, dir, hrefFor: (key, nextDir) => href({ sort: key, dir: nextDir }) }}
+          />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="font-mono text-[13px] text-creme-gedempt">
+              {page.from.toLocaleString("en-US")} to {page.to.toLocaleString("en-US")} of{" "}
+              {page.total.toLocaleString("en-US")}
+            </span>
+            <Pagination page={page.page} totalPages={page.totalPages} hrefFor={(p) => href({ page: String(p) })} />
           </div>
-        ) : (
-          <div className="p-6" style={{ columnCount: 3, columnGap: "2rem" }}>
-            {sortedLetters.map((letter) => (
-              <div key={letter} className="mb-8" style={{ breakInside: "avoid" }}>
-                <h3 className="text-2xl font-serif text-[#8b6f47] mb-4 border-b border-[#e0ddd0] pb-2">
-                  {letter}
-                </h3>
-                <ul className="space-y-3">
-                  {groupedAuthors[letter]
-                    .sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name)))
-                    .map((author) => (
-                      <li key={author.id}>
-                        <div className="mb-1">
-                          <Link
-                            href={`/author/${author.id}`}
-                            className="text-[#8b6f47] hover:underline font-medium"
-                          >
-                            {author.name}
-                          </Link>
-                        </div>
-                        <div className="text-sm text-[#6b6b6b]">
-                          {author.work_count} title{author.work_count !== 1 ? "s" : ""}
-                        </div>
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

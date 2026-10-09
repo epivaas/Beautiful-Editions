@@ -170,8 +170,8 @@ function plural(n: number, word: string) {
 }
 
 /**
- * Gloed block (DESIGN.md §6 Editiepagina): several titles first, then limited editions, then printings.
- * Returns null when there is nothing to count.
+ * Gloed block (DESIGN.md §6 Editiepagina): several titles first, then limited editions, then printings,
+ * then photos. Returns null when there is nothing to count; the page then shows an empty Gloed block.
  */
 export function bandCounts(c: { titles: number; limited: number; printings: number; photos: number }) {
   const rest = (parts: [number, string][]) => parts.filter(([n]) => n > 0).map(([n, w]) => plural(n, w));
@@ -185,6 +185,7 @@ export function bandCounts(c: { titles: number; limited: number; printings: numb
     };
   if (c.printings > 0)
     return { value: c.printings, label: c.printings === 1 ? "printing" : "printings", lines: rest([[c.photos, "photo"]]) };
+  if (c.photos > 0) return { value: c.photos, label: c.photos === 1 ? "photo" : "photos", lines: [] };
   return null;
 }
 

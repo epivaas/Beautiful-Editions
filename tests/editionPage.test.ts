@@ -145,8 +145,14 @@ describe('bandCounts', () => {
     expect(bandCounts({ titles: 1, limited: 0, printings: 4, photos: 1 })).toEqual({ value: 4, label: 'printings', lines: ['1 photo'] });
   });
 
-  it('returns null when there is nothing to count', () => {
-    expect(bandCounts({ titles: 1, limited: 0, printings: 0, photos: 5 })).toBeNull();
+  it('counts photos when there are no limited editions or printings', () => {
+    expect(bandCounts({ titles: 1, limited: 0, printings: 0, photos: 5 })).toEqual({ value: 5, label: 'photos', lines: [] });
+    expect(bandCounts({ titles: 1, limited: 0, printings: 0, photos: 1 })?.label).toBe('photo');
+  });
+
+  it('returns null when there is nothing to count (the page shows an empty Gloed block)', () => {
+    expect(bandCounts({ titles: 1, limited: 0, printings: 0, photos: 0 })).toBeNull();
+    expect(bandCounts({ titles: 0, limited: 0, printings: 0, photos: 0 })).toBeNull();
   });
 });
 

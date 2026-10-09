@@ -122,8 +122,11 @@ export default async function EditionPage({ params, searchParams }: PageProps) {
           title={edition.title}
           size={edition.title.length > LONG_TITLE ? "md" : "lg"}
           publisher={publisherName}
+          // The Gloed block never disappears: without anything to count it stays as an empty block
           count={
-            counts && {
+            counts === null
+              ? "empty"
+              : {
               value: counts.value,
               label: counts.label,
               labelPosition: "below",

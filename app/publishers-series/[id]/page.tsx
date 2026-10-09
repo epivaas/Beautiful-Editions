@@ -2,6 +2,10 @@ import { supabase } from "@/utils/supabase";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { fetchAllRows, fetchAllRowsInChunks } from "@/utils/supabasePagination";
+import { getPublisherList, getSeriesList } from "@/app/lib/overviewQueries";
+import { activeSpan } from "@/app/lib/overview";
+import ListBand from "@/components/ListBand";
+import { TextLink } from "@/components/Button";
 
 interface WorkSummary {
   id: number;
@@ -218,8 +222,10 @@ function groupByYear(editions: EditionWithWorks[]): GroupedYear[] {
 
 export default async function PublisherSeriesDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }> | { id: string };
+  searchParams: Promise<{ kind?: string }>;
 }) {
   const resolvedParams = params instanceof Promise ? await params : params;
   const id = parseInt(resolvedParams.id, 10);
@@ -228,7 +234,9 @@ export default async function PublisherSeriesDetailPage({
     notFound();
   }
 
-  const publisher = await getPublisher(id);
+  // Publishers and series share ids; ?kind=series asks for the series explicitly
+  const wantsSeries = (await searchParams).kind === "series";
+  const publisher = wantsSeries ? null : await getPublisher(id);
   const series = await getSeries(id);
 
   if (!publisher && !series) {
@@ -242,23 +250,54 @@ export default async function PublisherSeriesDetailPage({
       : [];
 
   const groupedYears = groupByYear(editions);
-  const heading = publisher ? publisher.name : series?.name || "Collection";
-  const subtitle = publisher
-    ? "Works grouped by publication year"
-    : Array.isArray(series?.publisher) && series.publisher.length > 0 && series.publisher[0]?.name
-      ? `Series of ${series.publisher[0].name}`
-      : "Works grouped by publication year";
+
+  // Same numbers as on the Publishers and Series overviews (cached lists)
+  const now = new Date().getFullYear();
+  const seriesPublisher = Array.isArray(series?.publisher) ? series.publisher[0] : series?.publisher;
+  const listRow = publisher
+    ? (await getPublisherList()).find((p) => p.id === publisher.id)
+    : (await getSeriesList()).find((s) => s.id === series?.id);
+  const span = listRow ? activeSpan([listRow.firstYear, listRow.lastYear], now) : null;
+  const band = publisher
+    ? {
+        pill: "Publisher",
+        title: publisher.name.trim(),
+        sentence: ["Publisher", span].filter(Boolean).join(" · "),
+        back: { href: "/publishers", label: "Publishers" },
+      }
+    : {
+        pill: "Series",
+        title: series?.name.trim() || "Series",
+        sentence: [seriesPublisher?.name ? `Series of ${seriesPublisher.name.trim()}` : "Series", span]
+          .filter(Boolean)
+          .join(" · "),
+        back: { href: "/series", label: "Series" },
+      };
 
   return (
-    <div className="py-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif text-[#8b6f47] mb-2">{heading}</h1>
-          {subtitle && (
-            <p className="text-lg text-[#6b6b6b]">{subtitle}</p>
-          )}
-        </div>
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-creme-gedempt">
+          <TextLink href={band.back.href} standalone>
+            {band.back.label}
+          </TextLink>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page" className="text-creme">
+            {band.title}
+          </span>
+        </nav>
+        <ListBand
+          pill={band.pill}
+          title={band.title}
+          sentence={band.sentence}
+          count={listRow?.titles ?? 0}
+          label={["title", "titles"]}
+        />
+      </div>
 
+      {/* The list below is restyled in the step "Auteur en reeks" */}
+      <div className="py-2">
+      <div className="max-w-5xl mx-auto">
         {groupedYears.length === 0 ? (
           <div className="bg-white border border-[#e0ddd0] rounded p-8 text-center text-[#6b6b6b]">
             No works found for this {publisher ? "publisher" : "series"}.
@@ -287,6 +326,7 @@ export default async function PublisherSeriesDetailPage({
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

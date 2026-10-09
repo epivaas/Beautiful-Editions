@@ -23,7 +23,7 @@ export default function Pagination({ page, totalPages, hrefFor }: PaginationProp
           …
         </span>
       ) : item === page ? (
-        <span key={item} aria-current="page" className={`${BOX} bg-amber font-mono font-medium text-inkt`}>
+        <span key={item} aria-current="page" className={`${BOX} bg-gloed font-mono font-medium text-inkt`}>
           {item}
         </span>
       ) : (

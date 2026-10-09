@@ -5,12 +5,12 @@ export type NavItem = {
   match: string[];
 };
 
-// Publishers and Series share /publishers-series until the routes are split.
+// Publisher and series detail pages still live under /publishers-series until they are restyled.
 export const NAV: NavItem[] = [
   { label: "Titles", href: "/titles", match: ["/titles", "/edition", "/sub-editions"] },
   { label: "Authors", href: "/author", match: ["/author"] },
-  { label: "Publishers", href: "/publishers-series", match: ["/publishers-series"] },
-  { label: "Series", href: "/publishers-series", match: [] },
+  { label: "Publishers", href: "/publishers", match: ["/publishers", "/publishers-series"] },
+  { label: "Series", href: "/series", match: ["/series"] },
   { label: "About", href: "/about", match: ["/about"] },
 ];
 
