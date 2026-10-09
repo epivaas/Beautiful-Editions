@@ -1,204 +1,157 @@
-"use client";
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { getPublisherSpotlight, getRecentEditions, getTitleSpotlight } from "@/app/lib/homeQueries";
+import { getPublisherList } from "@/app/lib/overviewQueries";
+import { newSeed, publisherCountParts, roundedCount, seededShuffle } from "@/app/lib/home";
+import { toEditionRow, type TitleEditionRow } from "@/app/lib/titlePage";
+import HomeBand from "@/components/HomeBand";
+import SpotlightCard from "@/components/SpotlightCard";
+import EditionCard from "@/components/EditionCard";
+import { Button, TextLink } from "@/components/Button";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { getMainPhoto, getAuthorName, getEditionInfo } from "./lib/editionUtils";
-import { supabaseUrl } from "@/utils/supabase";
+export const metadata: Metadata = {
+  title: "Shelfhound · Find the edition worth owning",
+  description: "A reference for beautifully illustrated editions: titles, editions, variants, printings and photographs.",
+};
 
-interface Photo {
-  id: number;
-  storage_path: string;
-  sort_order: number;
-  copyright_statement?: string;
-}
+type PageProps = { searchParams: Promise<{ shuffle?: string }> };
 
-interface Author {
-  id: number;
-  name: string;
-}
-
-interface Work {
-  id: number;
-  original_title: string;
-  work_authors?: {
-    author: Author;
-  }[];
-}
-
-interface Publisher {
-  id: number;
-  name: string;
-}
-
-interface Series {
-  id: number;
-  name: string;
-  publisher_id: number;
-}
-
-interface Edition {
-  id: number;
+function Row({
+  id,
+  title,
+  sentence,
+  link,
+  children,
+}: {
+  id: string;
   title: string;
-  photos?: Photo[];
-  work?: Work;
-  publisher?: Publisher;
-  series?: Series;
+  sentence: string;
+  link?: { href: string; label: string };
+  children: ReactNode;
+}) {
+  return (
+    <section id={id} aria-labelledby={`${id}-heading`} className="flex scroll-mt-24 flex-col gap-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          <h2 id={`${id}-heading`} className="m-0 text-[32px] leading-[38px]">
+            {title}
+          </h2>
+          <span className="text-sm text-creme-gedempt">{sentence}</span>
+        </div>
+        {link && (
+          <TextLink href={link.href} standalone className="text-sm">
+            {link.label}
+          </TextLink>
+        )}
+      </div>
+      {children}
+    </section>
+  );
 }
 
-export default function Home() {
-  const [editions, setEditions] = useState<Edition[]>([]);
-  const [loading, setLoading] = useState(true);
+const GRID = "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4";
 
-  useEffect(() => {
-    const fetchEditions = async () => {
-      try {
-        const response = await fetch("/api/featured-editions");
-        const data = await response.json();
-        console.log("Fetched editions:", data);
-        setEditions(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Failed to fetch editions:", error);
-        setEditions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+function Card({ edition, fromWork }: { edition: TitleEditionRow; fromWork?: number }) {
+  const row = toEditionRow(edition, fromWork);
+  const from = fromWork ?? edition.work_editions?.[0]?.work?.id;
+  return (
+    <EditionCard
+      href={`/edition/${row.id}${from ? `?from=${from}` : ""}`}
+      title={row.title}
+      publisher={row.publisher?.name.trim()}
+      year={row.year}
+      binding={row.binding}
+      variants={row.variants}
+      photo={row.photos[0] ?? null}
+    />
+  );
+}
 
-    fetchEditions();
-  }, []);
+export default async function HomePage({ searchParams }: PageProps) {
+  const now = new Date();
+  const shuffle = Number((await searchParams).shuffle);
+  // A server component renders once per request, so a random seed per visit is intended here
+  const seed = Number.isFinite(shuffle) && shuffle > 0 ? shuffle : newSeed();
+  const nextSeed = newSeed();
 
-  
-  
+  const [recent, titleSpotlight, publisherSpotlight, publishers] = await Promise.all([
+    getRecentEditions(),
+    getTitleSpotlight(now),
+    getPublisherSpotlight(now),
+    getPublisherList(),
+  ]);
+  const editionTotal = publishers.reduce((sum, p) => sum + p.editions, 0);
+  const whatsNew = seededShuffle(recent, seed).slice(0, 4);
 
   return (
-    <div style={{ paddingTop: '3rem', paddingBottom: '3rem', maxWidth: '1400px', margin: '0 auto', paddingLeft: '1rem', paddingRight: '1rem' }}>
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.875rem', fontFamily: 'sans-serif', color: '#000000', fontWeight: '600' }}>Featured Works</h2>
-      </div>
-      {loading ? (
-        <div style={{ textAlign: 'center', paddingTop: '3rem', paddingBottom: '3rem' }}>
-          <p style={{ color: '#000000', fontFamily: 'sans-serif' }}>Loading editions...</p>
-        </div>
-      ) : editions.length === 0 ? (
-        <div style={{ textAlign: 'center', paddingTop: '3rem', paddingBottom: '3rem' }}>
-          <p style={{ color: '#000000', fontFamily: 'sans-serif' }}>No editions available</p>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '2rem' }}>
-          {editions.map((edition) => {
-            const photo = getMainPhoto(edition.photos);
-            return (
-              <Link
-                key={edition.id}
-                href={`/edition/${edition.id}`}
-                style={{
-                  display: 'block',
-                  textDecoration: 'none'
-                }}
-              >
-                {/* Image Container */}
-                <div style={{
-                  backgroundColor: '#ffffff',
-                  aspectRatio: '3/4',
-                  overflow: 'hidden',
-                  borderRadius: '0.75rem',
-                  marginBottom: '1rem',
-                  position: 'relative',
-                  transition: 'transform 0.3s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                  const overlay = e.currentTarget.querySelector('.copyright-overlay') as HTMLElement;
-                  if (overlay) overlay.style.opacity = '1';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  const overlay = e.currentTarget.querySelector('.copyright-overlay') as HTMLElement;
-                  if (overlay) overlay.style.opacity = '0';
-                }}
-                >
-                  {photo ? (
-                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                      <Image
-                        fill
-                        src={`${supabaseUrl}/storage/v1/object/public/Book-photos/${photo.storage_path}`}
-                        alt={edition.title}
-                        sizes="(max-width: 768px) 100vw, 25vw"
-                        style={{
-                          objectFit: 'cover'
-                        }}
-                      />
-                      {photo.copyright_statement && (
-                        <div className="copyright-overlay" style={{
-                          position: 'absolute',
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                          color: 'white',
-                          padding: '0.75rem',
-                          fontSize: '0.75rem',
-                          fontFamily: 'sans-serif',
-                          opacity: 0,
-                          transition: 'opacity 0.3s',
-                          lineHeight: '1.3',
-                          pointerEvents: 'none'
-                        }}>
-                          {photo.copyright_statement}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div style={{
-                      width: '100%',
-                      height: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: '#f5f3ed',
-                      color: '#c0b8a8',
-                      fontFamily: 'sans-serif'
-                    }}>
-                      <span>No Image</span>
-                    </div>
-                  )}
-                </div>
+    <div className="flex flex-col gap-14">
+      <HomeBand editions={roundedCount(editionTotal, 1000)} />
 
-                {/* Text Content */}
-                <div style={{ textAlign: 'center' }}>
-                  <h3 style={{
-                    fontFamily: 'sans-serif',
-                    fontSize: '0.95rem',
-                    fontWeight: '600',
-                    color: '#000000',
-                    marginBottom: '0.1rem',
-                    lineHeight: '1.4'
-                  }}>
-                    {edition.work?.original_title || edition.title}
-                  </h3>
-                  <p style={{
-                    fontFamily: 'sans-serif',
-                    fontSize: '0.85rem',
-                    color: '#000000',
-                    marginBottom: '0.3rem'
-                  }}>
-                    {getAuthorName(edition.work)}
-                  </p>
-                  {getEditionInfo(edition, editions) && (
-                    <p style={{
-                      fontFamily: 'sans-serif',
-                      fontSize: '0.75rem',
-                      color: '#666666'
-                    }}>
-                      {getEditionInfo(edition, editions)}
-                    </p>
-                  )}
-                </div>
-              </Link>
-            );
-          })}
+      <Row id="whats-new" title="What's new" sentence="A selection of recently added editions, different every visit">
+        <div className={GRID}>
+          {whatsNew.map((edition) => (
+            <Card key={edition.id} edition={edition} />
+          ))}
         </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="secondary" href={`/?shuffle=${nextSeed}#whats-new`} scroll={false}>
+            Show other editions
+          </Button>
+          <span className="text-[13px] text-creme-gedempt">A new selection from the editions added recently.</span>
+        </div>
+      </Row>
+
+      {titleSpotlight && (
+        <Row
+          id="title-spotlight"
+          title="Title in the spotlight"
+          sentence="New pick every week"
+          link={{ href: "/titles", label: "All titles →" }}
+        >
+          <div className={GRID}>
+            <SpotlightCard
+              eyebrow="Title in the spotlight"
+              kind="title"
+              name={titleSpotlight.work.title}
+              byline={titleSpotlight.work.authors.length ? `by ${titleSpotlight.work.authors.join(", ")}` : null}
+              count={`${titleSpotlight.editionCount} ${titleSpotlight.editionCount === 1 ? "edition" : "editions"}`}
+              href={`/titles/${titleSpotlight.work.id}`}
+              cta="View the title →"
+            />
+            {titleSpotlight.editions.map((edition) => (
+              <Card key={edition.id} edition={edition} fromWork={titleSpotlight.work.id} />
+            ))}
+          </div>
+        </Row>
+      )}
+
+      {publisherSpotlight && (
+        <Row
+          id="publisher-spotlight"
+          title="Publisher in the spotlight"
+          sentence="New pick every two weeks"
+          link={{ href: "/publishers", label: "All publishers →" }}
+        >
+          <div className={GRID}>
+            <SpotlightCard
+              eyebrow="Publisher in the spotlight"
+              kind="publisher"
+              name={publisherSpotlight.publisher.name}
+              count={publisherCountParts(publisherSpotlight.publisher).map((part, i) => (
+                <span key={part.text}>
+                  {i > 0 && " · "}
+                  <span className="font-semibold text-creme">{part.value.toLocaleString("en-US")}</span>
+                  {part.text.slice(part.value.toLocaleString("en-US").length)}
+                </span>
+              ))}
+              href={`/publishers-series/${publisherSpotlight.publisher.id}`}
+              cta="View the publisher →"
+            />
+            {publisherSpotlight.editions.map((edition) => (
+              <Card key={edition.id} edition={edition} />
+            ))}
+          </div>
+        </Row>
       )}
     </div>
   );

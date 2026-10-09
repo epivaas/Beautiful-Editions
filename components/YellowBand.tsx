@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import GloedBlock from "./GloedBlock";
 
 const TITLE_SIZES = {
   xl: "text-5xl leading-[1] md:text-[88px] md:leading-[88px]",
@@ -29,7 +30,7 @@ type YellowBandProps = {
   count?: { label: string; value: ReactNode; note?: ReactNode; labelPosition?: "above" | "below" } | "empty" | null;
   /** Heading level of the title; h1 on pages, h2 when shown as an example. */
   as?: "h1" | "h2";
-  /** Compact band for overview lists (about 180 px high): less padding and a smaller number (80 px). */
+  /** Compact band for overview lists (about 180 px high): less padding and the compact Gloed block. */
   compact?: boolean;
   children?: ReactNode;
 };
@@ -76,26 +77,15 @@ export default function YellowBand({
         {children}
       </div>
 
-      {count === "empty" && (
-        <div aria-hidden="true" className="min-h-12 bg-gloed md:w-[280px] md:shrink-0" />
-      )}
-
+      {count === "empty" && <GloedBlock empty />}
       {count && count !== "empty" && (
-        <div
-          className={`flex flex-col justify-end gap-2.5 bg-gloed px-6 py-6 md:w-[280px] md:shrink-0 md:px-8 md:py-9`}
-        >
-          <div
-            className={`font-mono text-[15px] uppercase tracking-[0.08em] ${count.labelPosition === "below" ? "order-2" : ""}`}
-          >
-            {count.label}
-          </div>
-          <div
-            className={`order-1 font-extrabold leading-[0.8] tracking-[-0.04em] ${compact ? "text-[56px] md:text-[80px]" : "text-[88px] md:text-[130px]"}`}
-          >
-            {count.value}
-          </div>
-          {count.note && <div className="order-3 font-mono text-sm leading-[22px]">{count.note}</div>}
-        </div>
+        <GloedBlock
+          value={count.value}
+          label={count.label}
+          labelPosition={count.labelPosition}
+          lines={count.note}
+          size={compact ? "compact" : "default"}
+        />
       )}
     </section>
   );

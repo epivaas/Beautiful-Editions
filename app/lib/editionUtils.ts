@@ -52,24 +52,3 @@ export const getMainPhoto = (photos?: Photo[]) => {
   return sorted[0];
 };
 
-export const getAuthorName = (work?: Work) => {
-  if (!work) return "Unknown Author";
-  const author = work.work_authors?.[0]?.author;
-  return author?.name || "Unknown Author";
-};
-
-export const getEditionInfo = (edition: Edition, editionsList: Edition[]) => {
-  if (edition.series) {
-    const seriesName = edition.series.name;
-    const publisherId = edition.series.publisher_id;
-    const matchingPublisher = editionsList.find(e => e.publisher?.id === publisherId)?.publisher;
-    if (matchingPublisher) {
-      return `photo from the ${seriesName} (${matchingPublisher.name}) edition`;
-    }
-    return `photo from the ${seriesName} edition`;
-  }
-  if (edition.publisher) {
-    return `photo from the ${edition.publisher.name} edition`;
-  }
-  return null;
-};

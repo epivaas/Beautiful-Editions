@@ -31,6 +31,8 @@ export type PublisherListRow = {
 
 export type SeriesListRow = PublisherListRow & { publisher: { id: number; name: string } | null };
 
+export type PublisherWithLimited = PublisherListRow & { limitedEditions: number };
+
 type WorkQueryRow = {
   id: number;
   original_title: string;
@@ -150,19 +152,44 @@ function counted(entry: { editions: number; works: Set<number>; years: (number |
   };
 }
 
+// Limited sub-editions per publisher, from a flat list (a few hundred rows)
+async function getLimitedByPublisher() {
+  const { data, error } = await fetchAllRows(() =>
+    supabase
+      .from("sub_editions")
+      .select("id, edition:editions ( publisher_id )")
+      .eq("is_limited_edition", true)
+      .order("id", { ascending: true })
+  );
+  if (error) console.error("Error fetching limited sub-editions:", error);
+  const counts = new Map<number, number>();
+  for (const row of (data as unknown as { edition: { publisher_id: number } | null }[]) ?? []) {
+    const id = row.edition?.publisher_id;
+    if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export const getPublisherList = unstable_cache(
-  async (): Promise<PublisherListRow[]> => {
-    const [{ data, error }, aggregates] = await Promise.all([
+  async (): Promise<PublisherWithLimited[]> => {
+    const [{ data, error }, aggregates, limited] = await Promise.all([
       supabase.from("publishers").select("id, name").order("id", { ascending: true }),
       getEditionAggregates(),
+      getLimitedByPublisher(),
     ]);
     if (error) {
       console.error("Error fetching publishers:", error);
       return [];
     }
-    return (data ?? []).map((p) => ({ id: p.id, name: p.name.trim(), ...counted(aggregates.byPublisher.get(p.id)) }));
+    return (data ?? []).map((p) => ({
+      id: p.id,
+      name: p.name.trim(),
+      ...counted(aggregates.byPublisher.get(p.id)),
+      limitedEditions: limited.get(p.id) ?? 0,
+    }));
   },
-  ["overview-publishers"],
+  // v2: rows include limitedEditions
+  ["overview-publishers-v2"],
   { revalidate: REVALIDATE, tags: ["overview-publishers"] }
 );
 

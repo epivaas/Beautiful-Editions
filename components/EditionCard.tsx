@@ -49,7 +49,8 @@ export default function EditionCard({
           </Link>
         </h3>
         <AlsoContains titles={otherTitles} max={2} />
-        {meta && <div className="font-mono text-[13px] text-creme-gedempt">{meta}</div>}
+        {/* Some bindings are a whole paragraph; the card shows two lines, the edition page the rest */}
+        {meta && <div className="line-clamp-2 font-mono text-[13px] text-creme-gedempt">{meta}</div>}
         {illustrators.length > 0 && (
           <div className="text-sm leading-[19px] text-creme-gedempt">{illustrators.join(", ")}</div>
         )}
