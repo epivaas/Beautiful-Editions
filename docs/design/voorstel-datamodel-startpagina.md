@@ -1,6 +1,6 @@
 # Voorstel: datamodel voor de startpagina
 
-Status: **SQL aangeleverd op 9 oktober 2026, nog niet bevestigd.** De startpagina gebruikt `created_at` en `spotlights` pas nadat de SQL is uitgevoerd en gecontroleerd.
+Status: **uitgevoerd op 9 oktober 2026; de startpagina gebruikt beide.** Bestaande edities hebben geen `created_at` (eerst kregen ze per vergissing de datum van de wijziging; dat is met een `update` weer leeggemaakt).
 
 De startpagina werkt nu met de bestaande gegevens:
 - **What's new** neemt willekeurig 4 uit de 120 edities met het hoogste id. Het id stijgt bij elke nieuwe editie, dus de hoogste id's zijn de laatst toegevoegde.
@@ -80,9 +80,20 @@ create policy "spotlights are readable by everyone"
 
 ---
 
-## Hoe verder
+## Een spotlight inplannen (Table Editor in Supabase)
 
-Zeg welke van de twee je wilt. Ik geef je dan:
-- de SQL om in de SQL-editor van Supabase uit te voeren;
-- een leesquery om te controleren of het gelukt is;
-- de aanpassing van de startpagina.
+Voeg een rij toe aan `spotlights`:
+
+| Kolom | Titel | Uitgever |
+|---|---|---|
+| `kind` | `title` | `publisher` |
+| `work_id` | id van de titel (zie de URL `/titles/…`) | leeg |
+| `publisher_id` | leeg | id van de uitgever |
+| `starts_on` | eerste dag | eerste dag |
+| `ends_on` | leeg = een week, of een einddatum | leeg = twee weken, of een einddatum |
+| `text` | 2 of 3 zinnen op de tekstkaart (mag leeg) | idem |
+
+- **Vastzetten:** `ends_on` ver in de toekomst, bv. `2099-12-31`.
+- **Volgorde:** zijn er meerdere rijen tegelijk actief, dan wint de laatst gestarte.
+- **Zonder rij voor vandaag** kiest de site automatisch, en slaat ze titels en uitgevers over die in de laatste acht weken ingepland stonden.
+- **Snelheid:** een nieuwe rij verschijnt binnen vijf minuten op de startpagina.

@@ -77,3 +77,62 @@ export function publisherCountParts(p: PublisherCounts) {
 export function newSeed() {
   return Math.floor(Math.random() * 1e9) + 1;
 }
+
+export type SpotlightKind = "title" | "publisher";
+
+export type SpotlightRow = {
+  id: number;
+  kind: SpotlightKind;
+  work_id: number | null;
+  publisher_id: number | null;
+  /** "YYYY-MM-DD" */
+  starts_on: string;
+  ends_on: string | null;
+  text: string | null;
+};
+
+/** One period: a week for a title, two weeks for a publisher. */
+const PERIOD_DAYS: Record<SpotlightKind, number> = { title: 7, publisher: 14 };
+
+/** "YYYY-MM-DD" in UTC, the format of a date column. */
+export function isoDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function addDays(day: string, days: number) {
+  const d = new Date(`${day}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return isoDate(d);
+}
+
+/**
+ * The planned or pinned spotlight of a kind for `today`: starts_on ≤ today ≤ end, where the end is ends_on
+ * or, without one, the end of a single period. The latest start wins, then the highest id. Null without one.
+ */
+export function activeSpotlight(rows: SpotlightRow[], kind: SpotlightKind, today: string) {
+  const active = rows.filter((r) => {
+    if (r.kind !== kind || r.starts_on > today) return false;
+    const end = r.ends_on ?? addDays(r.starts_on, PERIOD_DAYS[kind] - 1);
+    return today <= end;
+  });
+  active.sort((a, b) => (a.starts_on < b.starts_on ? 1 : a.starts_on > b.starts_on ? -1 : b.id - a.id));
+  return active[0] ?? null;
+}
+
+/** Titles or publishers that were planned in the last `weeks` weeks, so the automatic pick skips them. */
+export function recentlyShown(rows: SpotlightRow[], kind: SpotlightKind, today: string, weeks = 8) {
+  const from = addDays(today, -weeks * 7);
+  return new Set(
+    rows
+      .filter((r) => r.kind === kind && r.starts_on >= from && r.starts_on <= today)
+      .map((r) => (kind === "title" ? r.work_id : r.publisher_id))
+      .filter((id): id is number => id !== null)
+  );
+}
+
+/** Editions of the last three months first, topped up with the newest by id, without duplicates. */
+export function mergeRecent<T extends { id: number }>(recent: T[], newest: T[], min: number) {
+  if (recent.length >= min) return recent;
+  const seen = new Set(recent.map((e) => e.id));
+  return [...recent, ...newest.filter((e) => !seen.has(e.id))];
+}

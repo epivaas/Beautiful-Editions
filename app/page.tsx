@@ -116,6 +116,7 @@ export default async function HomePage({ searchParams }: PageProps) {
               byline={titleSpotlight.work.authors.length ? `by ${titleSpotlight.work.authors.join(", ")}` : null}
               count={`${titleSpotlight.editionCount} ${titleSpotlight.editionCount === 1 ? "edition" : "editions"}`}
               href={`/titles/${titleSpotlight.work.id}`}
+              text={titleSpotlight.text}
               cta="View the title →"
             />
             {titleSpotlight.editions.map((edition) => (
@@ -145,6 +146,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                 </span>
               ))}
               href={`/publishers-series/${publisherSpotlight.publisher.id}`}
+              text={publisherSpotlight.text}
               cta="View the publisher →"
             />
             {publisherSpotlight.editions.map((edition) => (

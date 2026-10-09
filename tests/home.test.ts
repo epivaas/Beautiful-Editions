@@ -1,5 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { periodIndex, pickForPeriod, publisherCountParts, roundedCount, seededShuffle, weekIndex } from '../app/lib/home';
+import {
+  activeSpotlight,
+  isoDate,
+  mergeRecent,
+  periodIndex,
+  pickForPeriod,
+  publisherCountParts,
+  recentlyShown,
+  roundedCount,
+  seededShuffle,
+  weekIndex,
+  type SpotlightRow,
+} from '../app/lib/home';
 
 describe('weekIndex and periodIndex', () => {
   it('counts whole weeks from Monday 1 January 2024, changing on Mondays', () => {
@@ -75,5 +87,59 @@ describe('publisherCountParts', () => {
   it('leaves out limited editions when there are none and uses the singular', () => {
     expect(texts({ titles: 21, editions: 21, limitedEditions: 1 })).toEqual(['21 titles', '1 limited edition']);
     expect(texts({ titles: 1, editions: 1, limitedEditions: 0 })).toEqual(['1 title']);
+  });
+});
+
+function spot(id: number, extra: Partial<SpotlightRow>): SpotlightRow {
+  return { id, kind: 'title', work_id: 1, publisher_id: null, starts_on: '2026-10-05', ends_on: null, text: null, ...extra };
+}
+
+describe('activeSpotlight', () => {
+  it('lasts one period without an end date: a week for a title, two weeks for a publisher', () => {
+    const t = spot(1, { starts_on: '2026-10-05' });
+    expect(activeSpotlight([t], 'title', '2026-10-11')?.id).toBe(1);
+    expect(activeSpotlight([t], 'title', '2026-10-12')).toBeNull();
+    const p = spot(2, { kind: 'publisher', work_id: null, publisher_id: 5, starts_on: '2026-10-05' });
+    expect(activeSpotlight([p], 'publisher', '2026-10-18')?.id).toBe(2);
+    expect(activeSpotlight([p], 'publisher', '2026-10-19')).toBeNull();
+  });
+
+  it('respects ends_on, ignores future rows and other kinds', () => {
+    const pinned = spot(1, { starts_on: '2026-01-01', ends_on: '2099-12-31', text: 'Pinned' });
+    expect(activeSpotlight([pinned], 'title', '2026-10-09')?.text).toBe('Pinned');
+    expect(activeSpotlight([spot(2, { starts_on: '2026-11-01' })], 'title', '2026-10-09')).toBeNull();
+    expect(activeSpotlight([pinned], 'publisher', '2026-10-09')).toBeNull();
+  });
+
+  it('prefers the latest start, then the highest id', () => {
+    const rows = [
+      spot(1, { starts_on: '2026-10-01', ends_on: '2026-12-31' }),
+      spot(2, { starts_on: '2026-10-08', ends_on: '2026-12-31' }),
+      spot(3, { starts_on: '2026-10-08', ends_on: '2026-12-31' }),
+    ];
+    expect(activeSpotlight(rows, 'title', '2026-10-09')?.id).toBe(3);
+  });
+});
+
+describe('recentlyShown', () => {
+  it('collects titles or publishers planned in the last eight weeks', () => {
+    const rows = [
+      spot(1, { work_id: 10, starts_on: '2026-09-01' }),
+      spot(2, { work_id: 11, starts_on: '2026-07-01' }),
+      spot(3, { kind: 'publisher', work_id: null, publisher_id: 5, starts_on: '2026-10-01' }),
+    ];
+    expect([...recentlyShown(rows, 'title', '2026-10-09')]).toEqual([10]);
+    expect([...recentlyShown(rows, 'publisher', '2026-10-09')]).toEqual([5]);
+  });
+});
+
+describe('mergeRecent and isoDate', () => {
+  it('tops up recent editions with the newest by id, without duplicates', () => {
+    expect(mergeRecent([{ id: 9 }], [{ id: 12 }, { id: 9 }, { id: 8 }], 4).map((e) => e.id)).toEqual([9, 12, 8]);
+    expect(mergeRecent([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }], [{ id: 9 }], 4)).toHaveLength(4);
+  });
+
+  it('formats a UTC date', () => {
+    expect(isoDate(new Date(Date.UTC(2026, 9, 9, 23, 30)))).toBe('2026-10-09');
   });
 });
