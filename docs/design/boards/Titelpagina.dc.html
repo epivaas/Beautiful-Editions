@@ -118,7 +118,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #FF6B
       <div style="min-width:90px"><div style="font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Illustrators</div><div style="font-size:14px;line-height:20px;margin-top:3px">{{e.illus}}</div></div>
     </div>
     <div style="{{e.incRow}}"><span style="flex:0 0 76px;font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Includes</span><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="{{e.i1s}}">{{e.i1}}</span><span style="{{e.i2s}}">{{e.i2}}</span><span style="{{e.i3s}}">{{e.i3}}</span></div></div>
-    <div style="{{e.varRow}}"><span style="flex:0 0 76px;font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Variants</span><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="{{e.v1s}}">{{e.v1}}</span><span style="{{e.v2s}}">{{e.v2}}</span><span style="{{e.v3s}}">{{e.v3}}</span></div></div>
+    <div style="{{e.varRow}}"><span style="flex:0 0 76px;font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Limited</span><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="{{e.v1s}}">{{e.v1}}</span><span style="{{e.v2s}}">{{e.v2}}</span><span style="{{e.v3s}}">{{e.v3}}</span></div></div>
+    <div style="{{e.alsoStyle}}"><span style="flex:0 0 76px;font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Also contains</span><span>{{e.also}}</span></div>
     <p style="{{e.noteStyle}}">{{e.note}}</p>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto">
       <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#D2C6AE">{{e.count}}</span>
@@ -178,11 +179,11 @@ class Component extends DCLogic {
     const pool = [img.g, img.a, img.x, img.q, img.o];
     const base = [
       { img: img.a, pub: "Folio Society", name: "Standard edition", year: "1983", binding: "Quarter cloth", pages: "Pp. [1–8] 9–380", inc: "", illus: "Illustrator A", vars: "", prints: 3, photos: 4 },
-      { img: img.o, pub: "Folio Society", name: "Illustrated edition", year: "1996", binding: "Full cloth", pages: "Pp. [1–8] 9–412", inc: "Slipcase", illus: "Illustrator B", vars: "", prints: 3, photos: 7, note: "[Korte nota van twee regels.]" },
+      { img: img.o, pub: "Folio Society", name: "Illustrated edition", year: "1996", binding: "Full cloth", pages: "Pp. [1–8] 9–412", inc: "Slipcase", illus: "Illustrator B", vars: "", prints: 3, photos: 7, also: "Iliad, Homeric Hymns, Batrachomyomachia, +3", note: "[Korte nota van twee regels.]" },
       { img: img.g, pub: "Folio Society", name: "Revised edition", year: "2008", binding: "", pages: "398 pp.", inc: "Slipcase", illus: "Illustrator B", vars: "", prints: 1, photos: 2 },
-      { img: img.q, pub: "Suntup Editions", name: "The Odyssey", year: "2018", binding: "", pages: "Pp. [1–9] 10–388", inc: "Slipcase, Clamshell box, Dust jacket", illus: "Illustrator D, Illustrator F", vars: "Lettered, Numbered, Artist", prints: 2, photos: 18, note: "[Redactionele nota, kan van enkele woorden tot tientallen regels lopen. Hier worden de eerste drie regels getoond en de rest ingekort, zodat elke kaart even hoog blijft. Tekst over het papier, de vertaling, de gravures en eventuele afwijkingen komt hier te staan en loopt door in de volledige nota.]" },
+      { img: img.q, pub: "Suntup Editions", name: "The Odyssey", year: "2018", binding: "", pages: "Pp. [1–9] 10–388", inc: "Slipcase, Clamshell box, Dust jacket", illus: "Illustrator D, Illustrator F", vars: "Lettered · 26, Numbered · 250, Artist · 50", prints: 2, photos: 18, note: "[Redactionele nota, kan van enkele woorden tot tientallen regels lopen. Hier worden de eerste drie regels getoond en de rest ingekort, zodat elke kaart even hoog blijft. Tekst over het papier, de vertaling, de gravures en eventuele afwijkingen komt hier te staan en loopt door in de volledige nota.]" },
       { img: img.x, pub: "Curious King Books", name: "Standard edition", year: "2021", binding: "Full cloth", pages: "412 pp.", inc: "", illus: "Illustrator E", vars: "", prints: 1, photos: 1 },
-      { img: img.o, pub: "Curious King Books", name: "Deluxe edition", year: "2022", binding: "Full leather", pages: "Pp. [1–10] 11–420", inc: "Slipcase, Dust jacket", illus: "Illustrator E, Illustrator G", vars: "Deluxe, Collector", prints: 1, photos: 9 }
+      { img: img.o, pub: "Curious King Books", name: "Deluxe edition", year: "2022", binding: "Full leather", pages: "Pp. [1–10] 11–420", inc: "Slipcase, Dust jacket", illus: "Illustrator E, Illustrator G", vars: "Deluxe · 100, Collector · 25", prints: 1, photos: 9 }
     ];
     const none = "display:none";
     const chipC = "display:inline-flex;align-items:center;min-height:28px;padding:0 11px;background:#5C5147;border-radius:6px;font-size:13px;font-weight:600";
@@ -202,6 +203,8 @@ class Component extends DCLogic {
       o.incRow = incs.length ? rowFlex : none; o.gIncRow = incs.length ? "display:flex;flex-wrap:wrap;gap:4px" : none;
       o.varRow = vs.length ? rowFlex : none;
       o.note = e.note || "";
+      o.also = e.also || "";
+      o.alsoStyle = e.also ? "display:flex;gap:14px;align-items:baseline;font-size:14px;line-height:20px" : none;
       o.noteStyle = e.note ? "margin:0;font-size:15px;line-height:23px;color:#D2C6AE;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden" : none;
       o.bindBox = e.binding ? "min-width:90px" : none;
       o.yearBinding = e.binding ? e.year + " · " + e.binding : e.year;
@@ -213,7 +216,7 @@ class Component extends DCLogic {
       const extra = e.photos - 1 - nT;
       o.more = extra > 0 ? "+" + extra : "";
       o.moreStyle = extra > 0 ? "box-sizing:border-box;flex:1 1 0;height:78px;background:#5C5147;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500" : none;
-      o.count = [].concat(vs.length ? [vs.length + (vs.length === 1 ? " variant" : " variants")] : [], e.prints ? [e.prints + (e.prints === 1 ? " printing" : " printings")] : [], [e.photos + (e.photos === 1 ? " photo" : " photos")]).join(" · ");
+      o.count = [].concat(vs.length ? [vs.length + (vs.length === 1 ? " limited edition" : " limited editions")] : [], e.prints ? [e.prints + (e.prints === 1 ? " printing" : " printings")] : [], [e.photos + (e.photos === 1 ? " photo" : " photos")]).join(" · ");
       return o;
     };
     const all = base.map(enrich);
