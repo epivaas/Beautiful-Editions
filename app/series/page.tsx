@@ -46,7 +46,7 @@ function columns(q: string | null): Column<SeriesListRow>[] {
     width: "26%",
     render: (row) =>
       row.publisher && (
-        <Link href={`/publishers-series/${row.publisher.id}`} className={`${CELL_LINK} text-sm text-amber hover:underline`}>
+        <Link href={`/publishers/${row.publisher.id}`} className={`${CELL_LINK} text-sm text-amber hover:underline`}>
           <Highlight text={row.publisher.name} q={q} />
         </Link>
       ),

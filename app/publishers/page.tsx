@@ -27,7 +27,7 @@ const COLUMNS: Column<PublisherListRow>[] = [
     sortKey: "name",
     render: (row) => (
       <Link
-        href={`/publishers-series/${row.id}`}
+        href={`/publishers/${row.id}`}
         className={`${ROW_TITLE} block py-2 text-2xl font-extrabold leading-7 tracking-[-0.02em]`}
       >
         {row.name}

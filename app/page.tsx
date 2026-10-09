@@ -146,7 +146,7 @@ export default async function HomePage({ searchParams }: PageProps) {
                   {part.text.slice(part.value.toLocaleString("en-US").length)}
                 </span>
               ))}
-              href={`/publishers-series/${publisherSpotlight.publisher.id}`}
+              href={`/publishers/${publisherSpotlight.publisher.id}`}
               text={publisherSpotlight.text}
               cta="View the publisher →"
             />

@@ -185,7 +185,7 @@ export default async function AuthorPage({ params, searchParams }: PageProps) {
                 {perPublisher.map((p) => (
                   <li key={p.id} className="flex items-center gap-3">
                     <Link
-                      href={`/publishers-series/${p.id}`}
+                      href={`/publishers/${p.id}`}
                       className="inline-flex min-h-11 w-[150px] shrink-0 items-center text-sm text-amber hover:underline sm:min-h-8"
                     >
                       {p.name}

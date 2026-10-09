@@ -1,4 +1,4 @@
-// Pure helpers for the publisher page (/publishers-series/[id]): titles grouped per publication year.
+// Pure helpers for the publisher page (/publishers/[id]): titles grouped per publication year.
 // No Supabase import, so they can be unit tested.
 import { firstLetter, LETTERS } from "./overview";
 

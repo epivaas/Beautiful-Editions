@@ -80,7 +80,7 @@ export default async function SeriesPage({ params }: PageProps) {
           {series.publisher && (
             <>
               <span aria-hidden="true">/</span>
-              <TextLink href={`/publishers-series/${series.publisher.id}`} standalone>
+              <TextLink href={`/publishers/${series.publisher.id}`} standalone>
                 {publisherName}
               </TextLink>
             </>

@@ -82,7 +82,7 @@ function publisherColumns(q: string): Column<PublisherWithLimited>[] {
       key: "name",
       label: "Publisher",
       render: (row) => (
-        <Link href={`/publishers-series/${row.id}`} className={`${CELL_LINK} ${ROW_TITLE} font-bold`}>
+        <Link href={`/publishers/${row.id}`} className={`${CELL_LINK} ${ROW_TITLE} font-bold`}>
           <span>
             <Highlight text={row.name} q={q} />
           </span>

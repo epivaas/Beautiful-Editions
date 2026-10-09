@@ -5,11 +5,10 @@ export type NavItem = {
   match: string[];
 };
 
-// Publisher and series detail pages still live under /publishers-series until they are restyled.
 export const NAV: NavItem[] = [
   { label: "Titles", href: "/titles", match: ["/titles", "/edition", "/sub-editions"] },
   { label: "Authors", href: "/author", match: ["/author"] },
-  { label: "Publishers", href: "/publishers", match: ["/publishers", "/publishers-series"] },
+  { label: "Publishers", href: "/publishers", match: ["/publishers"] },
   { label: "Series", href: "/series", match: ["/series"] },
   { label: "About", href: "/about", match: ["/about"] },
 ];

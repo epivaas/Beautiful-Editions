@@ -65,7 +65,7 @@ export default function HeaderSearch({ className = "", autoFocus = false }: Head
             ...results.titles.items.map((t) => ({ key: `t${t.id}`, href: `/titles/${t.id}`, group: "Titles" as const })),
             ...results.publishers.items.map((p) => ({
               key: `p${p.id}`,
-              href: `/publishers-series/${p.id}`,
+              href: `/publishers/${p.id}`,
               group: "Publishers" as const,
             })),
           ]
@@ -214,7 +214,7 @@ export default function HeaderSearch({ className = "", autoFocus = false }: Head
           {results.publishers.items.map((p) => (
             <Link
               key={p.id}
-              href={`/publishers-series/${p.id}`}
+              href={`/publishers/${p.id}`}
               tabIndex={-1}
               onClick={() => setOpen(false)}
               {...optionProps(`p${p.id}`)}

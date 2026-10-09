@@ -81,7 +81,7 @@ Bestaande routes staan tussen haakjes. Elk bord in `boards/` hoort bij een pagin
 | Editiepagina (details en printings) | `/edition/[id]` | Titel- en editiepagina |
 | Pagina van een limited edition (lettered, numbered, artist; intern "variantpagina") | `/sub-editions/[id]` | Variantpagina |
 | Authors, auteurspagina | `/author`, `/author/[id]` | Overzichtspagina's, Auteur en reeks |
-| Publishers, Series | `/publishers`, `/series`; uitgever `/publishers-series/[id]`, reeks `/series/[id]` | Overzichtspagina's, Auteur en reeks |
+| Publishers, Series | `/publishers`, `/series`; uitgever `/publishers/[id]`, reeks `/series/[id]` (`/publishers-series/[id]` stuurt door) | Overzichtspagina's, Auteur en reeks |
 | Zoeken, gedetailleerd zoeken | `/titles/search` | Menu en zoeken |
 | About, FAQ, lege toestanden, 404 | nieuw (`app/not-found.tsx` bestaat) | About en randgevallen |
 | Foto's: strook, alle foto's, lightbox | nieuw | Foto's bekijken |

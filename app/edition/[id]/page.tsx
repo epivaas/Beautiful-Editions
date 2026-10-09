@@ -153,7 +153,7 @@ export default async function EditionPage({ params, searchParams }: PageProps) {
               {
                 label: "Publisher",
                 value: edition.publisher && (
-                  <Link href={`/publishers-series/${edition.publisher.id}`} className={FACT_LINK}>
+                  <Link href={`/publishers/${edition.publisher.id}`} className={FACT_LINK}>
                     {publisherName}
                   </Link>
                 ),

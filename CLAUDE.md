@@ -10,7 +10,7 @@ Naslagwerk en koperstool voor mooi geïllustreerde boekedities (Folio Society, C
 - Next.js 16 (App Router, TypeScript, server components waar mogelijk), React 19, Tailwind CSS 4, Supabase (`@supabase/supabase-js`, client in `utils/supabase.ts`), Vitest. Gedeployed op Vercel.
 - `npm run dev`, `npm run build`, `npm run lint`, `npm test`.
 - Lees `.env.local` nooit voor en toon of commit die niet. Bewerk de database of het schema nooit zonder het eerst te bespreken.
-- Let op: `app/components/SearchBox.tsx` en `components/SearchBox.tsx` bestaan beide, `app/edities/` is leeg, en `app/globals.css` gebruikt nog Tailwind v3-directives (`@tailwind base`). Ruim dat op bij de migratie naar `@import "tailwindcss"` en `@theme` (zie `docs/design/tokens.css`).
+- Routes: `/titles/[id]` (titel), `/titles/[id]/photos`, `/edition/[id]`, `/sub-editions/[id]` (limited edition), `/author/[id]`, `/publishers/[id]`, `/series/[id]`, zoeken op `/titles/search`. `/publishers-series/[id]` stuurt alleen nog door.
 
 ## De nieuwe stijl
 De volledige gids staat in `docs/design/DESIGN.md`; tokens in `docs/design/tokens.css`; logo's in `docs/design/logo/`; de borden (markup met de exacte waarden) in `docs/design/boards/`. **Lees DESIGN.md voor je aan een pagina of component begint.** De korte regels:

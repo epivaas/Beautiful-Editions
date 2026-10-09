@@ -3,6 +3,8 @@ import { getEditionIndex } from "@/app/lib/searchQueries";
 import { parseCriteria, suggestFor, type SuggestField } from "@/app/lib/search";
 
 const FIELDS: SuggestField[] = ["author", "illustrator", "binding"];
+// The edition index is cached for an hour on the server; the browser may keep an answer for 5 minutes
+const CACHE = { "Cache-Control": "public, max-age=300" };
 
 /**
  * Suggestions for the text fields of the detailed search, limited to the editions that meet the other
@@ -13,5 +15,5 @@ export async function GET(request: Request) {
   const field = params.field as SuggestField | undefined;
   if (!field || !FIELDS.includes(field)) return NextResponse.json([], { status: 400 });
   const index = await getEditionIndex();
-  return NextResponse.json(suggestFor(index, parseCriteria(params), field, params.q ?? ""));
+  return NextResponse.json(suggestFor(index, parseCriteria(params), field, params.q ?? ""), { headers: CACHE });
 }
