@@ -12,18 +12,19 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
 <style>body{margin:0}a{color:#FFB627}</style>
 </helmet>
-<div style="width: 1280px; min-height: 5600px; box-sizing: border-box; padding: 72px 80px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif; display: flex; flex-direction: column; gap: 64px">
+<div style="width: 1280px; min-height: 7350px; box-sizing: border-box; padding: 72px 80px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif; display: flex; flex-direction: column; gap: 64px">
 
   <header style="display: flex; flex-direction: column; gap: 20px; max-width: 900px">
     <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Shelfhound · Designgids v0.3 · deel 4</div>
     <h1 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.03em">Overzichtspagina's</h1>
-    <p style="margin: 0; font-size: 19px; line-height: 29px; color: #D2C6AE">Vijf lijsten zonder zijbalk, allemaal als tabel: Publishers, Series, Titles, Authors en de titels van één uitgever. Er is hier geen foto nodig, dus de rijen zijn compact en snel te scannen. Cijfers, titels en uitgevers zijn voorbeeldgegevens.</p>
+    <p style="margin: 0; font-size: 19px; line-height: 29px; color: #D2C6AE">Vijf lijsten zonder zijbalk, allemaal onder een gele band en als tabel: Publishers, Series, Titles, Authors en de titels van één uitgever. Er is hier geen foto nodig, dus de rijen zijn compact en snel te scannen. Cijfers, titels en uitgevers zijn voorbeeldgegevens.</p>
   </header>
 
   <div style="display: flex; gap: 32px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 24px 28px; font-size: 14px; line-height: 21px">
     <div style="flex: 0 0 160px; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #FFB627; padding-top: 2px">Eén tabelstijl</div>
     <div style="flex: 1 1 0"><strong style="font-weight: 700">Kop</strong><br><span style="color: #D2C6AE">Donkere rij, labels in kleine hoofdletters. De gesorteerde kolom heeft een Amber pijltje.</span></div>
     <div style="flex: 1 1 0"><strong style="font-weight: 700">Rij</strong><br><span style="color: #D2C6AE">44 px hoog, haarlijn ertussen, geen zebra. De titel is de link, getallen staan in Plex Mono rechts uitgelijnd. Bij hover krijgt de rij #52483F en de titel een Amber onderlijn van 2 px (op de tweede rij hieronder: "The Obelisk Gate").</span></div>
+    <div style="flex: 1 1 0"><strong style="font-weight: 700">Gele band</strong><br><span style="color: #D2C6AE">Elke lijst opent met een compacte gele band (± 180 px, 220 px met chip, tegen ruim 300 px op detailpagina's): naam groot, één zin uitleg, en rechts het Gloed-blok met alleen het aantal. Geen tweede getal, geen tellertje boven de lijst.</span></div>
     <div style="flex: 1 1 0"><strong style="font-weight: 700">Lange lijsten</strong><br><span style="color: #D2C6AE">Gepagineerd met een stabiele URL per pagina. Boven de tabel staat een filterveld dat alleen in déze lijst zoekt (anders dan het zoekveld in de kop), en bij titels en auteurs de A tot Z-balk.</span></div>
   </div>
 
@@ -40,9 +41,16 @@
         <div style="margin-left: auto; width: 300px; box-sizing: border-box; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #3B332C; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span style="flex: 1 1 auto">Search</span><span style="font-size: 12px; font-weight: 600; color: #FFB627">Detailed</span></div>
       </div>
       <div style="padding: 32px 32px 40px; display: flex; flex-direction: column; gap: 24px">
-        <div style="display: flex; align-items: baseline; justify-content: space-between">
-          <h2 style="margin: 0; font-weight: 800; font-size: 48px; line-height: 52px; letter-spacing: -0.03em">Publishers</h2>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">4 publishers</span>
+        <div style="display: flex; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+          <div style="flex: 1 1 0; min-width: 0; padding: 32px 36px 36px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px">
+            
+            <h2 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.035em">Publishers</h2>
+            <div style="font-size: 18px; line-height: 26px; font-weight: 500">The houses that publish the editions.</div>
+          </div>
+          <div style="flex: 0 0 280px; background: #FF6B3D; padding: 28px 28px 30px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px">
+            <div style="font-weight: 800; font-size: 80px; line-height: 1; letter-spacing: -0.04em">4</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">publishers</div>
+          </div>
         </div>
         <div style="background: #473E36; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden">
           <div style="display: grid; grid-template-columns: minmax(0, 2.4fr) 110px 110px 170px; gap: 16px; padding: 10px 24px; background: #2A241F; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">
@@ -74,9 +82,16 @@
         <div style="margin-left: auto; width: 300px; box-sizing: border-box; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #3B332C; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span style="flex: 1 1 auto">Search</span><span style="font-size: 12px; font-weight: 600; color: #FFB627">Detailed</span></div>
       </div>
       <div style="padding: 32px 32px 40px; display: flex; flex-direction: column; gap: 24px">
-        <div style="display: flex; align-items: baseline; justify-content: space-between">
-          <h2 style="margin: 0; font-weight: 800; font-size: 48px; line-height: 52px; letter-spacing: -0.03em">Series</h2>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">5 series</span>
+        <div style="display: flex; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+          <div style="flex: 1 1 0; min-width: 0; padding: 32px 36px 36px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px">
+            
+            <h2 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.035em">Series</h2>
+            <div style="font-size: 18px; line-height: 26px; font-weight: 500">Publisher series, in order of publication.</div>
+          </div>
+          <div style="flex: 0 0 280px; background: #FF6B3D; padding: 28px 28px 30px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px">
+            <div style="font-weight: 800; font-size: 80px; line-height: 1; letter-spacing: -0.04em">5</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">series</div>
+          </div>
         </div>
         <div style="box-sizing: border-box; width: 320px; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px; background: #473E36; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span>Filter this list</span></div>
         <div style="background: #473E36; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden">
@@ -109,9 +124,16 @@
         <div style="margin-left: auto; width: 300px; box-sizing: border-box; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #3B332C; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span style="flex: 1 1 auto">Search</span><span style="font-size: 12px; font-weight: 600; color: #FFB627">Detailed</span></div>
       </div>
       <div style="padding: 32px 32px 40px; display: flex; flex-direction: column; gap: 20px">
-        <div style="display: flex; align-items: baseline; justify-content: space-between">
-          <h2 style="margin: 0; font-weight: 800; font-size: 48px; line-height: 52px; letter-spacing: -0.03em">Titles</h2>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">2,134 titles</span>
+        <div style="display: flex; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+          <div style="flex: 1 1 0; min-width: 0; padding: 32px 36px 36px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px">
+            
+            <h2 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.035em">Titles</h2>
+            <div style="font-size: 18px; line-height: 26px; font-weight: 500">Every work on the shelf, under its original title.</div>
+          </div>
+          <div style="flex: 0 0 280px; background: #FF6B3D; padding: 28px 28px 30px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px">
+            <div style="font-weight: 800; font-size: 80px; line-height: 1; letter-spacing: -0.04em">2,134</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">titles</div>
+          </div>
         </div>
         <nav aria-label="A tot Z" style="display: flex; flex-wrap: wrap; gap: 2px"><sc-for list="{{letters}}" as="l" hint-placeholder-count="26"><a href="#" style="{{l.style}}">{{l.l}}</a></sc-for></nav>
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px">
@@ -155,9 +177,16 @@
         <div style="margin-left: auto; width: 300px; box-sizing: border-box; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #3B332C; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span style="flex: 1 1 auto">Search</span><span style="font-size: 12px; font-weight: 600; color: #FFB627">Detailed</span></div>
       </div>
       <div style="padding: 32px 32px 40px; display: flex; flex-direction: column; gap: 20px">
-        <div style="display: flex; align-items: baseline; justify-content: space-between">
-          <h2 style="margin: 0; font-weight: 800; font-size: 48px; line-height: 52px; letter-spacing: -0.03em">Authors</h2>
-          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">1,046 authors</span>
+        <div style="display: flex; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+          <div style="flex: 1 1 0; min-width: 0; padding: 32px 36px 36px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px">
+            
+            <h2 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.035em">Authors</h2>
+            <div style="font-size: 18px; line-height: 26px; font-weight: 500">The people behind the works, from A to Z.</div>
+          </div>
+          <div style="flex: 0 0 280px; background: #FF6B3D; padding: 28px 28px 30px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px">
+            <div style="font-weight: 800; font-size: 80px; line-height: 1; letter-spacing: -0.04em">1,046</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">authors</div>
+          </div>
         </div>
         <nav aria-label="A tot Z" style="display: flex; flex-wrap: wrap; gap: 2px"><sc-for list="{{letters}}" as="l" hint-placeholder-count="26"><a href="#" style="{{l.style}}">{{l.l}}</a></sc-for></nav>
         <div style="box-sizing: border-box; width: 320px; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px; background: #473E36; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span>Filter this list</span></div>
@@ -188,12 +217,16 @@
       </div>
       <div style="padding: 24px 32px 40px; display: flex; flex-direction: column; gap: 22px">
         <nav style="font-size: 14px; color: #D2C6AE; display: flex; gap: 8px"><a href="#">Publishers</a><span aria-hidden="true">/</span><span>Folio Society</span></nav>
-        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 24px">
-          <div style="display: flex; flex-direction: column; gap: 8px">
-            <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #FFB627">Publisher</div>
-            <h2 style="margin: 0; font-weight: 800; font-size: 64px; line-height: 64px; letter-spacing: -0.035em">Folio Society</h2>
+        <div style="display: flex; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+          <div style="flex: 1 1 0; min-width: 0; padding: 32px 36px 36px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px">
+            <div><span style="display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; background: #1B1612; color: #FFB627; border-radius: 6px; font-weight: 800; font-size: 16px; letter-spacing: -0.01em">Publisher</span></div>
+            <h2 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.035em">Folio Society</h2>
+            <div style="font-size: 18px; line-height: 26px; font-weight: 500">Publisher · 1947 to now</div>
           </div>
-          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; line-height: 22px; text-align: right; color: #D2C6AE">2,314 titles<br>3,102 editions<br>1947 to 2026</div>
+          <div style="flex: 0 0 280px; background: #FF6B3D; padding: 28px 28px 30px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px">
+            <div style="font-weight: 800; font-size: 80px; line-height: 1; letter-spacing: -0.04em">2,314</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">titles</div>
+          </div>
         </div>
 
         <div style="background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 18px 20px 14px">
@@ -232,17 +265,82 @@
           </div>
           </sc-for>
         </div>
-        <div style="font-size: 13px; line-height: 19px; color: #D2C6AE">Elke balk is één jaar. Een klik springt naar dat jaar in de tabel (de jaarkop krijgt dezelfde Gloed-stip), slepen over meerdere balken filtert op die periode. Het geselecteerde jaar is Gloed, de rest Amber. Een jaarkop blijft bovenaan plakken tijdens het scrollen.</div>
+        <div style="font-size: 13px; line-height: 19px; color: #D2C6AE">Elke balk is één jaar. Een klik springt naar dat jaar in de tabel (de jaarkop krijgt een Gloed-rand), slepen over meerdere balken filtert op die periode. Het geselecteerde jaar is Gloed, de rest Amber. Een jaarkop blijft bovenaan plakken tijdens het scrollen.</div>
       </div>
     </div>
   </section>
 
-  <!-- ===== TITLES OF A PUBLISHER ===== -->
-  
+  <!-- ===== TITLES OF A PUBLISHER: FEW YEARS ===== -->
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 24px">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: #FFB627">Titles van een publisher · weinig jaren</div>
+      <div style="font-size: 14px; color: #D2C6AE; max-width: 640px; text-align: right">Suntup Editions publiceert pas sinds 2013. De jaarbalk blijft dan even compact als hij is: elke balk heeft een vaste breedte en de kaart krimpt mee.</div>
+    </div>
+    <div style="border: 1px solid #5C5147; border-radius: 10px; overflow: hidden; background: #3B332C">
+      <div style="display: flex; align-items: center; gap: 28px; padding: 14px 28px; background: #2A241F; border-bottom: 1px solid #5C5147">
+        <span style="font-weight: 800; font-size: 22px; letter-spacing: -0.04em">Shelf<span style="color: #FFB627">hound</span></span>
+        <nav style="display: flex; gap: 22px; font-size: 14px"><sc-for list="{{navPublishers}}" as="n" hint-placeholder-count="5"><a href="#" style="{{n.style}}">{{n.l}}</a></sc-for></nav>
+        <div style="margin-left: auto; width: 300px; box-sizing: border-box; height: 40px; display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #3B332C; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span style="flex: 1 1 auto">Search</span><span style="font-size: 12px; font-weight: 600; color: #FFB627">Detailed</span></div>
+      </div>
+      <div style="padding: 24px 32px 40px; display: flex; flex-direction: column; gap: 22px">
+        <nav style="font-size: 14px; color: #D2C6AE; display: flex; gap: 8px"><a href="#">Publishers</a><span aria-hidden="true">/</span><span>Suntup Editions</span></nav>
+        <div style="display: flex; align-items: stretch; background: #FFB627; color: #1B1612; border-radius: 8px; overflow: hidden">
+          <div style="flex: 1 1 0; min-width: 0; padding: 32px 36px 36px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px">
+            <div><span style="display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; background: #1B1612; color: #FFB627; border-radius: 6px; font-weight: 800; font-size: 16px; letter-spacing: -0.01em">Publisher</span></div>
+            <h2 style="margin: 0; font-weight: 800; font-size: 72px; line-height: 72px; letter-spacing: -0.035em">Suntup Editions</h2>
+            <div style="font-size: 18px; line-height: 26px; font-weight: 500">Publisher · 2013 to now</div>
+          </div>
+          <div style="flex: 0 0 280px; background: #FF6B3D; padding: 28px 28px 30px; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px">
+            <div style="font-weight: 800; font-size: 80px; line-height: 1; letter-spacing: -0.04em">134</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase">titles</div>
+          </div>
+        </div>
+
+        <div style="align-self: flex-start; box-sizing: border-box; min-width: 480px; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; padding: 18px 20px 14px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 32px; margin-bottom: 12px">
+            <span style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">Titles per publication year</span>
+            <span style="font-size: 13px; color: #D2C6AE">Selected: 2024 · 9 titles</span>
+          </div>
+          <div style="display: flex; align-items: flex-end; gap: 4px; height: 90px">
+            <sc-for list="{{bars2}}" as="b" hint-placeholder-count="14"><div style="{{b.style}}"></div></sc-for>
+          </div>
+          <div style="position: relative; height: 22px; margin-top: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #D2C6AE">
+            <sc-for list="{{ticks2}}" as="k" hint-placeholder-count="7"><span style="{{k.style}}">{{k.l}}</span></sc-for>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px">
+          <div style="box-sizing: border-box; width: 320px; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px; background: #473E36; border: 1px solid #5C5147; border-radius: 6px; color: #D2C6AE; font-size: 15px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D2C6AE" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg><span>Filter this list</span></div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <span style="display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 10px 0 12px; background: #5C5147; border-radius: 6px; font-size: 14px">Jumped to 2024 <span aria-hidden="true" style="font-size: 16px">×</span></span>
+            <span style="font-size: 13px; color: #D2C6AE">Group by</span>
+            <span style="display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid #F5ECD7; border-radius: 6px; font-size: 14px; font-weight: 600">Year ▾</span>
+          </div>
+        </div>
+
+
+        <div style="background: #473E36; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden">
+          <div style="display: grid; grid-template-columns: 88px minmax(0, 2.4fr) minmax(0, 1.6fr) minmax(0, 1.4fr) 80px; gap: 16px; padding: 10px 20px; background: #2A241F; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">
+            <span>Year <span style="color: #FFB627">▲</span></span><span>Title</span><span>Author</span><span>Illustrator</span><span style="text-align: right">Editions</span>
+          </div>
+          <sc-for list="{{pubRows2}}" as="r" hint-placeholder-count="14">
+          <div style="{{r.sRow}}">
+            <span style="{{r.s1}}">{{r.c1}}</span>
+            <span style="{{r.s2}}">{{r.c2}}</span>
+            <span style="{{r.s3}}">{{r.c3}}</span>
+            <span style="{{r.s4}}">{{r.c4}}</span>
+            <span style="{{r.s5}}">{{r.c5}}</span>
+          </div>
+          </sc-for>
+        </div>
+        <div style="font-size: 13px; line-height: 19px; color: #D2C6AE; max-width: 820px">Regel voor de jaarbalk: elke balk is 20 px breed met 4 px ertussen. De kaart is zo breed als de balken nodig hebben, met een minimum van 480 px zodat de kop en "Selected" erin passen, en staat links uitgelijnd. Bij ongeveer 50 jaar of meer is dat de volle breedte (zoals bij de Folio Society) en worden de balken smaller. Staan er minder dan vijf jaren in, dan komt er geen jaarbalk: de jaarkoppen in de tabel zijn dan genoeg. Jaarlabels staan bij elk jaar als er plaats voor is, anders om de twee of vijf jaar.</div>
+      </div>
+    </div>
+  </section>
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":5600}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":7350}}'>
 class Component extends DCLogic {
   renderVals() {
     const items = ["Titles", "Authors", "Publishers", "Series", "About"];
@@ -308,7 +406,7 @@ class Component extends DCLogic {
     const pb = "min-width:36px;height:36px;padding:0 8px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;font-size:14px;font-weight:600;text-decoration:none;";
     const pages = [
       { l: "‹", style: pb + "color:#A89C86;" },
-      { l: "1", style: pb + "background:#FF6B3D;color:#1B1612;" },
+      { l: "1", style: pb + "background:#FFB627;color:#1B1612;" },
       { l: "2", style: pb + "color:#F5ECD7;" },
       { l: "3", style: pb + "color:#F5ECD7;" },
       { l: "…", style: pb + "color:#D2C6AE;" },
@@ -329,8 +427,8 @@ class Component extends DCLogic {
     }));
 
     const g = (n) => ({
-      sRow: "display:grid;grid-template-columns:88px minmax(0,2.4fr) minmax(0,1.6fr) minmax(0,1.4fr) 80px;gap:16px;align-items:center;padding:0 20px;min-height:44px;border-top:1px solid #5C5147;background:" + (n.year === "1998" ? "#52483F" : "#2A241F"),
-      s1: "font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:#FFB627;" + (n.year === "1998" ? "border-left:4px solid #FF6B3D;margin-left:-20px;padding-left:16px" : ""),
+      sRow: "display:grid;grid-template-columns:88px minmax(0,2.4fr) minmax(0,1.6fr) minmax(0,1.4fr) 80px;gap:16px;align-items:center;padding:0 20px;min-height:44px;border-top:1px solid #5C5147;background:" + ((n.year === "1998" || n.year === "2024") ? "#52483F" : "#2A241F"),
+      s1: "font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500;color:#FFB627;" + ((n.year === "1998" || n.year === "2024") ? "border-left:4px solid #FF6B3D;margin-left:-20px;padding-left:16px" : ""),
       s2: "font-size:13px;color:#D2C6AE;grid-column:span 4",
       s3: "display:none", s4: "display:none", s5: "display:none",
       c1: n.year, c2: n.count + " titles", c3: "", c4: "", c5: ""
@@ -358,9 +456,28 @@ class Component extends DCLogic {
       r("The Odyssey", "Homer", "Illustrator A", "3")
     ];
 
+    const yrs2 = [3, 5, 4, 6, 8, 5, 7, 9, 6, 8, 7, 9, 4, 5];
+    const bars2 = yrs2.map((c, i) => {
+      const yr = 2013 + i;
+      return { style: "flex:0 0 20px;height:" + Math.round(18 + c * 8) + "px;background:" + (yr === 2024 ? "#FF6B3D" : "#FFB627") + ";border-radius:2px 2px 0 0" };
+    });
+    const ticks2 = [];
+    for (let i = 0; i < 14; i += 2) ticks2.push({ l: String(2013 + i), style: "position:absolute;top:0;transform:translateX(-50%);left:" + (i * 24 + 10) + "px" });
+    const pubRows2 = [
+      g({ year: "2026", count: 6 }),
+      r("The Left Hand of Darkness", "Ursula K. Le Guin", "Illustrator G", "1"),
+      r("Dune", "Frank Herbert", "Illustrator H", "2"),
+      g({ year: "2025", count: 8 }),
+      r("Legend", "David Gemmell", "Illustrator I", "1"),
+      r("Hyperion", "Dan Simmons", "Illustrator J", "1"),
+      g({ year: "2024", count: 9 }),
+      r("The Obelisk Gate", "N. K. Jemisin", "Illustrator K", "2"),
+      r("Neuromancer", "William Gibson", "Illustrator L", "1")
+    ];
+
     return {
       navTitles: nav("Titles"), navAuthors: nav("Authors"), navPublishers: nav("Publishers"), navSeries: nav("Series"),
-      letters, publishers, series, titles, authors, pages, bars, ticks, pubRows
+      letters, publishers, series, titles, authors, pages, bars, ticks, pubRows, bars2, ticks2, pubRows2
     };
   }
 }

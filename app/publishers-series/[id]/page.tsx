@@ -1,45 +1,33 @@
-import { supabase } from "@/utils/supabase";
+import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import Link from "next/link";
-import { fetchAllRows, fetchAllRowsInChunks } from "@/utils/supabasePagination";
+import { supabase } from "@/utils/supabase";
 import { getPublisherList } from "@/app/lib/overviewQueries";
-import { activeSpan } from "@/app/lib/overview";
+import { getPublisherTitles } from "@/app/lib/publisherPageQuery";
+import { groupPage, pageOfYear, publisherTitleRows, sortTitleRows, yearCounts } from "@/app/lib/publisherPage";
+import { activeSpan, matchesFilter, overviewHref, paginate } from "@/app/lib/overview";
 import ListBand from "@/components/ListBand";
+import ListFilter from "@/components/ListFilter";
+import YearBars from "@/components/YearBars";
+import YearGroupedList from "@/components/YearGroupedList";
+import Pagination from "@/components/Pagination";
+import { ActiveFilter } from "@/components/Chip";
 import { TextLink } from "@/components/Button";
 
-interface WorkSummary {
-  id: number;
-  original_title: string;
-  english_title: string | null;
-}
+const PAGE_SIZE = 50;
 
-interface EditionWithWorks {
-  id: number;
-  publication_year: number | null;
-  works: WorkSummary[];
-}
+type PageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ kind?: string; q?: string; year?: string; dir?: string; page?: string }>;
+};
 
-interface GroupedYear {
-  year: string;
-  works: Array<{
-    edition_id: number;
-    original_title: string;
-    english_title: string | null;
-  }>;
+function parseId(value: string | undefined) {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
 }
 
 async function getPublisher(id: number) {
-  const { data, error } = await supabase
-    .from("publishers")
-    .select("id, name")
-    .eq("id", id)
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return data;
+  const { data } = await supabase.from("publishers").select("id, name").eq("id", id).maybeSingle();
+  return data as { id: number; name: string } | null;
 }
 
 /** Only whether a series exists: old links to a series used this route. */
@@ -48,189 +36,119 @@ async function seriesExists(id: number) {
   return data !== null;
 }
 
-async function getEditionsForPublisher(publisherId: number): Promise<EditionWithWorks[]> {
-  const { data: editionsData, error: editionsError } = await fetchAllRows(() =>
-    supabase
-      .from("editions")
-      .select("id, publication_year")
-      .eq("publisher_id", publisherId)
-      .order("publication_year", { ascending: false })
-      // Unique tiebreaker so pagination never skips or repeats rows
-      .order("id", { ascending: true })
-  );
-
-  if (editionsError) {
-    console.error("Error fetching publisher editions:", editionsError);
-    return [];
-  }
-
-  const editionIds = (editionsData || []).map((edition) => edition.id).filter(Boolean);
-
-  if (editionIds.length === 0) {
-    return [];
-  }
-
-  const { data: linksData, error: linksError } = await fetchAllRowsInChunks(
-    editionIds,
-    (editionIdChunk) => supabase
-      .from("work_editions")
-      .select("edition_id, work_id")
-      .in("edition_id", editionIdChunk)
-  );
-
-  if (linksError) {
-    console.error("Error fetching publisher work links:", linksError);
-    return [];
-  }
-
-  const workIds = Array.from(new Set((linksData || []).map((link) => link.work_id).filter(Boolean)));
-  let worksById: Record<number, WorkSummary> = {};
-
-  if (workIds.length > 0) {
-    const { data: worksData, error: worksError } = await fetchAllRowsInChunks(
-      workIds,
-      (workIdChunk) => supabase
-        .from("works")
-        .select("id, original_title, english_title")
-        .in("id", workIdChunk)
-    );
-
-    if (worksError) {
-      console.error("Error fetching publisher works:", worksError);
-    } else {
-      worksById = Object.fromEntries((worksData || []).map((work) => [work.id, work]));
-    }
-  }
-
-  return (editionsData || []).map((edition) => ({
-    id: edition.id,
-    publication_year: edition.publication_year,
-    works: (linksData || [])
-      .filter((link) => link.edition_id === edition.id)
-      .map((link) => worksById[link.work_id])
-      .filter(Boolean),
-  }));
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const id = parseId((await params).id);
+  const publisher = id ? await getPublisher(id) : null;
+  return { title: publisher ? `${publisher.name.trim()} · Shelfhound` : "Publisher · Shelfhound" };
 }
 
-function groupByYear(editions: EditionWithWorks[]): GroupedYear[] {
-  const grouped = new Map<string, Array<{ edition_id: number; original_title: string; english_title: string | null }>>();
-
-  editions.forEach((edition) => {
-    const year = edition.publication_year ? String(edition.publication_year) : "Unknown";
-
-    if (!grouped.has(year)) {
-      grouped.set(year, []);
-    }
-
-    const existingWorks = grouped.get(year) || [];
-    edition.works.forEach((work) => {
-      existingWorks.push({
-        edition_id: edition.id,
-        original_title: work.original_title,
-        english_title: work.english_title,
-      });
-    });
-  });
-
-  return Array.from(grouped.entries())
-    .map(([year, works]) => ({ year, works }))
-    .sort((a, b) => {
-      if (a.year === "Unknown") return 1;
-      if (b.year === "Unknown") return -1;
-      return Number(a.year) - Number(b.year);
-    });
-}
-
-export default async function PublisherSeriesDetailPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ id: string }> | { id: string };
-  searchParams: Promise<{ kind?: string }>;
-}) {
-  const resolvedParams = params instanceof Promise ? await params : params;
-  const id = parseInt(resolvedParams.id, 10);
-
-  if (Number.isNaN(id)) {
-    notFound();
-  }
+/**
+ * Publisher page (board Overzichten, "Titles van een publisher"): the band, a bar per publication year
+ * that also jumps to that year, a filter and the titles grouped per year with sticky year headings.
+ */
+export default async function PublisherPage({ params, searchParams }: PageProps) {
+  const id = parseId((await params).id);
+  if (!id) notFound();
+  const query = await searchParams;
 
   // Series have their own page now; ?kind=series was how the shared route asked for one
-  const wantsSeries = (await searchParams).kind === "series";
-  const publisher = wantsSeries ? null : await getPublisher(id);
+  const publisher = query.kind === "series" ? null : await getPublisher(id);
   if (!publisher) {
     if (await seriesExists(id)) permanentRedirect(`/series/${id}`);
     notFound();
   }
 
-  const editions = await getEditionsForPublisher(publisher.id);
-  const groupedYears = groupByYear(editions);
+  const [data, list] = await Promise.all([getPublisherTitles(publisher.id), getPublisherList()]);
+  const name = publisher.name.trim();
+  const listRow = list.find((p) => p.id === publisher.id);
+  const span = listRow ? activeSpan([listRow.firstYear, listRow.lastYear], new Date().getFullYear()) : null;
 
-  // Same numbers as on the Publishers overview (cached list)
-  const now = new Date().getFullYear();
-  const listRow = (await getPublisherList()).find((p) => p.id === publisher.id);
-  const span = listRow ? activeSpan([listRow.firstYear, listRow.lastYear], now) : null;
-  const band = {
-    pill: "Publisher",
-    title: publisher.name.trim(),
-    sentence: ["Publisher", span].filter(Boolean).join(" · "),
-    back: { href: "/publishers", label: "Publishers" },
-  };
+  const q = query.q?.trim() || null;
+  const dir = query.dir === "asc" ? "asc" : "desc";
+  const all = publisherTitleRows(data.editions, data.works);
+  const filtered = q
+    ? all.filter((r) => matchesFilter([r.title, r.englishTitle, ...r.authors.map((a) => a.name), ...r.illustrators], q))
+    : all;
+  const sorted = sortTitleRows(filtered, dir);
+  const counts = yearCounts(filtered);
+  const year = Number(query.year);
+  const selected = Number.isInteger(year) && counts.some((c) => c.year === year) ? year : null;
+  // A chosen year opens the page on which it starts
+  const pageNumber = selected !== null && !query.page ? pageOfYear(sorted, selected, PAGE_SIZE) : Number(query.page ?? 1);
+  const page = paginate(sorted, pageNumber, PAGE_SIZE);
+  const items = groupPage(sorted, (page.page - 1) * PAGE_SIZE, PAGE_SIZE);
+
+  const base = `/publishers-series/${publisher.id}`;
+  const state = { q, dir, year: selected !== null ? String(selected) : null, page: String(page.page) };
+  const defaults = { dir: "desc", page: "1" };
+  const href = (changes: Record<string, string | null>, hash = "") => overviewHref(base, state, changes, defaults) + hash;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-6">
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-creme-gedempt">
-          <TextLink href={band.back.href} standalone>
-            {band.back.label}
+          <TextLink href="/publishers" standalone>
+            Publishers
           </TextLink>
           <span aria-hidden="true">/</span>
           <span aria-current="page" className="text-creme">
-            {band.title}
+            {name}
           </span>
         </nav>
         <ListBand
-          pill={band.pill}
-          title={band.title}
-          sentence={band.sentence}
-          count={listRow?.titles ?? 0}
+          pill="Publisher"
+          title={name}
+          sentence={["Publisher", span].filter(Boolean).join(" · ")}
+          count={listRow?.titles ?? new Set(all.map((r) => r.workId)).size}
           label={["title", "titles"]}
         />
       </div>
 
-      {/* The list below is restyled in the step for the publisher page (year bar, board Overzichten) */}
-      <div className="py-2">
-      <div className="max-w-5xl mx-auto">
-        {groupedYears.length === 0 ? (
-          <div className="bg-white border border-[#e0ddd0] rounded p-8 text-center text-[#6b6b6b]">
-            No works found for this publisher.
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {groupedYears.map((group) => (
-              <div key={group.year}>
-                <h2 className="text-3xl font-serif text-[#8b6f47] mb-4">{group.year}</h2>
-                <ul className="space-y-3 pl-4 border-l border-[#e0ddd0]">
-                  {group.works.map((work, index) => (
-                    <li key={`${work.edition_id}-${work.original_title}-${index}`}>
-                      <Link
-                        href={`/edition/${work.edition_id}`}
-                        className="text-[#4f4a3d] hover:underline font-medium"
-                      >
-                        {work.original_title}
-                      </Link>
-                      {work.english_title && work.english_title !== work.original_title && (
-                        <span className="text-[#6b6b6b] ml-2">({work.english_title})</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        )}
+      <YearBars counts={counts} selected={selected} hrefFor={(y) => href({ year: String(y) }, `#y-${y}`)} />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          {/* A filter keeps the order, but not the chosen year or the page */}
+          <ListFilter action={base} q={q} keep={{ dir: dir === "desc" ? null : dir }} />
+        </div>
+        {selected !== null && <ActiveFilter removeHref={href({ year: null })}>{`Jumped to ${selected}`}</ActiveFilter>}
       </div>
-      </div>
+
+      {sorted.length === 0 ? (
+        <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
+          <p className="m-0 text-[22px] font-extrabold leading-7 tracking-[-0.02em]">
+            {q ? "No titles match" : "No titles yet"}
+          </p>
+          {q ? (
+            <>
+              <p className="m-0 text-sm text-creme-gedempt">Check the spelling or try fewer words.</p>
+              <TextLink href={base} standalone className="text-sm">
+                Clear filter
+              </TextLink>
+            </>
+          ) : (
+            <p className="m-0 text-sm text-creme-gedempt">There are no editions of this publisher on Shelfhound yet.</p>
+          )}
+        </div>
+      ) : (
+        <>
+          <YearGroupedList
+            items={items}
+            selected={selected}
+            dir={dir}
+            q={q}
+            sortHref={href({ dir: dir === "desc" ? "asc" : "desc", year: null })}
+          />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="font-mono text-[13px] text-creme-gedempt">
+              {page.from.toLocaleString("en-US")} to {page.to.toLocaleString("en-US")} of {page.total.toLocaleString("en-US")}
+            </span>
+            {page.totalPages > 1 && (
+              <Pagination page={page.page} totalPages={page.totalPages} hrefFor={(p) => href({ page: String(p), year: null })} />
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
