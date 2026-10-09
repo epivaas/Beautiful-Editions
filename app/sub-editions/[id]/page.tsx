@@ -1,176 +1,190 @@
-import { supabase } from "@/utils/supabase";
-import ImageCarousel from "@/components/ImageCarousel";
-import { notFound } from "next/navigation";
-import { fetchAllRows } from "@/utils/supabasePagination";
-import Image from "next/image";
+import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
+import { getVariantPage } from "@/app/lib/editionPageQuery";
+import { contributorsByRole, limitedEditionName, toLimitedCards, worksOf } from "@/app/lib/editionPage";
+import { variantChips, variantFacts } from "@/app/lib/variantPage";
+import { includesOf, toPhotos } from "@/app/lib/titlePage";
+import YellowBand from "@/components/YellowBand";
+import PhotoMosaic from "@/components/PhotoMosaic";
+import PhotoTile from "@/components/PhotoTile";
+import FactGrid from "@/components/FactGrid";
+import IncludesBar from "@/components/IncludesBar";
+import NoteText from "@/components/NoteText";
+import EditionCredits from "@/components/EditionCredits";
+import LimitedEditionCard from "@/components/LimitedEditionCard";
+import { FilterChip } from "@/components/Chip";
+import { TextLink } from "@/components/Button";
 
-type ParentPhoto = {
-  id: number;
-  storage_path: string;
-  sort_order: number;
-  caption: string | null;
-};
+type PageProps = { params: Promise<{ id: string }> };
 
-type ParentEdition = {
-  id: number;
-  title: string;
-  publication_year: number | null;
-  publisher: { id: number; name: string } | null;
-  work: { id: number; original_title: string | null; english_title: string | null } | null;
-  photos: ParentPhoto[] | null;
-};
+// Longer edition titles get the smaller title size in the band
+const LONG_TITLE = 32;
+// Loose links in the facts grid: 44 px tap target on phones
+const FACT_LINK = "inline-flex min-h-11 items-center text-amber hover:underline sm:min-h-0";
 
-type SubEditionRecord = {
-  id: number;
-  edition_id: number;
-  impression_label: string | null;
-  sequence_number: number | null;
-  publication_year: number | null;
-  catalogue_number: string | null;
-  is_limited_edition: boolean | null;
-  limited_edition_count: number | null;
-  publisher_url: string | null;
-  edition: ParentEdition | null;
-};
-
-function formatValue(value: unknown) {
-  if (value === null || value === undefined || value === "") {
-    return "NULL";
-  }
-  if (typeof value === "boolean") {
-    return value ? "Yes" : "No";
-  }
-  return String(value);
+function parseId(value: string | undefined) {
+  const id = Number(value);
+  return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-function getPhotoUrl(storagePath: string) {
-  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Book-photos/${storagePath}`;
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const id = parseId((await params).id);
+  const page = id ? await getVariantPage(id) : null;
+  if (!page) return { title: "Variant not found · Shelfhound" };
+  const name = limitedEditionName(page.sub.limited_state?.name, page.sub.impression_label);
+  return { title: [name, page.edition.title, "Shelfhound"].join(" · ") };
 }
 
-async function getSubEdition(id: string) {
-  const { data: subEdition, error: subEditionError } = await supabase
-    .from("sub_editions")
-    .select("*")
-    .eq("id", id)
-    .single();
+/**
+ * Variant page (board Variantpagina, DESIGN.md §6): one limited sub-edition. The book's title is the
+ * heading, the Gloed block says "Edition of 26", fields are compared with the edition. No printings.
+ */
+export default async function VariantPage({ params }: PageProps) {
+  const id = parseId((await params).id);
+  const page = id ? await getVariantPage(id) : null;
+  if (!page) notFound();
+  const { edition, sub } = page;
+  // A printing has no page of its own: it lives in the edition's printings table
+  if (!sub.is_limited_edition) redirect(`/edition/${edition.id}#printings`);
 
-  if (subEditionError || !subEdition) return null;
+  const name = limitedEditionName(sub.limited_state?.name, sub.impression_label);
+  const works = worksOf(edition);
+  const current = works[0] ?? null;
+  const authors = [
+    ...new Map(
+      works.flatMap((w) => (w.work_authors ?? []).map((wa) => wa.author)).filter((a) => a !== null).map((a) => [a.id, a])
+    ).values(),
+  ];
+  const role = contributorsByRole(edition.edition_contributors);
+  const subs = edition.sub_editions ?? [];
+  const chips = variantChips(subs, sub.id);
+  const others = toLimitedCards(subs, edition.title).filter((card) => card.id !== sub.id);
+  // The variant's own photos; without them the edition's own (not those of other variants)
+  const ownPhotos = toPhotos(sub.photos, `${edition.title}, ${name}`);
+  const photos = ownPhotos.length > 0 ? ownPhotos : toPhotos(edition.photos, edition.title);
+  const editionPhotos = ownPhotos.length === 0 && photos.length > 0;
+  const facts = variantFacts(sub, edition);
+  const notes = [sub.impression_label, sub.details].filter((t): t is string => !!t?.trim());
 
-  const { data: edition } = await supabase
-    .from("editions")
-    .select(`
-      id,
-      title,
-      publication_year,
-      publisher:publishers(id,name),
-      work:works(id,original_title,english_title),
-      photos:photos(id,storage_path,sort_order,caption)
-    `)
-    .eq("id", subEdition.edition_id)
-    .single();
-
-  return { ...subEdition, edition: edition as ParentEdition | null } as SubEditionRecord;
-}
-
-export default async function SubEditionPage({
-  params,
-}: {
-  params: Promise<{ id: string }> | { id: string };
-}) {
-  const resolvedParams = params instanceof Promise ? await params : params;
-  const sub = await getSubEdition(resolvedParams.id);
-  if (!sub) notFound();
-
-  const parent = sub.edition;
-  const work = parent?.work;
-  const parentPhotos = [...(parent?.photos || [])].sort((a, b) => a.sort_order - b.sort_order);
-  const basePhoto = parentPhotos[0];
-
-  // Photos specifically attached to this sub-edition
-  const { data: subPhotos } = await fetchAllRows(() =>
-    supabase
-      .from("photos")
-      .select("id,storage_path,sort_order,caption")
-      .eq("sub_edition_id", sub.id)
-      .order("sort_order", { ascending: true })
-  );
-  const photos = ((subPhotos || []) as ParentPhoto[])
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map((p) => ({
-      id: p.id,
-      storage_path: p.storage_path,
-      sort_order: p.sort_order,
-      caption: p.caption,
-      edition_id: null,
-      sub_edition_id: sub.id,
-    }));
+  // Some names in the database end with a space
+  const publisherName = edition.publisher?.name.trim() || null;
+  const editionLabel = [publisherName, edition.publication_year].filter(Boolean).join(", ") || edition.title;
 
   return (
-    <div className="py-8">
-      <div className="max-w-4xl mx-auto bg-white border border-[#e0ddd0] rounded p-8">
-        {work && (
-          <h1 className="text-3xl font-serif text-[#8b6f47] mb-2">
-            {work.original_title || work.english_title}
-          </h1>
+    <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-6">
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-creme-gedempt">
+          <TextLink href="/titles" standalone>
+            Titles
+          </TextLink>
+          {current && (
+            <>
+              <span aria-hidden="true">/</span>
+              <TextLink href={`/titles/${current.id}`} standalone>
+                {current.original_title}
+              </TextLink>
+            </>
+          )}
+          <span aria-hidden="true">/</span>
+          <TextLink href={`/edition/${edition.id}`} standalone>
+            {editionLabel}
+          </TextLink>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page" className="text-creme">
+            {name}
+          </span>
+        </nav>
+
+        <YellowBand
+          title={edition.title}
+          size={edition.title.length > LONG_TITLE ? "lg" : "xl"}
+          publisher={publisherName}
+          subtitle={name}
+          subtitleNote={edition.publication_year}
+          // The Gloed block never disappears: without a print run it stays as an empty block
+          count={
+            sub.limited_edition_count
+              ? { label: "Edition of", value: sub.limited_edition_count.toLocaleString("en-US"), labelPosition: "above" }
+              : "empty"
+          }
+        >
+          <EditionCredits authors={authors} translators={role("Translator")} illustrators={role("Illustrator")} />
+        </YellowBand>
+
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+          {chips.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="mr-1.5 font-mono text-[13px] uppercase tracking-[0.08em] text-creme-gedempt">Variants</span>
+              {chips.map((chip) => (
+                <FilterChip key={chip.id} href={chip.href} count={chip.count} selected={chip.selected}>
+                  {chip.name}
+                </FilterChip>
+              ))}
+            </div>
+          )}
+          <TextLink href={`/edition/${edition.id}`} standalone className="text-sm">
+            ← Back to the edition
+          </TextLink>
+        </div>
+      </div>
+
+      {/* The photo block never disappears: without any photo it shows one empty tile on the mat */}
+      <section aria-label="Photographs" className="flex flex-col gap-2">
+        {editionPhotos && <p className="m-0 text-[13px] text-creme-gedempt">Photos of the edition</p>}
+        {photos.length > 0 ? (
+          <PhotoMosaic photos={photos} />
+        ) : (
+          <PhotoTile alt={`${edition.title}, ${name}`} className="h-[190px] w-full max-w-[320px]" />
+        )}
+      </section>
+
+      <div className="flex flex-col gap-7">
+        <IncludesBar items={includesOf(sub)} />
+
+        {facts.length > 0 && (
+          <section aria-labelledby="apart" className="flex flex-col gap-3.5">
+            <h2 id="apart" className="text-[26px] leading-8">
+              What sets this variant apart
+            </h2>
+            <FactGrid
+              items={facts.map((f) => ({
+                label: f.label,
+                mono: f.mono,
+                note: f.note,
+                value: f.href ? (
+                  <a href={f.href} target="_blank" rel="noopener noreferrer" className={FACT_LINK}>
+                    {f.value}
+                  </a>
+                ) : (
+                  f.value
+                ),
+              }))}
+            />
+          </section>
         )}
 
-        <div className="grid md:grid-cols-[1fr_240px] gap-6 items-start mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-[#8b6f47]">Edition</h2>
-            <p className="text-lg text-[#6b6b6b] mb-2">{parent?.title}</p>
-
-            <div className="text-sm text-[#6b6b6b]">
-              <div>
-                <strong>Publisher:</strong> {parent?.publisher?.name || "—"}
-              </div>
-              <div>
-                <strong>Year:</strong> {parent?.publication_year || "—"}
-              </div>
-            </div>
-
-            <div className="mt-6 p-4 bg-[#f9f8f0] border border-[#e9e7dd] rounded">
-              <div className="text-sm text-[#8b6f47] font-medium">Sub-edition</div>
-              <div className="text-base text-[#6b6b6b] mt-1">{sub.impression_label || `Variant ${sub.sequence_number || sub.id}`}</div>
-            </div>
-          </div>
-
-          <div className="justify-self-end">
-            {basePhoto ? (
-              <Image
-                src={getPhotoUrl(basePhoto.storage_path)}
-                alt={basePhoto.caption || "Base photo"}
-                width={220}
-                height={220}
-                className="w-[220px] h-[220px] object-contain rounded"
-              />
-            ) : (
-              <div className="w-[220px] h-[220px] bg-[#f6f4ea] flex items-center justify-center text-sm text-[#9b9b9b]">No image</div>
-            )}
-          </div>
-        </div>
-
-        <div className="border-t border-[#e0ddd0] pt-6">
-          <h3 className="text-xl font-serif text-[#8b6f47] mb-4">Sub-edition details</h3>
-          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4 text-sm text-[#6b6b6b]">
-            <div><strong>ID:</strong> {formatValue(sub.id)}</div>
-            <div><strong>Edition ID:</strong> {formatValue(sub.edition_id)}</div>
-            <div><strong>Impression label:</strong> {formatValue(sub.impression_label)}</div>
-            <div><strong>Sequence number:</strong> {formatValue(sub.sequence_number)}</div>
-            <div><strong>Publication year:</strong> {formatValue(sub.publication_year)}</div>
-            <div><strong>Catalogue number:</strong> {formatValue(sub.catalogue_number)}</div>
-            <div><strong>Limited edition:</strong> {formatValue(sub.is_limited_edition)}</div>
-            <div><strong>Limited edition count:</strong> {formatValue(sub.limited_edition_count)}</div>
-            <div className="sm:col-span-2"><strong>Publisher URL:</strong> {formatValue(sub.publisher_url)}</div>
-          </div>
-        </div>
-
-        {photos.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-serif text-[#8b6f47] mb-4">Photos for this Sub-edition</h3>
-            <ImageCarousel photos={photos} />
-          </div>
+        {notes.length > 0 && (
+          <section aria-labelledby="note" className="flex max-w-[760px] flex-col gap-3.5">
+            <h2 id="note" className="text-[26px] leading-8">
+              Note
+            </h2>
+            <NoteText texts={notes} />
+          </section>
         )}
       </div>
+
+      {others.length > 0 && (
+        <section aria-labelledby="others" className="flex flex-col gap-4">
+          <h2 id="others" className="text-[26px] leading-8">
+            Other variants of this edition
+          </h2>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
+            {others.map((card) => (
+              <LimitedEditionCard key={card.id} {...card} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -16,6 +16,8 @@ export type EditionSubRow = {
   is_limited_edition: boolean | null;
   limited_edition_count: number | null;
   limited_state: { name: string; sort_order: number } | null;
+  publisher_url: string | null;
+  details: string | null;
   photos: TitlePhotoRow[] | null;
 };
 

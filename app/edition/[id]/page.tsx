@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { NAME_SEPARATOR } from "@/app/lib/names";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
 import { getEditionPage } from "@/app/lib/editionPageQuery";
 import {
   bandCounts,
@@ -19,7 +17,9 @@ import FactGrid from "@/components/FactGrid";
 import LimitedEditionCard from "@/components/LimitedEditionCard";
 import PrintingsTable from "@/components/PrintingsTable";
 import TitleChips from "@/components/TitleChips";
-import { IncludesChip } from "@/components/Chip";
+import EditionCredits, { joinNames } from "@/components/EditionCredits";
+import IncludesBar from "@/components/IncludesBar";
+import NoteText from "@/components/NoteText";
 import { TextLink } from "@/components/Button";
 
 type PageProps = {
@@ -40,18 +40,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const edition = id ? await getEditionPage(id) : null;
   if (!edition) return { title: "Edition not found · Shelfhound" };
   return { title: [edition.title, edition.publisher?.name.trim(), "Shelfhound"].filter(Boolean).join(" · ") };
-}
-
-const INLINE_LINK = "underline underline-offset-[3px] hover:no-underline";
-
-/** "Doré, Gustave; Rackham, Arthur": names are "Last, First", so people are separated by a semicolon */
-function joinNames(names: ReactNode[]) {
-  return names.map((name, i) => (
-    <span key={i}>
-      {i > 0 && NAME_SEPARATOR}
-      {name}
-    </span>
-  ));
 }
 
 export default async function EditionPage({ params, searchParams }: PageProps) {
@@ -80,17 +68,6 @@ export default async function EditionPage({ params, searchParams }: PageProps) {
     printings: printings.length,
     photos: photos.length,
   });
-
-  const authorLinks = authors.map((a) => (
-    <Link key={a.id} href={`/author/${a.id}`} className={INLINE_LINK}>
-      {a.name}
-    </Link>
-  ));
-  const credits = [
-    authorLinks.length > 0 && <span key="by">by {joinNames(authorLinks)}</span>,
-    role("Translator").length > 0 && <span key="tr">translated by {joinNames(role("Translator"))}</span>,
-    role("Illustrator").length > 0 && <span key="il">illustrated by {joinNames(role("Illustrator"))}</span>,
-  ].filter(Boolean);
 
   // Some names in the database end with a space
   const publisherName = edition.publisher?.name.trim() || null;
@@ -148,16 +125,7 @@ export default async function EditionPage({ params, searchParams }: PageProps) {
           {edition.publication_year && (
             <div className="text-xl font-medium leading-7 md:text-[22px] md:leading-[30px]">{edition.publication_year}</div>
           )}
-          {credits.length > 0 && (
-            <div className="text-base leading-6">
-              {credits.map((part, i) => (
-                <span key={i}>
-                  {i > 0 && " · "}
-                  {part}
-                </span>
-              ))}
-            </div>
-          )}
+          <EditionCredits authors={authors} translators={role("Translator")} illustrators={role("Illustrator")} />
           {titles.length > 1 && <TitleChips titles={titles} />}
         </YellowBand>
       </div>
@@ -169,18 +137,7 @@ export default async function EditionPage({ params, searchParams }: PageProps) {
       )}
 
       <div className="flex flex-col gap-7">
-        {includes.length > 0 && (
-          <div className="flex items-center gap-4 rounded-card border border-lijn bg-oppervlak px-[18px] py-3.5">
-            <span className="w-[76px] shrink-0 text-[11px] font-semibold uppercase tracking-[0.09em] text-creme-gedempt">
-              Includes
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {includes.map((item) => (
-                <IncludesChip key={item}>{item}</IncludesChip>
-              ))}
-            </div>
-          </div>
-        )}
+        <IncludesBar items={includes} />
 
         <section aria-labelledby="publication" className="flex flex-col gap-3.5">
           <h2 id="publication" className="text-[26px] leading-8">
@@ -246,15 +203,11 @@ export default async function EditionPage({ params, searchParams }: PageProps) {
         </section>
 
         {(edition.notes || edition.details) && (
-          <section aria-labelledby="note" className="flex max-w-[68ch] flex-col gap-3.5">
+          <section aria-labelledby="note" className="flex max-w-[760px] flex-col gap-3.5">
             <h2 id="note" className="text-[26px] leading-8">
               Note
             </h2>
-            {[edition.notes, edition.details].filter(Boolean).map((text, i) => (
-              <p key={i} className="m-0 whitespace-pre-line text-[17px] leading-[27px]">
-                {text}
-              </p>
-            ))}
+            <NoteText texts={[edition.notes, edition.details].filter((t): t is string => !!t)} />
           </section>
         )}
       </div>

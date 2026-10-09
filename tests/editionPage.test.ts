@@ -29,6 +29,8 @@ function sub(id: number, extra: Partial<EditionSubRow> = {}): EditionSubRow {
     is_limited_edition: false,
     limited_edition_count: null,
     limited_state: null,
+    publisher_url: null,
+    details: null,
     photos: [],
     ...extra,
   };

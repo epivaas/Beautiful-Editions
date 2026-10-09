@@ -1,5 +1,5 @@
 import { supabase } from "@/utils/supabase";
-import type { EditionPageRow } from "./editionPage";
+import type { EditionPageRow, EditionSubRow } from "./editionPage";
 
 const PHOTO = "id, storage_path, caption, copyright_statement, is_main, sort_order";
 
@@ -13,7 +13,7 @@ const EDITION_SELECT = `
   photos ( ${PHOTO} ),
   sub_editions (
     id, impression_label, sequence_number, catalogue_number, isbn, binding_type, size_dimensions, typeface,
-    slipcase, dustjacket, clamshell, is_limited_edition, limited_edition_count,
+    slipcase, dustjacket, clamshell, is_limited_edition, limited_edition_count, publisher_url, details,
     limited_state:limited_states ( name, sort_order ),
     photos ( ${PHOTO} )
   ),
@@ -30,4 +30,15 @@ export async function getEditionPage(id: number): Promise<EditionPageRow | null>
   }
 
   return data as unknown as EditionPageRow | null;
+}
+
+/** A sub-edition with its whole edition (other variants, contributors, titles), from the edition page query. */
+export async function getVariantPage(id: number): Promise<{ edition: EditionPageRow; sub: EditionSubRow } | null> {
+  const { data, error } = await supabase.from("sub_editions").select("edition_id").eq("id", id).maybeSingle();
+  if (error) console.error("Error fetching sub-edition:", error);
+  if (!data) return null;
+
+  const edition = await getEditionPage(data.edition_id);
+  const sub = edition?.sub_editions?.find((s) => s.id === id);
+  return edition && sub ? { edition, sub } : null;
 }

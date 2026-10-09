@@ -5,6 +5,8 @@ export type FactItem = {
   value: ReactNode;
   /** Numbers, pages and years in IBM Plex Mono. */
   mono?: boolean;
+  /** Muted line under the value, e.g. "Same as edition" on a variant page. */
+  note?: ReactNode;
 };
 
 function isEmpty(value: ReactNode) {
@@ -23,6 +25,7 @@ export default function FactGrid({ items }: { items: FactItem[] }) {
           <dt className="text-[11px] font-semibold uppercase tracking-[0.09em] text-creme-gedempt">{item.label}</dt>
           <dd className={`m-0 mt-[3px] break-words text-base leading-6 ${item.mono ? "font-mono text-sm" : ""}`}>
             {isEmpty(item.value) ? <span className="text-leeg">—</span> : item.value}
+            {item.note && <div className="line-clamp-3 font-sans text-[13px] leading-[19px] text-leeg">{item.note}</div>}
           </dd>
         </div>
       ))}

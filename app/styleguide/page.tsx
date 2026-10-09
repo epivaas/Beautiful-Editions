@@ -6,6 +6,8 @@ import { ActiveFilter, FilterChip, IncludesChip, VariantLabel } from "@/componen
 import PhotoTile from "@/components/PhotoTile";
 import EditionCard from "@/components/EditionCard";
 import YellowBand from "@/components/YellowBand";
+import FactGrid from "@/components/FactGrid";
+import NoteText from "@/components/NoteText";
 import DataTable, { type Column } from "@/components/DataTable";
 import Pagination from "@/components/Pagination";
 import { supabase } from "@/utils/supabase";
@@ -115,9 +117,16 @@ export default async function StyleguidePage() {
           <p className="max-w-[68ch] text-base">
             Body text, Archivo 400 at 16 px. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
           </p>
-          <p className="max-w-[68ch] text-[17px] leading-[27px]">
-            Note 17/27 in a column of at most 68 characters, used for longer descriptions of an edition.
-          </p>
+          <div className="max-w-[760px]">
+            <NoteText
+              texts={[
+                "Note 17/27 in a column of at most 760 px, used for longer descriptions of an edition. After ten lines it is cut off with “Show full note”.",
+                ...Array.from({ length: 4 }, () =>
+                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                ),
+              ]}
+            />
+          </div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.09em] text-creme-gedempt">Field label</div>
           <Eyebrow>Eyebrow · mono 13</Eyebrow>
           <div className="font-mono text-base">1947 · 26 · No. 14/250</div>
@@ -212,9 +221,21 @@ export default async function StyleguidePage() {
           subtitle="Lettered edition"
           subtitleNote="2018"
           meta="by Homer · illustrated by Illustrator D"
-          count={{ label: "Edition of", value: 26, note: "Lettered A–Z" }}
+          count={{ label: "Edition of", value: 26, note: "Lettered A–Z", labelPosition: "above" }}
         />
         <YellowBand as="h2" size="lg" title="Homer" meta="Greek · c. 8th century BC · Wikipedia" />
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <Eyebrow>Facts grid (variant page: compared with the edition)</Eyebrow>
+        <FactGrid
+          items={[
+            { label: "Copies", value: "Edition of 26" },
+            { label: "Binding", value: "Full leather", note: "Edition: Cloth" },
+            { label: "Pages", value: "Pp. [1–9] 10–388", note: "Same as edition", mono: true },
+            { label: "ISBN", value: null, mono: true },
+          ]}
+        />
       </section>
 
       <section className="flex flex-col gap-5">
