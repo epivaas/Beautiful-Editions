@@ -59,14 +59,6 @@
  * Remove each one when its page moves to the new components.
  */
 @layer components {
-  .bibliophilic-hover {
-    transition: all 0.3s ease;
-  }
-
-  .bibliophilic-hover:hover {
-    transform: translateY(-2px);
-  }
-
   .publisher-series-grid {
     display: flex;
     flex-direction: column;
