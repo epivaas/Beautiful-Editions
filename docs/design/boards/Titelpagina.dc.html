@@ -16,7 +16,7 @@ a{color:#FFB627}
 a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #FF6B3D;outline-offset:3px}
 </style>
 </helmet>
-<div style="min-height: 2050px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif">
+<div style="min-height: 3700px; background: #3B332C; color: #F5ECD7; font-family: 'Archivo', system-ui, sans-serif">
 
   <div style="background: #5C5147; padding: 8px 24px; text-align: center; font-size: 13px; line-height: 19px; color: #F5ECD7">Ontwerpvoorbeeld met voorbeeldgegevens. Uitgevers zijn de jouwe, de rest is placeholder, en de foto's zijn je vijf testfoto's: ze horen niet bij deze titel. Probeer de filters en de weergave.</div>
 
@@ -82,43 +82,68 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #FF6B
           <button type="button" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}" style="{{c.style}}"><span>{{c.label}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">{{c.count}}</span></button>
           </sc-for>
         </div>
-        <div role="group" aria-label="View" style="display: flex; gap: 0">
-          <button type="button" aria-pressed="{{isTable}}" onClick="{{showTable}}" style="{{tableBtnStyle}}">Table</button>
-          <button type="button" aria-pressed="{{isGrid}}" onClick="{{showGrid}}" style="{{gridBtnStyle}}">Grid</button>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px">
+          <div role="group" aria-label="Sort by" style="display: flex; align-items: center; gap: 10px">
+            <span style="font-size: 13px; color: #D2C6AE">Sort by</span>
+            <div style="display: flex">
+              <sc-for list="{{sorts}}" as="s" hint-placeholder-count="3">
+              <button type="button" aria-pressed="{{s.pressed}}" onClick="{{s.pick}}" style="{{s.style}}">{{s.label}}</button>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{showToggle}}" hint-placeholder-val="{{ true }}">
+          <div role="group" aria-label="View" style="display: flex; gap: 0">
+            <button type="button" aria-pressed="{{isCards}}" onClick="{{showCards}}" style="{{cardsBtnStyle}}">Cards</button>
+            <button type="button" aria-pressed="{{isGrid}}" onClick="{{showGrid}}" style="{{gridBtnStyle}}">Grid</button>
+          </div>
+          </sc-if>
         </div>
       </div>
 
-      <sc-if value="{{isTable}}" hint-placeholder-val="{{ true }}">
-      <div style="overflow-x: auto; background: #473E36; border: 1px solid #5C5147; border-radius: 8px">
-        <div role="table" aria-label="Editions of The Odyssey" style="min-width: 780px">
-          <div role="row" style="display: grid; grid-template-columns: 64px minmax(200px, 2.2fr) 70px minmax(120px, 1.3fr) minmax(150px, 1.5fr) 90px; gap: 16px; padding: 10px 16px; background: #2A241F; font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">
-            <span role="columnheader"></span><span role="columnheader">Edition</span><span role="columnheader">Year</span><span role="columnheader">Illustrator</span><span role="columnheader">Binding</span><span role="columnheader">Printings</span>
-          </div>
-          <sc-for list="{{rows}}" as="e" hint-placeholder-count="9">
-          <div role="row" style="display: grid; grid-template-columns: 64px minmax(200px, 2.2fr) 70px minmax(120px, 1.3fr) minmax(150px, 1.5fr) 90px; gap: 16px; align-items: center; padding: 12px 16px; border-top: 1px solid #5C5147">
-            <div role="cell" style="box-sizing: border-box; width: 48px; height: 64px; padding: 3px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="{{e.img}}" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div>
-            <div role="cell"><div style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">{{e.pub}}</div><a href="#" style="font-weight: 700; font-size: 18px; line-height: 24px; color: #F5ECD7; text-decoration: none">{{e.name}}</a></div>
-            <div role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">{{e.year}}</div>
-            <div role="cell" style="font-size: 14px">{{e.illus}}</div>
-            <div role="cell" style="font-size: 14px">{{e.binding}}</div>
-            <div role="cell" style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">{{e.printings}}</div>
-          </div>
-          </sc-for>
-        </div>
+      <sc-if value="{{isCards}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 16px">
+        <sc-for list="{{rows}}" as="e" hint-placeholder-count="6">
+        <article style="display:flex;flex-wrap:wrap;gap:28px;background:#473E36;border:1px solid #5C5147;border-radius:8px;padding:20px">
+  <div style="flex:0 0 360px;max-width:100%;display:flex;flex-direction:column;gap:8px">
+    <div style="position:relative;box-sizing:border-box;height:260px;padding:12px;background:#A19E99;display:flex;align-items:center;justify-content:center"><img src="{{e.img}}" alt="" style="display:block;width:auto;height:auto;max-width:100%;max-height:100%"><button type="button" aria-label="Photo credit" style="position:absolute;right:8px;bottom:8px;width:28px;height:28px;border-radius:14px;border:0;background:rgba(27,22,18,0.85);color:#F5ECD7;font:600 14px 'Archivo',system-ui,sans-serif">©</button></div>
+    <div style="display:flex;gap:8px"><div style="{{e.t1s}}"><img src="{{e.t1}}" alt="" style="display:block;width:auto;height:auto;max-width:100%;max-height:100%"></div><div style="{{e.t2s}}"><img src="{{e.t2}}" alt="" style="display:block;width:auto;height:auto;max-width:100%;max-height:100%"></div><div style="{{e.t3s}}"><img src="{{e.t3}}" alt="" style="display:block;width:auto;height:auto;max-width:100%;max-height:100%"></div><div style="{{e.moreStyle}}">{{e.more}}</div></div>
+  </div>
+  <div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:14px">
+    <span style="font-weight:800;font-size:18px;line-height:22px;letter-spacing:-0.01em;color:#FFB627">{{e.pub}}</span>
+    <h3 style="margin:0;font-weight:800;font-size:30px;line-height:34px;letter-spacing:-0.02em">{{e.name}}</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:12px 32px">
+      <div style="min-width:90px"><div style="font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Year</div><div style="font-family:'IBM Plex Mono',monospace;font-size:14px;line-height:20px;margin-top:3px">{{e.year}}</div></div>
+      <div style="{{e.bindBox}}"><div style="font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Binding</div><div style="font-size:14px;line-height:20px;margin-top:3px">{{e.binding}}</div></div>
+      <div style="min-width:90px"><div style="font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Pages</div><div style="font-family:'IBM Plex Mono',monospace;font-size:14px;line-height:20px;margin-top:3px">{{e.pages}}</div></div>
+      <div style="min-width:90px"><div style="font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Illustrators</div><div style="font-size:14px;line-height:20px;margin-top:3px">{{e.illus}}</div></div>
+    </div>
+    <div style="{{e.incRow}}"><span style="flex:0 0 76px;font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Includes</span><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="{{e.i1s}}">{{e.i1}}</span><span style="{{e.i2s}}">{{e.i2}}</span><span style="{{e.i3s}}">{{e.i3}}</span></div></div>
+    <div style="{{e.varRow}}"><span style="flex:0 0 76px;font-weight:600;font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#D2C6AE">Variants</span><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="{{e.v1s}}">{{e.v1}}</span><span style="{{e.v2s}}">{{e.v2}}</span><span style="{{e.v3s}}">{{e.v3}}</span></div></div>
+    <p style="{{e.noteStyle}}">{{e.note}}</p>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#D2C6AE">{{e.count}}</span>
+      <button type="button" style="min-height:44px;padding:0 20px;border-radius:6px;border:1px solid #FFB627;background:#FFB627;color:#1B1612;font:700 15px 'Archivo',system-ui,sans-serif">View edition</button>
+    </div>
+  </div>
+</article>
+        </sc-for>
       </div>
       </sc-if>
 
       <sc-if value="{{isGrid}}" hint-placeholder-val="{{ false }}">
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px">
-        <sc-for list="{{rows}}" as="e" hint-placeholder-count="9">
-        <div style="display: flex; flex-direction: column; background: #473E36; border: 1px solid #5C5147; border-radius: 8px; overflow: hidden">
-          <div style="box-sizing: border-box; height: 220px; padding: 12px; background: #A19E99; display: flex; align-items: center; justify-content: center"><img src="{{e.img}}" alt="" style="display: block; width: auto; height: auto; max-width: 100%; max-height: 100%"></div>
-          <div style="padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px">
-            <div style="font-weight: 600; font-size: 12px; letter-spacing: 0.09em; text-transform: uppercase; color: #D2C6AE">{{e.pub}}</div>
-            <a href="#" style="font-weight: 800; font-size: 20px; line-height: 25px; letter-spacing: -0.02em; color: #F5ECD7; text-decoration: none">{{e.name}}</a>
-            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #D2C6AE">{{e.year}} · {{e.binding}}</div>
-          </div>
-        </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px">
+        <sc-for list="{{rows}}" as="e" hint-placeholder-count="6">
+        <div style="display:flex;flex-direction:column;background:#473E36;border:1px solid #5C5147;border-radius:8px;overflow:hidden">
+  <div style="position:relative;box-sizing:border-box;height:220px;padding:12px;background:#A19E99;display:flex;align-items:center;justify-content:center"><img src="{{e.img}}" alt="" style="display:block;width:auto;height:auto;max-width:100%;max-height:100%"><button type="button" aria-label="Photo credit" style="position:absolute;right:8px;bottom:8px;width:28px;height:28px;border-radius:14px;border:0;background:rgba(27,22,18,0.85);color:#F5ECD7;font:600 14px 'Archivo',system-ui,sans-serif">©</button></div>
+  <div style="padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1 1 auto">
+    <span style="font-weight:800;font-size:14px;line-height:18px;color:#FFB627">{{e.pub}}</span>
+    <a href="#" style="font-weight:800;font-size:20px;line-height:25px;letter-spacing:-0.02em;color:#F5ECD7;text-decoration:none">{{e.name}}</a>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#D2C6AE">{{e.yearBinding}}</div>
+    <div style="{{e.illusStyle}}">{{e.illus}}</div>
+    <div style="{{e.gIncRow}}"><span style="{{e.i1g}}">{{e.i1}}</span><span style="{{e.i2g}}">{{e.i2}}</span><span style="{{e.i3g}}">{{e.i3}}</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:auto"><span style="{{e.v1g}}">{{e.v1}}</span><span style="{{e.v2g}}">{{e.v2}}</span><span style="{{e.v3g}}">{{e.v3}}</span><span style="{{e.pStyle}}">{{e.prints}}</span></div>
+  </div>
+</div>
         </sc-for>
       </div>
       </sc-if>
@@ -135,53 +160,98 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #FF6B
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":2050}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":3700}}'>
 class Component extends DCLogic {
   constructor(...args) {
     super(...args);
-    this.state = { pub: "All", view: "table" };
+    this.state = { pub: "All", view: "cards", sort: "year", dir: 1 };
   }
   renderVals() {
-    const imgs = [
-      "/_blob/de2eb2ef1e67c63572db96a9a968f96b",
-      "/_blob/7eeb527f7aeba08cb6788c268c78c873",
-      "/_blob/88977a7b0f7e9b0052ebc707ed89d620",
-      "/_blob/992190712ebbb08aa522dded27f19a39",
-      "/_blob/dbcf6a4fe243cb86fee07070bef8319a"
+
+    const img = {
+      o: "/_blob/de2eb2ef1e67c63572db96a9a968f96b",
+      g: "/_blob/7eeb527f7aeba08cb6788c268c78c873",
+      q: "/_blob/88977a7b0f7e9b0052ebc707ed89d620",
+      a: "/_blob/992190712ebbb08aa522dded27f19a39",
+      x: "/_blob/dbcf6a4fe243cb86fee07070bef8319a"
+    };
+    const pool = [img.g, img.a, img.x, img.q, img.o];
+    const base = [
+      { img: img.a, pub: "Folio Society", name: "Standard edition", year: "1983", binding: "Quarter cloth", pages: "Pp. [1–8] 9–380", inc: "", illus: "Illustrator A", vars: "", prints: 3, photos: 4 },
+      { img: img.o, pub: "Folio Society", name: "Illustrated edition", year: "1996", binding: "Full cloth", pages: "Pp. [1–8] 9–412", inc: "Slipcase", illus: "Illustrator B", vars: "", prints: 3, photos: 7, note: "[Korte nota van twee regels.]" },
+      { img: img.g, pub: "Folio Society", name: "Revised edition", year: "2008", binding: "", pages: "398 pp.", inc: "Slipcase", illus: "Illustrator B", vars: "", prints: 1, photos: 2 },
+      { img: img.q, pub: "Suntup Editions", name: "The Odyssey", year: "2018", binding: "", pages: "Pp. [1–9] 10–388", inc: "Slipcase, Clamshell box, Dust jacket", illus: "Illustrator D, Illustrator F", vars: "Lettered, Numbered, Artist", prints: 2, photos: 18, note: "[Redactionele nota, kan van enkele woorden tot tientallen regels lopen. Hier worden de eerste drie regels getoond en de rest ingekort, zodat elke kaart even hoog blijft. Tekst over het papier, de vertaling, de gravures en eventuele afwijkingen komt hier te staan en loopt door in de volledige nota.]" },
+      { img: img.x, pub: "Curious King Books", name: "Standard edition", year: "2021", binding: "Full cloth", pages: "412 pp.", inc: "", illus: "Illustrator E", vars: "", prints: 1, photos: 1 },
+      { img: img.o, pub: "Curious King Books", name: "Deluxe edition", year: "2022", binding: "Full leather", pages: "Pp. [1–10] 11–420", inc: "Slipcase, Dust jacket", illus: "Illustrator E, Illustrator G", vars: "Deluxe, Collector", prints: 1, photos: 9 }
     ];
-    const all = [
-      { pub: "Folio Society", name: "Standard edition", year: "1983", illus: "Illustrator A", binding: "Quarter cloth", printings: "3" },
-      { pub: "Folio Society", name: "Illustrated edition", year: "1996", illus: "Illustrator B", binding: "Full cloth, slipcase", printings: "2" },
-      { pub: "Folio Society", name: "Revised edition", year: "2008", illus: "Illustrator B", binding: "Quarter buckram, case", printings: "1" },
-      { pub: "Folio Society", name: "Anniversary edition", year: "2019", illus: "Illustrator C", binding: "Full cloth, slipcase", printings: "1" },
-      { pub: "Suntup Editions", name: "Numbered edition", year: "2018", illus: "Illustrator D", binding: "Full leather", printings: "1" },
-      { pub: "Suntup Editions", name: "Lettered edition", year: "2018", illus: "Illustrator D", binding: "Leather, clamshell box", printings: "1" },
-      { pub: "Suntup Editions", name: "Standard edition", year: "2020", illus: "Illustrator D", binding: "Cloth", printings: "2" },
-      { pub: "Curious King Books", name: "Standard edition", year: "2021", illus: "Illustrator E", binding: "Full cloth", printings: "1" },
-      { pub: "Curious King Books", name: "Limited edition", year: "2022", illus: "Illustrator E", binding: "Full leather, slipcase", printings: "1" }
-    ].map((e, i) => Object.assign({ img: imgs[i % imgs.length] }, e));
+    const none = "display:none";
+    const chipC = "display:inline-flex;align-items:center;min-height:28px;padding:0 11px;background:#5C5147;border-radius:6px;font-size:13px;font-weight:600";
+    const chipG = "display:inline-flex;align-items:center;min-height:24px;padding:0 8px;background:#5C5147;border-radius:6px;font-size:12px;font-weight:600";
+    const varC = "display:inline-flex;align-items:center;min-height:28px;padding:0 11px;background:#FF6B3D;color:#1B1612;border-radius:6px;font-size:13px;font-weight:700";
+    const varG = "display:inline-flex;align-items:center;min-height:24px;padding:0 8px;background:#FF6B3D;color:#1B1612;border-radius:6px;font-size:12px;font-weight:700";
+    const rowFlex = "display:flex;gap:14px;align-items:center";
+    const thumbOn = "box-sizing:border-box;flex:1 1 0;height:78px;padding:6px;background:#A19E99;display:flex;align-items:center;justify-content:center";
+    const enrich = (e, idx) => {
+      const incs = e.inc ? e.inc.split(", ") : [];
+      const vs = e.vars ? e.vars.split(", ") : [];
+      const o = Object.assign({}, e);
+      for (let k = 1; k <= 3; k++) {
+        o["i" + k] = incs[k - 1] || ""; o["i" + k + "s"] = incs[k - 1] ? chipC : none; o["i" + k + "g"] = incs[k - 1] ? chipG : none;
+        o["v" + k] = vs[k - 1] || ""; o["v" + k + "s"] = vs[k - 1] ? varC : none; o["v" + k + "g"] = vs[k - 1] ? varG : none;
+      }
+      o.incRow = incs.length ? rowFlex : none; o.gIncRow = incs.length ? "display:flex;flex-wrap:wrap;gap:4px" : none;
+      o.varRow = vs.length ? rowFlex : none;
+      o.note = e.note || "";
+      o.noteStyle = e.note ? "margin:0;font-size:15px;line-height:23px;color:#D2C6AE;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden" : none;
+      o.bindBox = e.binding ? "min-width:90px" : none;
+      o.yearBinding = e.binding ? e.year + " · " + e.binding : e.year;
+      o.illusStyle = "font-size:14px;line-height:19px;color:#D2C6AE";
+      o.pStyle = e.prints ? "font-family:'IBM Plex Mono',monospace;font-size:13px;color:#D2C6AE" : none;
+      o.prints = e.prints ? e.prints + (e.prints === 1 ? " printing" : " printings") : "";
+      const nT = Math.max(0, Math.min(3, e.photos - 1));
+      for (let k = 1; k <= 3; k++) { o["t" + k] = pool[(idx + k) % pool.length]; o["t" + k + "s"] = k <= nT ? thumbOn : none; }
+      const extra = e.photos - 1 - nT;
+      o.more = extra > 0 ? "+" + extra : "";
+      o.moreStyle = extra > 0 ? "box-sizing:border-box;flex:1 1 0;height:78px;background:#5C5147;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:500" : none;
+      o.count = [].concat(vs.length ? [vs.length + (vs.length === 1 ? " variant" : " variants")] : [], e.prints ? [e.prints + (e.prints === 1 ? " printing" : " printings")] : [], [e.photos + (e.photos === 1 ? " photo" : " photos")]).join(" · ");
+      return o;
+    };
+    const all = base.map(enrich);
+
     const pubs = ["All", "Folio Society", "Suntup Editions", "Curious King Books"];
     const st = this.state;
-    const rows = st.pub === "All" ? all : all.filter((e) => e.pub === st.pub);
+    const key = { year: (e) => Number(e.year), publisher: (e) => e.pub + e.year, name: (e) => e.name + e.year };
+    const rows = (st.pub === "All" ? all.slice() : all.filter((e) => e.pub === st.pub))
+      .sort((x, y) => (key[st.sort](x) > key[st.sort](y) ? 1 : key[st.sort](x) < key[st.sort](y) ? -1 : 0) * st.dir);
 
     const chipBase = "min-height:44px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;border-radius:6px;font:500 14px 'Archivo',system-ui,sans-serif;cursor:pointer;";
     const chips = pubs.map((p) => {
       const n = p === "All" ? all.length : all.filter((e) => e.pub === p).length;
       const on = st.pub === p;
       return {
-        label: p,
-        count: n,
-        pressed: on,
+        label: p, count: n, pressed: on,
         style: chipBase + (on ? "background:#FFB627;color:#1B1612;border:1px solid #FFB627;font-weight:700;" : "background:#473E36;color:#F5ECD7;border:1px solid #5C5147;"),
         pick: () => this.setState({ pub: p })
       };
     });
 
-    const vBase = "min-height:44px;padding:0 18px;font:600 14px 'Archivo',system-ui,sans-serif;cursor:pointer;border:1px solid #F5ECD7;";
-    const isTable = st.view === "table";
+    const seg = "min-height:44px;padding:0 16px;font:600 14px 'Archivo',system-ui,sans-serif;cursor:pointer;border:1px solid #F5ECD7;";
+    const on = "background:#F5ECD7;color:#1B1612;";
+    const off = "background:transparent;color:#F5ECD7;";
+    const sortDefs = [["year", "Year"], ["publisher", "Publisher"], ["name", "Name"]];
+    const sorts = sortDefs.map((d, i) => {
+      const a = st.sort === d[0];
+      return {
+        label: d[1] + (a ? (st.dir === 1 ? " ▲" : " ▼") : ""), pressed: a,
+        style: seg + (i === 0 ? "border-radius:6px 0 0 6px;" : i === sortDefs.length - 1 ? "border-radius:0 6px 6px 0;margin-left:-1px;" : "border-radius:0;margin-left:-1px;") + (a ? on : off),
+        pick: () => this.setState(a ? { dir: -st.dir } : { sort: d[0], dir: 1 })
+      };
+    });
+
+    const isCards = st.view === "cards";
     const isGrid = st.view === "grid";
-    const tableBtnStyle = vBase + "border-radius:6px 0 0 6px;" + (isTable ? "background:#F5ECD7;color:#1B1612;" : "background:transparent;color:#F5ECD7;");
-    const gridBtnStyle = vBase + "border-radius:0 6px 6px 0;margin-left:-1px;" + (isGrid ? "background:#F5ECD7;color:#1B1612;" : "background:transparent;color:#F5ECD7;");
+    const cardsBtnStyle = seg + "border-radius:6px 0 0 6px;" + (isCards ? on : off);
+    const gridBtnStyle = seg + "border-radius:0 6px 6px 0;margin-left:-1px;" + (isGrid ? on : off);
 
     const years = all.map((e) => Number(e.year));
     const facts = {
@@ -190,6 +260,7 @@ class Component extends DCLogic {
       years: Math.min.apply(null, years) + " to " + Math.max.apply(null, years)
     };
 
+    const imgs = [img.o, img.g, img.q, img.a, img.x];
     const g = [
       { src: imgs[0], alt: "The Obelisk Gate", ar: 1.11 },
       { src: imgs[1], alt: "Twee Gemmell-banden", ar: 1.8 },
@@ -203,8 +274,9 @@ class Component extends DCLogic {
     }));
 
     return {
-      rows, chips, facts, gallery, isTable, isGrid, tableBtnStyle, gridBtnStyle,
-      showTable: () => this.setState({ view: "table" }),
+      rows, chips, sorts, facts, gallery, isCards, isGrid, cardsBtnStyle, gridBtnStyle,
+      showToggle: all.length >= 4,
+      showCards: () => this.setState({ view: "cards" }),
       showGrid: () => this.setState({ view: "grid" }),
       resultLabel: rows.length + " of " + all.length + " editions"
     };
