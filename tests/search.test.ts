@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  criteriaLabels,
   criteriaParams,
   facetCounts,
   filterEditions,
@@ -199,5 +200,19 @@ describe('facets', () => {
     ]);
     expect(suggestFor(more, c({}), 'illustrator', '')).toEqual([]);
     expect(suggestFor(more, c({}), 'illustrator', 'dor', 1)).toHaveLength(1);
+  });
+});
+
+describe('criteriaLabels', () => {
+  const names = { publishers: [{ id: 2, name: 'The Folio Society' }], series: [] };
+  it('turns the set criteria into short labels', () => {
+    expect(criteriaLabels(parseCriteria({ from: '2008', to: '2008', binding: 'Full leather', publisher: '2', slipcase: '1' }), names)).toEqual([
+      'The Folio Society',
+      'Full leather',
+      '2008',
+      'With slipcase',
+    ]);
+    expect(criteriaLabels(parseCriteria({ from: '1990' }), names)).toEqual(['From 1990']);
+    expect(criteriaLabels(parseCriteria({}), names)).toEqual([]);
   });
 });

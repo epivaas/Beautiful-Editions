@@ -3,13 +3,13 @@ import Link from "next/link";
 import { getAuthorList, getPublisherList, getTitleList, type AuthorListRow, type PublisherWithLimited, type TitleListRow } from "@/app/lib/overviewQueries";
 import { getEditionIndex, getSearchOptions } from "@/app/lib/searchQueries";
 import { joinNames } from "@/app/lib/names";
-import { criteriaParams, facetCounts, filterEditions, hasCriteria, parseCriteria, type EditionSearchRow } from "@/app/lib/search";
+import { criteriaLabels, criteriaParams, facetCounts, filterEditions, hasCriteria, parseCriteria, type EditionSearchRow } from "@/app/lib/search";
 import { matchesFilter, paginate, sortBy, type SortDir } from "@/app/lib/overview";
 import DataTable, { CELL_LINK, ROW_TITLE, type Column } from "@/components/DataTable";
 import DetailedSearchForm from "@/components/DetailedSearchForm";
 import Highlight from "@/components/Highlight";
+import EmptyState from "@/components/EmptyState";
 import Pagination from "@/components/Pagination";
-import { Button, TextLink } from "@/components/Button";
 
 export const metadata: Metadata = { title: "Search · Shelfhound" };
 
@@ -205,13 +205,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
           </div>
 
           {quickTotal === 0 ? (
-            <div className="flex flex-col items-start gap-3 rounded-card border border-lijn bg-cocoa p-6">
-              <p className="m-0 text-2xl font-extrabold leading-7 tracking-[-0.02em]">No results for “{q}”</p>
-              <p className="m-0 text-sm text-creme-gedempt">
-                Check the spelling or try fewer words. Looking for a specific edition? Try the detailed search below.
-              </p>
-              <Button href="#detailed">Detailed search</Button>
-            </div>
+            <EmptyState
+              title={`No results for “${q}”`}
+              text="Check the spelling or try fewer words. Looking for a specific edition? Try the detailed search below."
+              action={{ href: "#detailed", label: "Detailed search" }}
+              secondary={{ href: "/titles", label: "Show all titles" }}
+            />
           ) : (
             <>
               {titleHits.length > 0 && (
@@ -255,13 +254,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
       {detailed && (
         <Section id="results" title="Editions" count={plural(editions.length, "edition")}>
           {editions.length === 0 ? (
-            <div className="flex flex-col items-start gap-3 rounded-card border border-lijn bg-cocoa p-6">
-              <p className="m-0 text-[22px] font-extrabold leading-7 tracking-[-0.02em]">No editions match these filters</p>
-              <p className="m-0 text-sm text-creme-gedempt">Remove a filter to see more.</p>
-              <TextLink href={q ? `/titles/search?q=${encodeURIComponent(q)}#detailed` : "/titles/search"} standalone className="text-sm">
-                Clear all filters
-              </TextLink>
-            </div>
+            <EmptyState
+              title="No editions match these filters"
+              text="Remove a filter to see more."
+              filters={criteriaLabels(criteria, options)}
+              action={{ href: q ? `/titles/search?q=${encodeURIComponent(q)}#detailed` : "/titles/search", label: "Clear all filters" }}
+            />
           ) : (
             <>
               <DataTable

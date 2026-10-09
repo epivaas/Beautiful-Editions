@@ -269,9 +269,9 @@ describe('sortRows', () => {
 });
 
 describe('countLine', () => {
-  it('joins variants, printings and photos, with plurals', () => {
-    expect(countLine(row(1, { variantCount: 2, printings: 1, photoCount: 18 }))).toBe('2 variants · 1 printing · 18 photos');
-    expect(countLine(row(1, { variantCount: 1, photoCount: 1 }))).toBe('1 variant · 1 photo');
+  it('joins limited editions, printings and photos, with plurals', () => {
+    expect(countLine(row(1, { variantCount: 2, printings: 1, photoCount: 18 }))).toBe('2 limited editions · 1 printing · 18 photos');
+    expect(countLine(row(1, { variantCount: 1, photoCount: 1 }))).toBe('1 limited edition · 1 photo');
   });
 
   it('leaves out zero parts', () => {

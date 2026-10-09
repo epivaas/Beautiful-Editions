@@ -3,19 +3,22 @@
 
 type LogoProps = {
   size?: number;
-  /** "inverted" for use on Amber: a Cocoa tile with Cocoa details (DESIGN.md §4, logo/…-omgekeerd.svg). */
-  variant?: "default" | "inverted";
+  /**
+   * "inverted" for use on Amber: a Cocoa tile with Cocoa details (DESIGN.md §4, logo/…-omgekeerd.svg).
+   * "ink" for use on Gloed (the 404 page): an Inkt tile with Amber details.
+   */
+  variant?: "default" | "inverted" | "ink";
   className?: string;
 };
 
 export function Logo({ size = 34, variant = "default", className = "" }: LogoProps) {
   // Tile radius scales with size (DESIGN.md §4): 8/64 in the header, 14/64 from 64 px up.
   const tileRadius = size >= 64 ? 14 : 8;
-  const inverted = variant === "inverted";
-  const tile = inverted ? "fill-cocoa" : "fill-amber";
-  const detail = inverted ? "fill-cocoa" : "fill-inkt";
-  const detailStroke = inverted ? "stroke-cocoa" : "stroke-inkt";
-  const snoutStroke = inverted ? "stroke-cocoa" : "stroke-amber";
+  const { tile, detail, detailStroke, snoutStroke } = {
+    default: { tile: "fill-amber", detail: "fill-inkt", detailStroke: "stroke-inkt", snoutStroke: "stroke-amber" },
+    inverted: { tile: "fill-cocoa", detail: "fill-cocoa", detailStroke: "stroke-cocoa", snoutStroke: "stroke-cocoa" },
+    ink: { tile: "fill-inkt", detail: "fill-amber", detailStroke: "stroke-amber", snoutStroke: "stroke-inkt" },
+  }[variant];
 
   return (
     <svg

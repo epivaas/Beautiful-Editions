@@ -30,7 +30,7 @@ function parseId(value: string | undefined) {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const id = parseId((await params).id);
   const page = id ? await getVariantPage(id) : null;
-  if (!page) return { title: "Variant not found · Shelfhound" };
+  if (!page) return { title: "Limited edition not found · Shelfhound" };
   const name = limitedEditionName(page.sub.limited_state?.name, page.sub.impression_label);
   return { title: [name, page.edition.title, "Shelfhound"].join(" · ") };
 }
@@ -114,7 +114,7 @@ export default async function VariantPage({ params }: PageProps) {
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           {chips.length > 0 && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="mr-1.5 font-mono text-[13px] uppercase tracking-[0.08em] text-creme-gedempt">Variants</span>
+              <span className="mr-1.5 font-mono text-[13px] uppercase tracking-[0.08em] text-creme-gedempt">Limited editions</span>
               {chips.map((chip) => (
                 <FilterChip key={chip.id} href={chip.href} count={chip.count} selected={chip.selected}>
                   {chip.name}
@@ -144,7 +144,7 @@ export default async function VariantPage({ params }: PageProps) {
         {facts.length > 0 && (
           <section aria-labelledby="apart" className="flex flex-col gap-3.5">
             <h2 id="apart" className="text-[26px] leading-8">
-              What sets this variant apart
+              What sets this limited edition apart
             </h2>
             <FactGrid
               items={facts.map((f) => ({
@@ -176,7 +176,7 @@ export default async function VariantPage({ params }: PageProps) {
       {others.length > 0 && (
         <section aria-labelledby="others" className="flex flex-col gap-4">
           <h2 id="others" className="text-[26px] leading-8">
-            Other variants of this edition
+            Other limited editions
           </h2>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
             {others.map((card) => (

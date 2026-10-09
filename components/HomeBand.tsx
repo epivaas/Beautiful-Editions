@@ -18,7 +18,7 @@ export default function HomeBand({ editions }: HomeBandProps) {
           Find the edition worth owning
         </h1>
         <p className="m-0 max-w-[640px] text-lg font-medium leading-[26px]">
-          A reference for beautifully illustrated editions: titles, editions, variants, printings and photographs, with
+          A reference for beautifully illustrated editions: titles, editions, limited editions, printings and photographs, with
           sources.
         </p>
 

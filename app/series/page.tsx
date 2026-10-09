@@ -4,9 +4,9 @@ import { getSeriesList, type SeriesListRow } from "@/app/lib/overviewQueries";
 import { matchesFilter, overviewHref, sortBy, type SortDir } from "@/app/lib/overview";
 import ListBand from "@/components/ListBand";
 import ListFilter from "@/components/ListFilter";
+import EmptyState from "@/components/EmptyState";
 import DataTable, { CELL_LINK, ROW_TITLE, type Column } from "@/components/DataTable";
 import Highlight from "@/components/Highlight";
-import { TextLink } from "@/components/Button";
 
 export const metadata: Metadata = { title: "Series · Shelfhound" };
 
@@ -91,13 +91,11 @@ export default async function SeriesPage({ searchParams }: PageProps) {
         keep={{ sort: sort === DEFAULTS.sort ? null : sort, dir: dir === DEFAULTS.dir ? null : dir }}
       />
       {rows.length === 0 ? (
-        <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
-          <p className="text-[22px] font-extrabold leading-7 tracking-[-0.02em]">No series match</p>
-          <p className="text-sm text-creme-gedempt">Check the spelling or try fewer words.</p>
-          <TextLink href="/series" standalone className="text-sm">
-            Clear filter
-          </TextLink>
-        </div>
+        <EmptyState
+          title="No series match"
+          text="Check the spelling or try fewer words."
+          secondary={{ href: "/series", label: "Clear filter" }}
+        />
       ) : (
         <DataTable
           caption="Series"

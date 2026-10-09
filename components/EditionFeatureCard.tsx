@@ -20,7 +20,7 @@ type EditionFeatureCardProps = {
   variants?: string[];
   note?: string | null;
   photos?: FeaturePhoto[];
-  /** "2 variants · 3 printings · 18 photos" */
+  /** "2 limited editions · 3 printings · 18 photos" */
   counts?: string;
   /** Other titles in this edition. */
   otherTitles?: { id: number; title: string }[];
@@ -116,7 +116,7 @@ export default function EditionFeatureCard({
         )}
 
         {variants.length > 0 && (
-          <LabelledRow label="Variants">
+          <LabelledRow label="Limited editions">
             {variants.map((v) => (
               <VariantLabel key={v}>{v}</VariantLabel>
             ))}

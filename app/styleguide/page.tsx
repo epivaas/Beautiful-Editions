@@ -7,6 +7,7 @@ import PhotoTile from "@/components/PhotoTile";
 import EditionCard from "@/components/EditionCard";
 import YellowBand from "@/components/YellowBand";
 import FactGrid from "@/components/FactGrid";
+import EmptyState from "@/components/EmptyState";
 import NoteText from "@/components/NoteText";
 import DataTable, { type Column } from "@/components/DataTable";
 import Pagination from "@/components/Pagination";
@@ -31,7 +32,7 @@ const COLORS = [
   { name: "leeg", swatch: "bg-leeg", use: "Empty “—”, disabled" },
   { name: "inkt", swatch: "bg-inkt", use: "Text on Amber, Gloed, mat" },
   { name: "amber", swatch: "bg-amber", use: "Clickable, selected, yellow band" },
-  { name: "gloed", swatch: "bg-gloed", use: "Counts, variant labels (no small text)" },
+  { name: "gloed", swatch: "bg-gloed", use: "Counts, limited edition labels (no small text)" },
 ];
 
 // Real photos only: the guide forbids placeholder or palette-coloured images.
@@ -145,6 +146,10 @@ export default async function StyleguidePage() {
             <Wordmark size={16} />
           </div>
           <Logo size={16} />
+          {/* On Gloed (404 page): Inkt tile with Amber details */}
+          <div className="flex items-center justify-center bg-gloed p-4">
+            <Logo size={64} variant="ink" />
+          </div>
         </div>
       </section>
 
@@ -227,7 +232,22 @@ export default async function StyleguidePage() {
       </section>
 
       <section className="flex flex-col gap-5">
-        <Eyebrow>Facts grid (variant page: compared with the edition)</Eyebrow>
+        <Eyebrow>Empty state (at most one Amber button)</Eyebrow>
+        <EmptyState
+          title="No editions match these filters"
+          text="There are no editions from 2008 with a leather binding. Remove a filter to see more."
+          filters={["2008", "Full leather"]}
+          action={{ href: "#", label: "Clear all filters" }}
+        />
+        <EmptyState
+          title="Nothing here yet"
+          text="There are no titles for this publisher in the database yet."
+          secondary={{ href: "#", label: "← Back to publishers" }}
+        />
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <Eyebrow>Facts grid (limited edition page: compared with the edition)</Eyebrow>
         <FactGrid
           items={[
             { label: "Copies", value: "Edition of 26" },

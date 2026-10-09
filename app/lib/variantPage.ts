@@ -30,7 +30,7 @@ type EditionFields = Pick<
 >;
 
 /**
- * "What sets this variant apart": copies and kind, the fields a variant can differ in (compared with the
+ * "What sets this limited edition apart": copies and kind, the fields a variant can differ in (compared with the
  * edition), the fields only an edition has (Same as edition) and the variant's own numbers. Empty fields drop out.
  */
 export function variantFacts(sub: EditionSubRow, edition: EditionFields): VariantFact[] {

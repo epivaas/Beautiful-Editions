@@ -242,10 +242,10 @@ function plural(n: number, word: string) {
   return `${n.toLocaleString("en-US")} ${word}${n === 1 ? "" : "s"}`;
 }
 
-/** "2 variants · 3 printings · 18 photos"; parts that are zero are left out. */
+/** "2 limited editions · 3 printings · 18 photos"; parts that are zero are left out. */
 export function countLine(row: EditionRow) {
   return [
-    row.variantCount > 0 && plural(row.variantCount, "variant"),
+    row.variantCount > 0 && plural(row.variantCount, "limited edition"),
     row.printings > 0 && plural(row.printings, "printing"),
     row.photoCount > 0 && plural(row.photoCount, "photo"),
   ]

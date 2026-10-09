@@ -8,6 +8,7 @@ import { joinNames } from "@/app/lib/names";
 import YellowBand from "@/components/YellowBand";
 import DataTable, { CELL_LINK, ROW_TITLE, type Column } from "@/components/DataTable";
 import NoteText from "@/components/NoteText";
+import EmptyState from "@/components/EmptyState";
 import { IncludesChip } from "@/components/Chip";
 import { TextLink } from "@/components/Button";
 
@@ -123,10 +124,11 @@ export default async function SeriesPage({ params }: PageProps) {
           <span className="font-mono text-[13px] text-creme-gedempt">{plural(rows.length, "title")}</span>
         </div>
         {rows.length === 0 ? (
-          <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
-            <p className="m-0 text-[22px] font-extrabold leading-7 tracking-[-0.02em]">No titles yet</p>
-            <p className="m-0 text-sm text-creme-gedempt">There are no editions in this series on Shelfhound yet.</p>
-          </div>
+          <EmptyState
+            title="Nothing here yet"
+            text="There are no editions in this series in the database yet. An empty list can also mean the data is still being added."
+            secondary={{ href: "/series", label: "← Back to series" }}
+          />
         ) : (
           <>
             <DataTable caption={`Titles in ${name}`} columns={COLUMNS} rows={rows} getRowKey={(r) => r.id} />

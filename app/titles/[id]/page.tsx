@@ -16,6 +16,7 @@ import {
   type SortKey,
 } from "@/app/lib/titlePage";
 import YellowBand from "@/components/YellowBand";
+import EmptyState from "@/components/EmptyState";
 import PhotoMosaic from "@/components/PhotoMosaic";
 import EditionCard from "@/components/EditionCard";
 import EditionFeatureCard from "@/components/EditionFeatureCard";
@@ -211,15 +212,11 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
         </div>
 
         {allEditions.length === 0 ? (
-          <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
-            <p className="text-[22px] font-extrabold leading-7 tracking-[-0.02em]">No editions recorded yet</p>
-            <p className="text-sm text-creme-gedempt">
-              The editions of this title have not been added to the database yet.
-            </p>
-            <TextLink href="/titles" standalone className="text-sm">
-              ← Back to titles
-            </TextLink>
-          </div>
+          <EmptyState
+            title="No editions recorded yet"
+            text="The editions of this title have not been added to the database yet."
+            secondary={{ href: "/titles", label: "← Back to titles" }}
+          />
         ) : (
           <>
             {allEditions.length > 1 && (

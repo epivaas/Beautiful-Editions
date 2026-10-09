@@ -7,6 +7,7 @@ import { GROUP_BYS, groupPage, groupRows, inRange, isGroupBy, pageOfGroup, publi
 import { activeSpan, matchesFilter, overviewHref, paginate } from "@/app/lib/overview";
 import ListBand from "@/components/ListBand";
 import ListFilter from "@/components/ListFilter";
+import EmptyState from "@/components/EmptyState";
 import YearBars from "@/components/YearBars";
 import GroupedTitleList from "@/components/GroupedTitleList";
 import GroupBySelect from "@/components/GroupBySelect";
@@ -162,21 +163,19 @@ export default async function PublisherPage({ params, searchParams }: PageProps)
       </div>
 
       {sorted.length === 0 ? (
-        <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
-          <p className="m-0 text-[22px] font-extrabold leading-7 tracking-[-0.02em]">
-            {q || range ? "No titles match" : "No titles yet"}
-          </p>
-          {q || range ? (
-            <>
-              <p className="m-0 text-sm text-creme-gedempt">Check the spelling, try fewer words or another period.</p>
-              <TextLink href={base} standalone className="text-sm">
-                Clear filter
-              </TextLink>
-            </>
-          ) : (
-            <p className="m-0 text-sm text-creme-gedempt">There are no editions of this publisher on Shelfhound yet.</p>
-          )}
-        </div>
+        q || range ? (
+          <EmptyState
+            title="No titles match"
+            text="Check the spelling, try fewer words or another period."
+            secondary={{ href: base, label: "Clear filter" }}
+          />
+        ) : (
+          <EmptyState
+            title="Nothing here yet"
+            text="There are no titles for this publisher in the database yet. An empty list can also mean the data is still being added."
+            secondary={{ href: "/publishers", label: "← Back to publishers" }}
+          />
+        )
       ) : (
         <>
           <GroupedTitleList

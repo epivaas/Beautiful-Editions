@@ -14,10 +14,10 @@ import {
 import ListBand from "@/components/ListBand";
 import AlphabetBar from "@/components/AlphabetBar";
 import ListFilter from "@/components/ListFilter";
+import EmptyState from "@/components/EmptyState";
 import DataTable, { CELL_LINK, ROW_TITLE, type Column } from "@/components/DataTable";
 import Highlight from "@/components/Highlight";
 import Pagination from "@/components/Pagination";
-import { TextLink } from "@/components/Button";
 
 export const metadata: Metadata = { title: "Authors · Shelfhound" };
 
@@ -87,13 +87,11 @@ export default async function AuthorsPage({ searchParams }: PageProps) {
       />
 
       {page.total === 0 ? (
-        <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
-          <p className="text-[22px] font-extrabold leading-7 tracking-[-0.02em]">No authors match</p>
-          <p className="text-sm text-creme-gedempt">Check the spelling, try fewer words or another letter.</p>
-          <TextLink href="/author" standalone className="text-sm">
-            Clear filter
-          </TextLink>
-        </div>
+        <EmptyState
+          title="No authors match"
+          text="Check the spelling, try fewer words or another letter."
+          secondary={{ href: "/author", label: "Clear filter" }}
+        />
       ) : (
         <>
           <DataTable

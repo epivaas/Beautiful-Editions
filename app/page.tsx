@@ -12,7 +12,7 @@ import { Button, TextLink } from "@/components/Button";
 
 export const metadata: Metadata = {
   title: "Shelfhound · Find the edition worth owning",
-  description: "A reference for beautifully illustrated editions: titles, editions, variants, printings and photographs.",
+  description: "A reference for beautifully illustrated editions: titles, editions, limited editions, printings and photographs.",
 };
 
 type PageProps = { searchParams: Promise<{ shuffle?: string }> };

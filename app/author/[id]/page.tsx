@@ -8,6 +8,7 @@ import { joinNames } from "@/app/lib/names";
 import YellowBand from "@/components/YellowBand";
 import DataTable, { CELL_LINK, ROW_TITLE, type Column } from "@/components/DataTable";
 import ListFilter from "@/components/ListFilter";
+import EmptyState from "@/components/EmptyState";
 import Pagination from "@/components/Pagination";
 import Highlight from "@/components/Highlight";
 import { TextLink } from "@/components/Button";
@@ -146,10 +147,11 @@ export default async function AuthorPage({ params, searchParams }: PageProps) {
       </div>
 
       {rows.length === 0 ? (
-        <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
-          <p className="m-0 text-[22px] font-extrabold leading-7 tracking-[-0.02em]">No titles yet</p>
-          <p className="m-0 text-sm text-creme-gedempt">There are no titles by this author on Shelfhound yet.</p>
-        </div>
+        <EmptyState
+          title="Nothing here yet"
+          text="There are no titles by this author in the database yet. An empty list can also mean the data is still being added."
+          secondary={{ href: "/author", label: "← Back to authors" }}
+        />
       ) : (
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1fr)_340px]">
           <section aria-labelledby="titles" className="flex min-w-0 flex-col gap-4">
@@ -163,12 +165,7 @@ export default async function AuthorPage({ params, searchParams }: PageProps) {
             </div>
             {long && <ListFilter action={base} q={q} />}
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
-                <p className="m-0 text-[22px] font-extrabold leading-7 tracking-[-0.02em]">No titles match</p>
-                <TextLink href={base} standalone className="text-sm">
-                  Clear filter
-                </TextLink>
-              </div>
+              <EmptyState title="No titles match" text="Check the spelling or try fewer words." secondary={{ href: base, label: "Clear filter" }} />
             ) : (
               <>
                 <DataTable caption={`Titles by ${name}`} columns={columns(q)} rows={page.rows} getRowKey={(r) => r.id} />

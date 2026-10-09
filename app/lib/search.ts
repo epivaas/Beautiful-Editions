@@ -254,3 +254,33 @@ export function suggestFor(rows: EditionSearchRow[], c: SearchCriteria, field: S
     .slice(0, limit)
     .map((value) => ({ value, count: counts.get(value) ?? 0 }));
 }
+
+/** The set criteria as short chip labels for an empty result: "2008", "Full leather", "With slipcase". */
+export function criteriaLabels(
+  c: SearchCriteria,
+  names: { publishers: { id: number; name: string }[]; series: { id: number; name: string }[] }
+) {
+  const years =
+    c.from !== null && c.to !== null
+      ? c.from === c.to
+        ? String(c.from)
+        : `${c.from} to ${c.to}`
+      : c.from !== null
+        ? `From ${c.from}`
+        : c.to !== null
+          ? `Until ${c.to}`
+          : null;
+  return [
+    c.title,
+    c.author,
+    c.publisher !== null ? names.publishers.find((p) => p.id === c.publisher)?.name ?? null : null,
+    c.series !== null ? names.series.find((s) => s.id === c.series)?.name ?? null : null,
+    c.illustrator,
+    c.binding,
+    years,
+    c.language,
+    c.limited ? "Limited editions" : null,
+    c.slipcase ? "With slipcase" : null,
+    c.photos ? "With photos" : null,
+  ].filter((label): label is string => !!label);
+}
