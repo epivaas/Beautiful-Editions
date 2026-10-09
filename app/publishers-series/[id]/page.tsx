@@ -3,12 +3,13 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { supabase } from "@/utils/supabase";
 import { getPublisherList } from "@/app/lib/overviewQueries";
 import { getPublisherTitles } from "@/app/lib/publisherPageQuery";
-import { groupPage, pageOfYear, publisherTitleRows, sortTitleRows, yearCounts } from "@/app/lib/publisherPage";
+import { GROUP_BYS, groupPage, groupRows, inRange, isGroupBy, pageOfGroup, publisherTitleRows, yearCounts } from "@/app/lib/publisherPage";
 import { activeSpan, matchesFilter, overviewHref, paginate } from "@/app/lib/overview";
 import ListBand from "@/components/ListBand";
 import ListFilter from "@/components/ListFilter";
 import YearBars from "@/components/YearBars";
-import YearGroupedList from "@/components/YearGroupedList";
+import GroupedTitleList from "@/components/GroupedTitleList";
+import GroupBySelect from "@/components/GroupBySelect";
 import Pagination from "@/components/Pagination";
 import { ActiveFilter } from "@/components/Chip";
 import { TextLink } from "@/components/Button";
@@ -17,7 +18,7 @@ const PAGE_SIZE = 50;
 
 type PageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ kind?: string; q?: string; year?: string; dir?: string; page?: string }>;
+  searchParams: Promise<{ kind?: string; q?: string; year?: string; from?: string; to?: string; group?: string; dir?: string; page?: string }>;
 };
 
 function parseId(value: string | undefined) {
@@ -65,23 +66,48 @@ export default async function PublisherPage({ params, searchParams }: PageProps)
 
   const q = query.q?.trim() || null;
   const dir = query.dir === "asc" ? "asc" : "desc";
+  const group = isGroupBy(query.group) ? query.group : "year";
   const all = publisherTitleRows(data.editions, data.works);
   const filtered = q
     ? all.filter((r) => matchesFilter([r.title, r.englishTitle, ...r.authors.map((a) => a.name), ...r.illustrators], q))
     : all;
-  const sorted = sortTitleRows(filtered, dir);
+  // The bar shows every year after the text filter; a dragged period then narrows the list
   const counts = yearCounts(filtered);
+  const from = Number(query.from);
+  const to = Number(query.to);
+  const range =
+    Number.isInteger(from) && Number.isInteger(to) && query.from && query.to
+      ? { from: Math.min(from, to), to: Math.max(from, to) }
+      : null;
+  const sorted = groupRows(range ? inRange(filtered, range.from, range.to) : filtered, group, dir);
   const year = Number(query.year);
-  const selected = Number.isInteger(year) && counts.some((c) => c.year === year) ? year : null;
+  const selected = group === "year" && Number.isInteger(year) && sorted.some((r) => r.year === year) ? year : null;
   // A chosen year opens the page on which it starts
-  const pageNumber = selected !== null && !query.page ? pageOfYear(sorted, selected, PAGE_SIZE) : Number(query.page ?? 1);
+  const pageNumber = selected !== null && !query.page ? pageOfGroup(sorted, `y-${selected}`, PAGE_SIZE) : Number(query.page ?? 1);
   const page = paginate(sorted, pageNumber, PAGE_SIZE);
   const items = groupPage(sorted, (page.page - 1) * PAGE_SIZE, PAGE_SIZE);
 
   const base = `/publishers-series/${publisher.id}`;
-  const state = { q, dir, year: selected !== null ? String(selected) : null, page: String(page.page) };
+  const state = {
+    q,
+    group: group === "year" ? null : group,
+    dir,
+    from: range ? String(range.from) : null,
+    to: range ? String(range.to) : null,
+    year: selected !== null ? String(selected) : null,
+    page: String(page.page),
+  };
   const defaults = { dir: "desc", page: "1" };
   const href = (changes: Record<string, string | null>, hash = "") => overviewHref(base, state, changes, defaults) + hash;
+  // A click on a bar jumps to that year when the list is grouped by year, and filters on it otherwise
+  const yearHrefs = Object.fromEntries(
+    counts.map((c) => [
+      c.year,
+      group === "year"
+        ? href({ year: String(c.year), from: null, to: null }, `#y-${c.year}`)
+        : href({ from: String(c.year), to: String(c.year), year: null }),
+    ])
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -104,24 +130,45 @@ export default async function PublisherPage({ params, searchParams }: PageProps)
         />
       </div>
 
-      <YearBars counts={counts} selected={selected} hrefFor={(y) => href({ year: String(y) }, `#y-${y}`)} />
+      <YearBars
+        counts={counts}
+        selected={selected}
+        range={range}
+        yearHrefs={yearHrefs}
+        rangeHref={href({ from: "__FROM__", to: "__TO__", year: null })}
+      />
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          {/* A filter keeps the order, but not the chosen year or the page */}
-          <ListFilter action={base} q={q} keep={{ dir: dir === "desc" ? null : dir }} />
+        <div className="w-full min-w-0 sm:w-auto sm:flex-1">
+          {/* A filter keeps the grouping, order and period, but not the chosen year or the page */}
+          <ListFilter
+            action={base}
+            q={q}
+            keep={{ group: state.group, dir: dir === "desc" ? null : dir, from: state.from, to: state.to }}
+          />
         </div>
-        {selected !== null && <ActiveFilter removeHref={href({ year: null })}>{`Jumped to ${selected}`}</ActiveFilter>}
+        <div className="flex flex-wrap items-center gap-3">
+          {selected !== null && <ActiveFilter removeHref={href({ year: null })}>{`Jumped to ${selected}`}</ActiveFilter>}
+          {range && (
+            <ActiveFilter removeHref={href({ from: null, to: null })}>
+              {range.from === range.to ? String(range.from) : `${range.from} to ${range.to}`}
+            </ActiveFilter>
+          )}
+          <GroupBySelect
+            value={group}
+            options={GROUP_BYS.map((g) => ({ key: g.key, label: g.label, href: href({ group: g.key === "year" ? null : g.key, year: null }) }))}
+          />
+        </div>
       </div>
 
       {sorted.length === 0 ? (
         <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6">
           <p className="m-0 text-[22px] font-extrabold leading-7 tracking-[-0.02em]">
-            {q ? "No titles match" : "No titles yet"}
+            {q || range ? "No titles match" : "No titles yet"}
           </p>
-          {q ? (
+          {q || range ? (
             <>
-              <p className="m-0 text-sm text-creme-gedempt">Check the spelling or try fewer words.</p>
+              <p className="m-0 text-sm text-creme-gedempt">Check the spelling, try fewer words or another period.</p>
               <TextLink href={base} standalone className="text-sm">
                 Clear filter
               </TextLink>
@@ -132,8 +179,9 @@ export default async function PublisherPage({ params, searchParams }: PageProps)
         </div>
       ) : (
         <>
-          <YearGroupedList
+          <GroupedTitleList
             items={items}
+            group={group}
             selected={selected}
             dir={dir}
             q={q}

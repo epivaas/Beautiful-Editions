@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
   groupPage,
-  pageOfYear,
+  groupRows,
+  inRange,
+  pageOfGroup,
   publisherTitleRows,
-  sortTitleRows,
   yearCounts,
   yearTicks,
   type PublisherEdition,
@@ -46,29 +47,70 @@ describe('publisherTitleRows', () => {
   });
 });
 
-describe('sorting and pages', () => {
-  const sorted = sortTitleRows(publisherTitleRows(editions, works));
+describe('grouping and pages', () => {
+  const rows = publisherTitleRows(editions, works);
+  const sorted = groupRows(rows);
+  const heads = (items: ReturnType<typeof groupPage>) =>
+    items.map((i) => (i.kind === 'group' ? `[${i.label} ${i.count}${i.continued ? ' c' : ''}]` : i.row.title));
 
-  it('puts the newest year first, A–Z within a year and the unknown year last', () => {
+  it('by year: newest first, A–Z within a year, the unknown year last', () => {
     expect(sorted.map((r) => `${r.year}:${r.title}`)).toEqual(['2005:Beowulf', '1998:Iliad', '1998:Odyssey', 'null:Iliad']);
-    expect(sortTitleRows(sorted, 'asc').map((r) => r.year)).toEqual([1998, 1998, 2005, null]);
+    expect(groupRows(rows, 'year', 'asc').map((r) => r.year)).toEqual([1998, 1998, 2005, null]);
   });
 
-  it('finds the page on which a year starts', () => {
-    expect(pageOfYear(sorted, 1998, 1)).toBe(2);
-    expect(pageOfYear(sorted, 1500, 1)).toBe(1);
+  it('finds the page on which a group starts', () => {
+    expect(pageOfGroup(sorted, 'y-1998', 1)).toBe(2);
+    expect(pageOfGroup(sorted, 'y-1500', 1)).toBe(1);
   });
 
-  it('puts a heading before each year and repeats it, marked continued, on the next page', () => {
-    expect(groupPage(sorted, 0, 2).map((i) => (i.kind === 'year' ? `[${i.year} ${i.count}]` : i.row.title))).toEqual([
-      '[2005 1]',
-      'Beowulf',
-      '[1998 2]',
-      'Iliad',
-    ]);
+  it('puts a heading before each group and repeats it, marked continued, on the next page', () => {
+    expect(heads(groupPage(sorted, 0, 2))).toEqual(['[2005 1]', 'Beowulf', '[1998 2]', 'Iliad']);
     const next = groupPage(sorted, 2, 2);
-    expect(next[0]).toEqual({ kind: 'year', year: 1998, count: 2, continued: true });
-    expect(next.filter((i) => i.kind === 'year').map((i) => i.kind === 'year' && i.year)).toEqual([1998, null]);
+    expect(next[0]).toEqual({ kind: 'group', id: 'y-1998', label: '1998', year: 1998, count: 2, continued: true });
+    expect(heads(next)).toEqual(['[1998 2 c]', 'Odyssey', '[Unknown year 1]', 'Iliad']);
+  });
+
+  it('by title: a heading per first letter, A–Z, then the newest year', () => {
+    expect(heads(groupPage(groupRows(rows, 'title'), 0, 10))).toEqual([
+      '[B 1]',
+      'Beowulf',
+      '[I 2]',
+      'Iliad',
+      'Iliad',
+      '[O 1]',
+      'Odyssey',
+    ]);
+    expect(groupRows(rows, 'title').filter((r) => r.title === 'Iliad').map((r) => r.year)).toEqual([1998, null]);
+  });
+
+  it('by author: a heading per author A–Z, a title with two authors under both, no author last', () => {
+    const two = publisherTitleRows(
+      [{ id: 20, year: 2001, workIds: [5], illustrators: [] }, ...editions],
+      [...works, { id: 5, title: 'Joint Work', englishTitle: null, sortTitle: 'Joint Work', authors: [{ id: 9, name: 'Homer' }, { id: 8, name: 'Austen, Jane' }] }]
+    );
+    const grouped = groupRows(two, 'author');
+    expect(heads(groupPage(grouped, 0, 20))).toEqual([
+      '[Austen, Jane 1]',
+      'Joint Work',
+      '[Homer 4]',
+      'Joint Work',
+      'Iliad',
+      'Odyssey',
+      'Iliad',
+      '[No author 1]',
+      'Beowulf',
+    ]);
+    // Each row has its own key, also when a title appears twice
+    expect(new Set(grouped.map((r) => r.rowKey)).size).toBe(grouped.length);
+  });
+});
+
+describe('inRange', () => {
+  const rows = publisherTitleRows(editions, works);
+  it('keeps the years of a period (in either order) and drops unknown years', () => {
+    expect(inRange(rows, 1998, 2004).map((r) => r.year)).toEqual([1998, 1998]);
+    expect(inRange(rows, 2005, 1998)).toHaveLength(3);
+    expect(inRange(rows, null, null)).toHaveLength(4);
   });
 });
 

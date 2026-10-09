@@ -1,5 +1,6 @@
 // Pure helpers for the publisher page (/publishers-series/[id]): titles grouped per publication year.
 // No Supabase import, so they can be unit tested.
+import { firstLetter, LETTERS } from "./overview";
 
 export type PublisherEdition = { id: number; year: number | null; workIds: number[]; illustrators: string[] };
 export type PublisherWork = {
@@ -62,16 +63,90 @@ export function publisherTitleRows(editions: PublisherEdition[], works: Publishe
   }));
 }
 
-/** Newest year first (or oldest with "asc"), unknown years always last; A–Z within a year. */
-export function sortTitleRows(rows: PublisherTitleRow[], dir: "asc" | "desc" = "desc") {
+export type GroupBy = "year" | "title" | "author";
+export const GROUP_BYS: { key: GroupBy; label: string }[] = [
+  { key: "year", label: "Year" },
+  { key: "title", label: "Title" },
+  { key: "author", label: "Author" },
+];
+
+export function isGroupBy(value: string | null | undefined): value is GroupBy {
+  return GROUP_BYS.some((g) => g.key === value);
+}
+
+/** Only rows from `from` to `to` (both included); rows without a year drop out of a period. */
+export function inRange(rows: PublisherTitleRow[], from: number | null, to: number | null) {
+  if (from === null && to === null) return rows;
+  const lo = Math.min(from ?? to!, to ?? from!);
+  const hi = Math.max(from ?? to!, to ?? from!);
+  return rows.filter((r) => r.year !== null && r.year >= lo && r.year <= hi);
+}
+
+/** A row under one heading. With Group by Author a title with two authors appears under both. */
+export type GroupedRow = PublisherTitleRow & { group: string; groupLabel: string; rowKey: string };
+
+const NO_AUTHOR = "No author";
+// A–Z first, then Greek, Cyrillic and other characters, as on the A–Z bar
+const LETTER_ORDER = new Map(LETTERS.map((l, i) => [l.key, i]));
+
+/** Newest year first, unknown years last. */
+function byYearDesc(a: PublisherTitleRow, b: PublisherTitleRow) {
+  return (a.year === null ? 1 : 0) - (b.year === null ? 1 : 0) || (b.year ?? 0) - (a.year ?? 0);
+}
+
+/**
+ * Rows with their heading, in list order.
+ * - year: newest year first (oldest with "asc"), unknown years last; A–Z within a year;
+ * - title: by first letter A–Z, then the sort title, then newest year;
+ * - author: per author A–Z ("No author" last), then newest year, then A–Z.
+ */
+export function groupRows(rows: PublisherTitleRow[], group: GroupBy = "year", dir: "asc" | "desc" = "desc"): GroupedRow[] {
+  const byTitle = (a: PublisherTitleRow, b: PublisherTitleRow) => collator.compare(a.sortTitle, b.sortTitle) || a.workId - b.workId;
+
+  if (group === "title") {
+    return rows
+      .map((r) => {
+        const key = firstLetter(r.sortTitle);
+        return { ...r, group: `l-${key}`, groupLabel: LETTERS.find((l) => l.key === key)?.label ?? "#", rowKey: r.key };
+      })
+      .sort(
+        (a, b) =>
+          (LETTER_ORDER.get(a.group.slice(2)) ?? 99) - (LETTER_ORDER.get(b.group.slice(2)) ?? 99) ||
+          collator.compare(a.sortTitle, b.sortTitle) ||
+          byYearDesc(a, b) ||
+          a.workId - b.workId
+      );
+  }
+
+  if (group === "author") {
+    return rows
+      .flatMap((r) =>
+        (r.authors.length > 0 ? r.authors : [null]).map((a) => ({
+          ...r,
+          group: a ? `a-${a.id}` : "a-none",
+          groupLabel: a ? a.name : NO_AUTHOR,
+          rowKey: `${r.key}-${a ? a.id : "none"}`,
+        }))
+      )
+      .sort(
+        (a, b) =>
+          (a.group === "a-none" ? 1 : 0) - (b.group === "a-none" ? 1 : 0) ||
+          collator.compare(a.groupLabel, b.groupLabel) ||
+          a.group.localeCompare(b.group) ||
+          byYearDesc(a, b) ||
+          byTitle(a, b)
+      );
+  }
+
   const sign = dir === "asc" ? 1 : -1;
-  return [...rows].sort(
-    (a, b) =>
-      (a.year === null ? 1 : 0) - (b.year === null ? 1 : 0) ||
-      (a.year !== null && b.year !== null ? sign * (a.year - b.year) : 0) ||
-      collator.compare(a.sortTitle, b.sortTitle) ||
-      a.workId - b.workId
-  );
+  return rows
+    .map((r) => ({ ...r, group: `y-${r.year ?? "unknown"}`, groupLabel: r.year === null ? "Unknown year" : String(r.year), rowKey: r.key }))
+    .sort(
+      (a, b) =>
+        (a.year === null ? 1 : 0) - (b.year === null ? 1 : 0) ||
+        (a.year !== null && b.year !== null ? sign * (a.year - b.year) : 0) ||
+        byTitle(a, b)
+    );
 }
 
 /** Titles per known year, oldest first, for the year bar. */
@@ -81,32 +156,33 @@ export function yearCounts(rows: PublisherTitleRow[]) {
   return [...counts].map(([year, count]) => ({ year, count })).sort((a, b) => a.year - b.year);
 }
 
-/** The page (1-based) on which a year starts; 1 when the year is not in the list. */
-export function pageOfYear(sorted: PublisherTitleRow[], year: number, size: number) {
-  const i = sorted.findIndex((r) => r.year === year);
+/** The page (1-based) on which a group starts; 1 when it is not in the list. */
+export function pageOfGroup(sorted: GroupedRow[], group: string, size: number) {
+  const i = sorted.findIndex((r) => r.group === group);
   return i < 0 ? 1 : Math.floor(i / size) + 1;
 }
 
 export type ListItem =
-  | { kind: "year"; year: number | null; count: number; continued: boolean }
-  | { kind: "row"; row: PublisherTitleRow };
+  | { kind: "group"; id: string; label: string; year: number | null; count: number; continued: boolean }
+  | { kind: "row"; row: GroupedRow };
 
 /**
- * One page of rows with a heading before each year. A year that started on an earlier page gets its
+ * One page of rows with a heading before each group. A group that started on an earlier page gets its
  * heading again, marked "continued". `start` is the index of the page's first row in `sorted`.
  */
-export function groupPage(sorted: PublisherTitleRow[], start: number, size: number): ListItem[] {
-  const counts = new Map<number | null, number>();
-  for (const r of sorted) counts.set(r.year, (counts.get(r.year) ?? 0) + 1);
+export function groupPage(sorted: GroupedRow[], start: number, size: number): ListItem[] {
+  const counts = new Map<string, number>();
+  for (const r of sorted) counts.set(r.group, (counts.get(r.group) ?? 0) + 1);
   const items: ListItem[] = [];
-  let previous: number | null | undefined = undefined;
+  let previous: string | null = null;
   sorted.slice(start, start + size).forEach((row, i) => {
-    if (i === 0 || row.year !== previous) {
-      const continued = i === 0 && start > 0 && sorted[start - 1].year === row.year;
-      items.push({ kind: "year", year: row.year, count: counts.get(row.year) ?? 0, continued });
+    if (row.group !== previous) {
+      const continued = i === 0 && start > 0 && sorted[start - 1].group === row.group;
+      const year = row.group.startsWith("y-") ? row.year : null;
+      items.push({ kind: "group", id: row.group, label: row.groupLabel, year, count: counts.get(row.group) ?? 0, continued });
     }
     items.push({ kind: "row", row });
-    previous = row.year;
+    previous = row.group;
   });
   return items;
 }
