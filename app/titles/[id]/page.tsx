@@ -9,24 +9,31 @@ import {
   sortEditions,
   summarize,
   toEditionRow,
-  type EditionRow,
+  countLine,
+  sortRows,
+  type SortDir,
+  type SortKey,
 } from "@/app/lib/titlePage";
 import YellowBand from "@/components/YellowBand";
 import PhotoMosaic from "@/components/PhotoMosaic";
-import PhotoTile from "@/components/PhotoTile";
 import EditionCard from "@/components/EditionCard";
-import DataTable, { type Column } from "@/components/DataTable";
+import EditionFeatureCard from "@/components/EditionFeatureCard";
 import ViewToggle from "@/components/ViewToggle";
-import { FilterChip, VariantLabel } from "@/components/Chip";
+import { FilterChip } from "@/components/Chip";
 import { Button, TextLink } from "@/components/Button";
 
 type PageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ publisher?: string; view?: string }>;
+  searchParams: Promise<{ publisher?: string; view?: string; sort?: string; dir?: string }>;
 };
 
-// The comparison table only appears from this many editions on (DESIGN.md §6)
-const TABLE_FROM = 4;
+// The Cards/Grid switch only appears from this many editions on (DESIGN.md §6)
+const TOGGLE_FROM = 4;
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: "year", label: "Year" },
+  { key: "publisher", label: "Publisher" },
+  { key: "name", label: "Name" },
+];
 // Longer original titles get the smaller title size in the band
 const LONG_TITLE = 28;
 
@@ -41,51 +48,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return { title: work ? `${work.original_title} · Shelfhound` : "Title not found · Shelfhound" };
 }
 
-const EDITION_COLUMNS: Column<EditionRow>[] = [
-  {
-    key: "photo",
-    label: "",
-    width: "76px",
-    // Decorative thumbnail: the same photo with its © credit is in the mosaic and on the card
-    render: (e) =>
-      e.mainPhoto ? <PhotoTile src={e.mainPhoto.src} alt="" padding={3} className="h-16 w-12" /> : null,
-  },
-  {
-    key: "title",
-    label: "Edition",
-    render: (e) => (
-      <div className="flex flex-col gap-1">
-        {e.publisher && (
-          <span className="text-[11px] font-semibold uppercase tracking-[0.09em] text-creme-gedempt">
-            {e.publisher.name}
-          </span>
-        )}
-        <Link href={`/edition/${e.id}`} className="text-lg font-bold leading-6 text-creme hover:text-amber">
-          {e.title}
-        </Link>
-        {e.variants.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {e.variants.map((v) => (
-              <VariantLabel key={v}>{v}</VariantLabel>
-            ))}
-          </div>
-        )}
-      </div>
-    ),
-  },
-  { key: "year", label: "Year", width: "80px", mono: true },
-  { key: "illustrators", label: "Illustrator", width: "20%", render: (e) => e.illustrators.join(", ") },
-  { key: "binding", label: "Binding", width: "22%" },
-  {
-    key: "printings",
-    label: "Printings",
-    width: "100px",
-    mono: true,
-    align: "right",
-    render: (e) => (e.printings > 0 ? e.printings : null),
-  },
-];
-
 export default async function TitlePage({ params, searchParams }: PageProps) {
   const id = parseId((await params).id);
   const work = id ? await getTitlePage(id) : null;
@@ -99,20 +61,41 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
 
   const publisherId = parseId(query.publisher);
   const activePublisher = publishers.some((p) => p.id === publisherId) ? publisherId : null;
-  const editions = filterByPublisher(allEditions, activePublisher).map(toEditionRow);
-  const view = allEditions.length >= TABLE_FROM && query.view !== "grid" ? "table" : "grid";
+  const sort: SortKey = SORTS.some((o) => o.key === query.sort) ? (query.sort as SortKey) : "year";
+  const dir: SortDir = query.dir === "desc" ? "desc" : "asc";
+  const editions = sortRows(filterByPublisher(allEditions, activePublisher).map(toEditionRow), sort, dir);
+  const showToggle = allEditions.length >= TOGGLE_FROM;
+  // Cards is the default; with fewer than four editions there is no switch and always Cards
+  const view = showToggle && query.view === "grid" ? "grid" : "cards";
 
-  const hrefWith = (changes: Record<string, string | null>) => {
+  // Links keep the other choices; defaults (no publisher, cards, year ascending) stay out of the URL
+  const hrefWith = (changes: Partial<Record<"publisher" | "view" | "sort" | "dir", string | null>>) => {
+    const state: Record<string, string | null> = {
+      publisher: activePublisher ? String(activePublisher) : null,
+      view: view === "grid" ? "grid" : null,
+      sort: sort === "year" ? null : sort,
+      dir: dir === "desc" ? "desc" : null,
+      ...changes,
+    };
     const next = new URLSearchParams();
-    if (activePublisher) next.set("publisher", String(activePublisher));
-    if (query.view === "grid") next.set("view", "grid");
-    for (const [key, value] of Object.entries(changes)) {
-      if (value === null) next.delete(key);
-      else next.set(key, value);
-    }
+    for (const [key, value] of Object.entries(state)) if (value) next.set(key, value);
     const qs = next.toString();
     return `/titles/${work.id}${qs ? `?${qs}` : ""}#editions`;
   };
+
+  const sortOptions = SORTS.map((option) => {
+    const active = option.key === sort;
+    // Clicking the active sort reverses it; another sort starts ascending
+    const nextDir = active && dir === "asc" ? "desc" : "asc";
+    return {
+      value: option.key,
+      label: active ? `${option.label} ${dir === "asc" ? "▲" : "▼"}` : option.label,
+      ariaLabel: active
+        ? `Sorted by ${option.label.toLowerCase()}, ${dir === "asc" ? "ascending" : "descending"}. Reverse order`
+        : `Sort by ${option.label.toLowerCase()}`,
+      href: hrefWith({ sort: option.key === "year" ? null : option.key, dir: nextDir === "desc" ? "desc" : null }),
+    };
+  });
 
   const authors = (work.work_authors || []).map((wa) => wa.author).filter((a) => a !== null);
   const englishTitle =
@@ -238,7 +221,7 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
           </div>
         ) : (
           <>
-            {(publishers.length > 1 || allEditions.length >= TABLE_FROM) && (
+            {allEditions.length > 1 && (
               <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
                 {publishers.length > 1 ? (
                   <div role="group" aria-label="Filter by publisher" className="flex flex-wrap gap-2">
@@ -259,27 +242,46 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
                 ) : (
                   <span />
                 )}
-                {allEditions.length >= TABLE_FROM && (
-                  <ViewToggle
-                    current={view}
-                    options={[
-                      { value: "table", label: "Table", href: hrefWith({ view: null }) },
-                      { value: "grid", label: "Grid", href: hrefWith({ view: "grid" }) },
-                    ]}
-                  />
-                )}
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-[13px] text-creme-gedempt">Sort by</span>
+                    <ViewToggle label="Sort by" current={sort} options={sortOptions} />
+                  </div>
+                  {showToggle && (
+                    <ViewToggle
+                      current={view}
+                      options={[
+                        { value: "cards", label: "Cards", href: hrefWith({ view: null }) },
+                        { value: "grid", label: "Grid", href: hrefWith({ view: "grid" }) },
+                      ]}
+                    />
+                  )}
+                </div>
               </div>
             )}
 
-            {view === "table" ? (
-              <DataTable
-                caption={`Editions of ${work.original_title}`}
-                columns={EDITION_COLUMNS}
-                rows={editions}
-                getRowKey={(e) => e.id}
-              />
+            {view === "cards" ? (
+              <div className="flex flex-col gap-4">
+                {editions.map((e) => (
+                  <EditionFeatureCard
+                    key={e.id}
+                    href={`/edition/${e.id}`}
+                    title={e.title}
+                    publisher={e.publisher?.name}
+                    year={e.year}
+                    binding={e.binding}
+                    pages={e.pages}
+                    illustrators={e.illustrators}
+                    includes={e.includes}
+                    variants={e.variants}
+                    note={e.note}
+                    photos={e.photos}
+                    counts={countLine(e)}
+                  />
+                ))}
+              </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
                 {editions.map((e) => (
                   <EditionCard
                     key={e.id}
@@ -288,8 +290,11 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
                     publisher={e.publisher?.name}
                     year={e.year}
                     binding={e.binding}
+                    illustrators={e.illustrators}
+                    includes={e.includes}
                     variants={e.variants}
-                    photo={e.mainPhoto}
+                    printings={e.printings}
+                    photo={e.photos[0] ?? null}
                   />
                 ))}
               </div>

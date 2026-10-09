@@ -9,7 +9,8 @@ const TITLE_SELECT = `
   work_authors ( author:authors ( id, name ) ),
   work_editions (
     edition:editions (
-      id, title, publication_year, language, binding_type, is_limited_edition, limited_edition_count,
+      id, title, publication_year, language, binding_type, pages_description, notes,
+      slipcase, dustjacket, clamshell, is_limited_edition, limited_edition_count,
       publisher:publishers ( id, name ),
       photos ( ${PHOTO} ),
       sub_editions (

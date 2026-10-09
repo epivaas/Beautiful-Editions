@@ -68,19 +68,32 @@ export function ActiveFilter({ children, removeHref }: ActiveFilterProps) {
   );
 }
 
+type LabelProps = {
+  children: ReactNode;
+  /** "sm" for compact grid cards: 24 px high, 12 px text. */
+  size?: "md" | "sm";
+};
+
+const LABEL_SIZES = {
+  md: "min-h-7 px-[11px] text-[13px]",
+  sm: "min-h-6 px-2 text-xs",
+} as const;
+
 /** What comes with the book: slipcase, dust jacket, clamshell box... All equal, so one style. */
-export function IncludesChip({ children }: { children: ReactNode }) {
+export function IncludesChip({ children, size = "md" }: LabelProps) {
   return (
-    <span className="inline-flex min-h-7 items-center rounded-ctl bg-lijn px-3 text-[13px] font-semibold text-creme">
+    <span className={`inline-flex items-center rounded-ctl bg-lijn font-semibold text-creme ${LABEL_SIZES[size]}`}>
       {children}
     </span>
   );
 }
 
-/** Variant label such as "Edition of 26" or "Lettered 26". Gloed surface, never Gloed text. */
-export function VariantLabel({ children }: { children: ReactNode }) {
+/** Variant label such as "Lettered · 26" or "Edition of 26". Gloed surface, never Gloed text. */
+export function VariantLabel({ children, size = "md" }: LabelProps) {
   return (
-    <span className="inline-flex min-h-[26px] items-center whitespace-nowrap rounded-ctl bg-gloed px-2.5 text-[13px] font-bold text-inkt">
+    <span
+      className={`inline-flex items-center whitespace-nowrap rounded-ctl bg-gloed font-bold text-inkt ${LABEL_SIZES[size]}`}
+    >
       {children}
     </span>
   );

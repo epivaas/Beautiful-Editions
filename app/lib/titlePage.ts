@@ -1,5 +1,5 @@
 // Pure helpers for the title page (/titles/[id]). No Supabase import, so they can be unit tested.
-import { getMainPhoto, getPhotoUrl } from "./editionUtils";
+import { getPhotoUrl } from "./editionUtils";
 
 export type TitlePhotoRow = {
   id: number;
@@ -25,6 +25,11 @@ export type TitleEditionRow = {
   publication_year: number | null;
   language: string | null;
   binding_type: string | null;
+  pages_description?: string | null;
+  notes?: string | null;
+  slipcase?: boolean | null;
+  dustjacket?: boolean | null;
+  clamshell?: boolean | null;
   is_limited_edition: boolean | null;
   limited_edition_count: number | null;
   publisher: { id: number; name: string } | null;
@@ -52,11 +57,22 @@ export type EditionRow = {
   publisher: { id: number; name: string } | null;
   year: number | null;
   binding: string | null;
+  pages: string | null;
   illustrators: string[];
+  /** What comes with the book, all equal: Slipcase, Clamshell box, Dust jacket. */
+  includes: string[];
+  /** Editorial note, whitespace collapsed; the cards clamp it to three lines. */
+  note: string | null;
   printings: number;
+  variantCount: number;
   variants: string[];
-  mainPhoto: { src: string; alt: string; credit: string | null } | null;
+  /** Photos of the edition and its sub-editions, main photo first. */
+  photos: TitlePhoto[];
+  photoCount: number;
 };
+
+export type SortKey = "year" | "publisher" | "name";
+export type SortDir = "asc" | "desc";
 
 /** Editions of a work, oldest first (as on the board), id as tiebreaker. */
 export function sortEditions(work: TitleWorkRow): TitleEditionRow[] {
@@ -123,7 +139,13 @@ export function limitedLabel(kind: string | null | undefined, count: number | nu
   return n ? `Edition of ${n}` : "Limited edition";
 }
 
-/** One edition as shown in the table and on the cards. */
+const INCLUDES: [keyof TitleEditionRow, string][] = [
+  ["slipcase", "Slipcase"],
+  ["clamshell", "Clamshell box"],
+  ["dustjacket", "Dust jacket"],
+];
+
+/** One edition as shown on the Cards and Grid views. */
 export function toEditionRow(edition: TitleEditionRow): EditionRow {
   const subs = edition.sub_editions || [];
   const limitedSubs = subs
@@ -134,9 +156,9 @@ export function toEditionRow(edition: TitleEditionRow): EditionRow {
     ...(edition.is_limited_edition ? [limitedLabel(null, edition.limited_edition_count)] : []),
     ...limitedSubs.map((s) => limitedLabel(s.limited_state?.name, s.limited_edition_count)),
   ];
-  const main = getMainPhoto(
-    (edition.photos || []).map((p) => ({ ...p, is_main: p.is_main ?? undefined }))
-  );
+  const photos = collectPhotos([edition]);
+  const uniqueVariants = unique(variants);
+  const note = edition.notes?.replace(/\s+/g, " ").trim() || null;
 
   return {
     id: edition.id,
@@ -144,17 +166,56 @@ export function toEditionRow(edition: TitleEditionRow): EditionRow {
     publisher: edition.publisher,
     year: edition.publication_year,
     binding: edition.binding_type || null,
+    pages: edition.pages_description || null,
     illustrators: unique(
       (edition.edition_contributors || [])
         .filter((c) => c.role === "Illustrator" && c.contributor)
         .map((c) => c.contributor!.name)
     ),
+    includes: INCLUDES.filter(([field]) => edition[field] === true).map(([, label]) => label),
+    note,
     printings: subs.length - limitedSubs.length,
-    variants: unique(variants),
-    mainPhoto: main
-      ? { src: getPhotoUrl(main.storage_path), alt: photoAlt(main as TitlePhotoRow, edition), credit: main.copyright_statement ?? null }
-      : null,
+    variantCount: uniqueVariants.length,
+    variants: uniqueVariants,
+    photos,
+    photoCount: photos.length,
   };
+}
+
+const collator = new Intl.Collator("en", { sensitivity: "base" });
+
+/**
+ * Sort editions for the Sort by control. Year: unknown years last (in both directions);
+ * publisher and name fall back to year, and id keeps equal rows in a stable order.
+ */
+export function sortRows(rows: EditionRow[], key: SortKey, dir: SortDir): EditionRow[] {
+  const sign = dir === "desc" ? -1 : 1;
+  const byYear = (a: EditionRow, b: EditionRow) => {
+    if (a.year === null || b.year === null) return a.year === b.year ? 0 : a.year === null ? 1 : -1;
+    return sign * (a.year - b.year);
+  };
+
+  return [...rows].sort((a, b) => {
+    let primary = 0;
+    if (key === "publisher") primary = sign * collator.compare(a.publisher?.name ?? "", b.publisher?.name ?? "");
+    if (key === "name") primary = sign * collator.compare(a.title, b.title);
+    return primary || byYear(a, b) || a.id - b.id;
+  });
+}
+
+function plural(n: number, word: string) {
+  return `${n.toLocaleString("en-US")} ${word}${n === 1 ? "" : "s"}`;
+}
+
+/** "2 variants · 3 printings · 18 photos"; parts that are zero are left out. */
+export function countLine(row: EditionRow) {
+  return [
+    row.variantCount > 0 && plural(row.variantCount, "variant"),
+    row.printings > 0 && plural(row.printings, "printing"),
+    row.photoCount > 0 && plural(row.photoCount, "photo"),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 /** Publishers with their number of editions, in order of first appearance. */

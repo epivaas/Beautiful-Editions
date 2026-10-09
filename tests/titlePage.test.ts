@@ -1,12 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import {
   collectPhotos,
+  countLine,
   filterByPublisher,
   limitedLabel,
   publisherCounts,
   sortEditions,
+  sortRows,
   summarize,
   toEditionRow,
+  type EditionRow,
   type TitleEditionRow,
   type TitlePhotoRow,
   type TitleWorkRow,
@@ -149,8 +152,9 @@ describe('toEditionRow', () => {
     );
     expect(row.illustrators).toEqual(['Keeping, Charles']);
     expect(row.binding).toBeNull();
-    expect(row.mainPhoto?.src).toMatch(/p2\.jpg$/);
-    expect(row.mainPhoto?.credit).toBe('© 2');
+    expect(row.photos[0].src).toMatch(/p2\.jpg$/);
+    expect(row.photos[0].credit).toBe('© 2');
+    expect(row.photoCount).toBe(2);
   });
 });
 
@@ -167,5 +171,87 @@ describe('publisherCounts and filterByPublisher', () => {
   it('filters by publisher, or returns everything without one', () => {
     expect(filterByPublisher(editions, 5).map((e) => e.id)).toEqual([2]);
     expect(filterByPublisher(editions, null)).toHaveLength(3);
+  });
+});
+
+describe('toEditionRow card fields', () => {
+  it('lists includes in a fixed order, pages and a collapsed note', () => {
+    const row = toEditionRow(
+      edition(1, {
+        dustjacket: true,
+        slipcase: true,
+        clamshell: false,
+        pages_description: 'Pp. [1–9] 10–388.',
+        notes: 'Printed by Butler and Tanner.\n\nBound by Mackay.',
+      })
+    );
+    expect(row.includes).toEqual(['Slipcase', 'Dust jacket']);
+    expect(row.pages).toBe('Pp. [1–9] 10–388.');
+    expect(row.note).toBe('Printed by Butler and Tanner. Bound by Mackay.');
+  });
+
+  it('leaves empty fields empty and counts sub-edition photos', () => {
+    const row = toEditionRow(
+      edition(1, {
+        notes: '   ',
+        pages_description: '',
+        sub_editions: [{ id: 9, is_limited_edition: true, limited_edition_count: 26, photos: [photo(5)] }],
+      })
+    );
+    expect(row.includes).toEqual([]);
+    expect(row.pages).toBeNull();
+    expect(row.note).toBeNull();
+    expect(row.photoCount).toBe(1);
+    expect(row.variantCount).toBe(1);
+  });
+});
+
+function row(id: number, extra: Partial<EditionRow> = {}): EditionRow {
+  return {
+    id, title: `Edition ${id}`, publisher: folio, year: 2000, binding: null, pages: null, illustrators: [],
+    includes: [], note: null, printings: 0, variantCount: 0, variants: [], photos: [], photoCount: 0, ...extra,
+  };
+}
+
+describe('sortRows', () => {
+  const rows = [
+    row(1, { year: 1996, title: 'the Odyssey', publisher: suntup }),
+    row(2, { year: null, title: 'Anniversary edition' }),
+    row(3, { year: 1983, title: 'Ödyssey, illustrated' }),
+    row(4, { year: 1996, title: 'Beowulf' }),
+  ];
+  const ids = (r: EditionRow[]) => r.map((x) => x.id);
+
+  it('sorts by year with unknown years last in both directions, id for ties', () => {
+    expect(ids(sortRows(rows, 'year', 'asc'))).toEqual([3, 1, 4, 2]);
+    expect(ids(sortRows(rows, 'year', 'desc'))).toEqual([1, 4, 3, 2]);
+  });
+
+  it('sorts by publisher, then year; descending reverses both (as on the board)', () => {
+    expect(ids(sortRows(rows, 'publisher', 'asc'))).toEqual([1, 3, 4, 2]);
+    expect(ids(sortRows(rows, 'publisher', 'desc'))).toEqual([4, 3, 2, 1]);
+  });
+
+  it('sorts by name ignoring case and accents', () => {
+    expect(ids(sortRows(rows, 'name', 'asc'))).toEqual([2, 4, 3, 1]);
+    expect(ids(sortRows(rows, 'name', 'desc'))).toEqual([1, 3, 4, 2]);
+  });
+
+  it('does not change the input array', () => {
+    const copy = [...rows];
+    sortRows(rows, 'name', 'desc');
+    expect(rows).toEqual(copy);
+  });
+});
+
+describe('countLine', () => {
+  it('joins variants, printings and photos, with plurals', () => {
+    expect(countLine(row(1, { variantCount: 2, printings: 1, photoCount: 18 }))).toBe('2 variants · 1 printing · 18 photos');
+    expect(countLine(row(1, { variantCount: 1, photoCount: 1 }))).toBe('1 variant · 1 photo');
+  });
+
+  it('leaves out zero parts', () => {
+    expect(countLine(row(1, { printings: 3 }))).toBe('3 printings');
+    expect(countLine(row(1))).toBe('');
   });
 });
