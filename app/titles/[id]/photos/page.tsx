@@ -105,7 +105,7 @@ export default async function PhotographsPage({ params, searchParams }: PageProp
         <EmptyState
           title="No photographs yet"
           text="Do you have one we may use? Send it with your name and the source."
-          secondary={{ href: "/about#suggest", label: "Send a photograph" }}
+          secondary={{ href: `${base}?suggest=photograph`, label: "Send a photograph" }}
         />
       ) : (
         <>

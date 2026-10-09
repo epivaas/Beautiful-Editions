@@ -191,7 +191,7 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
                 This title has no photographs. Do you have one we may use? Send it with your name and the source.
               </p>
               <div>
-                <Button variant="secondary" href="/about#suggest">
+                <Button variant="secondary" href={`/titles/${work.id}?suggest=photograph`} scroll={false}>
                   Send a photograph
                 </Button>
               </div>

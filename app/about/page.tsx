@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import YellowBand from "@/components/YellowBand";
+import { SuggestButton } from "@/components/SuggestChange";
 import FactGrid from "@/components/FactGrid";
 import NoteText from "@/components/NoteText";
 import { IncludesChip, VariantLabel } from "@/components/Chip";
@@ -91,8 +92,9 @@ export default async function AboutPage() {
       <section id="suggest" aria-labelledby="suggest-h" className="flex max-w-[760px] scroll-mt-24 flex-col gap-3">
         <Heading id="suggest-h">Spotted an error?</Heading>
         <p className="m-0 text-[17px] leading-[27px]">{SPOTTED_AN_ERROR}</p>
-        {/* The form comes with the comments queue (DESIGN.md: Opmerkingen); nothing pretends to send until then */}
-        <p className="m-0 text-sm text-creme-gedempt">The form opens soon.</p>
+        <div>
+          <SuggestButton />
+        </div>
       </section>
 
       <section aria-labelledby="colophon" className="flex max-w-[760px] flex-col gap-3 border-t border-lijn pt-8">

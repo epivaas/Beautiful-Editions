@@ -3,6 +3,8 @@ import { Archivo, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import SuggestChange from "@/components/SuggestChange";
+import { Suspense } from "react";
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -35,6 +37,10 @@ export default function RootLayout({
         <main className="container mx-auto w-full max-w-7xl flex-1 px-4 py-8">
           {children}
         </main>
+        {/* Reads ?suggest= on the client, so it waits for the search parameters */}
+        <Suspense fallback={null}>
+          <SuggestChange />
+        </Suspense>
         <SiteFooter />
       </body>
     </html>
