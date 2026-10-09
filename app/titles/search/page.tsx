@@ -1,221 +1,296 @@
-import { supabase } from "@/utils/supabase";
-import { Work } from "@/types/database";
+import type { Metadata } from "next";
 import Link from "next/link";
-import SearchBox from "@/components/SearchBox";
+import { getAuthorList, getPublisherList, getTitleList, type AuthorListRow, type PublisherWithLimited, type TitleListRow } from "@/app/lib/overviewQueries";
+import { getEditionIndex, getSearchOptions } from "@/app/lib/searchQueries";
+import { joinNames } from "@/app/lib/names";
+import { criteriaParams, facetCounts, filterEditions, hasCriteria, parseCriteria, type EditionSearchRow } from "@/app/lib/search";
+import { matchesFilter, paginate, sortBy, type SortDir } from "@/app/lib/overview";
+import DataTable, { CELL_LINK, ROW_TITLE, type Column } from "@/components/DataTable";
+import DetailedSearchForm from "@/components/DetailedSearchForm";
+import Highlight from "@/components/Highlight";
+import Pagination from "@/components/Pagination";
+import { Button, TextLink } from "@/components/Button";
 
-type SearchWork = Work & {
-  work_authors?: { author: { id: number; name: string } | null }[] | null;
-};
+export const metadata: Metadata = { title: "Search · Shelfhound" };
 
-type SearchWorkRelation = Work & {
-  work_authors?: {
-    author: { id: number; name: string } | { id: number; name: string }[] | null;
-  }[] | null;
-};
+const PAGE_SIZE = 50;
 
-function firstRelation<T>(relation: T | T[] | null | undefined): T | null {
-  return Array.isArray(relation) ? relation[0] ?? null : relation ?? null;
-}
+type PageProps = { searchParams: Promise<Record<string, string | undefined>> };
 
-function normalizeSearchWork(work: SearchWorkRelation): SearchWork {
-  return {
-    ...work,
-    work_authors: (work.work_authors || []).map((workAuthor) => ({
-      author: firstRelation(workAuthor.author),
-    })),
-  };
-}
+const FIELD_LABEL = "text-[11px] font-semibold uppercase tracking-[0.09em] text-creme-gedempt";
 
-async function searchWorks(searchQuery: string): Promise<SearchWork[]> {
-  // Search in original_title, english_title, and authors
-  const searchTerm = `%${searchQuery}%`;
-
-  // First, search works by title
-  const { data: worksByTitle, error: titleError } = await supabase
-    .from("works")
-    .select(`
-      *,
-      work_authors (
-        author:authors (
-          id,
-          name
-        )
-      )
-    `)
-    .or(`original_title.ilike.${searchTerm},english_title.ilike.${searchTerm}`)
-    .limit(50);
-  if (titleError) {
-    console.error("Error searching works by title:", titleError);
-  }
-
-  // Search by author name
-  const { data: authors, error: authorError } = await supabase
-    .from("authors")
-    .select("id")
-    .ilike("name", searchTerm)
-    .limit(10);
-  if (authorError) {
-    console.error("Error searching authors:", authorError);
-  }
-
-  let worksByAuthor: SearchWork[] = [];
-  if (authors && authors.length > 0) {
-    const authorIds = authors.map((a) => a.id);
-    const { data, error } = await supabase
-      .from("work_authors")
-      .select(`
-        work_id,
-        work:works (
-          *,
-          work_authors (
-            author:authors (
-              id,
-              name
-            )
-          )
-        )
-      `)
-      .in("author_id", authorIds)
-      .limit(50);
-
-    if (error) {
-      console.error("Error finding works by author:", error);
-    } else if (data) {
-      worksByAuthor = (data as { work: SearchWorkRelation | SearchWorkRelation[] | null }[])
-        .flatMap((item) => {
-          const work = firstRelation(item.work);
-          return work ? [normalizeSearchWork(work)] : [];
-        });
-    }
-  }
-
-  // Search editions by title
-  const { data: editions, error: editionError } = await supabase
-    .from("editions")
-    .select("id")
-    .ilike("title", searchTerm)
-    .limit(20);
-  if (editionError) {
-    console.error("Error searching editions:", editionError);
-  }
-
-  let worksByEdition: SearchWork[] = [];
-  if (editions && editions.length > 0) {
-    const editionIds = editions.map((edition) => edition.id);
-    const { data: workEditionLinks, error: workEditionError } = await supabase
-      .from("work_editions")
-      .select("work_id")
-      .in("edition_id", editionIds);
-
-    if (workEditionError) {
-      console.error("Error finding works for editions:", workEditionError);
-    } else if (workEditionLinks?.length) {
-      const workIds = [...new Set(workEditionLinks.map((link) => link.work_id))];
-      const { data, error } = await supabase
-        .from("works")
-        .select(`
-          *,
-          work_authors (
-            author:authors (
-              id,
-              name
-            )
-          )
-        `)
-        .in("id", workIds)
-        .limit(50);
-
-      if (error) {
-        console.error("Error fetching works for editions:", error);
-      } else if (data) {
-        worksByEdition = (data as SearchWorkRelation[]).map(normalizeSearchWork);
-      }
-    }
-  }
-
-  // Combine and deduplicate by work id
-  const allWorks = [
-    ...((worksByTitle || []) as SearchWorkRelation[]).map(normalizeSearchWork),
-    ...worksByAuthor,
-    ...worksByEdition,
+function titleColumns(q: string): Column<TitleListRow>[] {
+  return [
+    {
+      key: "title",
+      label: "Title",
+      width: "36%",
+      render: (row) => (
+        <Link href={`/titles/${row.id}`} className={`${CELL_LINK} ${ROW_TITLE} font-bold`}>
+          <span>
+            <Highlight text={row.title} q={q} />
+          </span>
+        </Link>
+      ),
+    },
+    {
+      key: "englishTitle",
+      label: "English title",
+      width: "28%",
+      render: (row) =>
+        row.englishTitle && (
+          <span className="text-sm text-creme-gedempt">
+            <Highlight text={row.englishTitle} q={q} />
+          </span>
+        ),
+    },
+    {
+      key: "authors",
+      label: "Author",
+      width: "24%",
+      render: (row) =>
+        row.authors.length > 0 && (
+          <span className="text-sm">
+            <Highlight text={joinNames(row.authors.map((a) => a.name))} q={q} />
+          </span>
+        ),
+    },
+    { key: "editions", label: "Editions", width: "12%", mono: true, align: "right", render: (row) => row.editions.toLocaleString("en-US") },
   ];
-
-  const uniqueWorks = Array.from(
-    new Map(allWorks.map((work) => [work.id, work])).values()
-  ).slice(0, 50);
-
-  return uniqueWorks;
 }
 
-export default async function SearchPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }> | { q?: string };
-}) {
-  // Handle both Promise and object formats for Next.js compatibility
-  const params = searchParams instanceof Promise ? await searchParams : searchParams;
-  const query = params.q || "";
-  const works = query ? await searchWorks(query) : [];
+function authorColumns(q: string): Column<AuthorListRow>[] {
+  return [
+    {
+      key: "name",
+      label: "Author",
+      render: (row) => (
+        <Link href={`/author/${row.id}`} className={`${CELL_LINK} ${ROW_TITLE} font-bold`}>
+          <span>
+            <Highlight text={row.name} q={q} />
+          </span>
+        </Link>
+      ),
+    },
+    { key: "titles", label: "Titles", width: "110px", mono: true, align: "right", render: (row) => row.titles.toLocaleString("en-US") },
+  ];
+}
+
+function publisherColumns(q: string): Column<PublisherWithLimited>[] {
+  return [
+    {
+      key: "name",
+      label: "Publisher",
+      render: (row) => (
+        <Link href={`/publishers-series/${row.id}`} className={`${CELL_LINK} ${ROW_TITLE} font-bold`}>
+          <span>
+            <Highlight text={row.name} q={q} />
+          </span>
+        </Link>
+      ),
+    },
+    { key: "editions", label: "Editions", width: "110px", mono: true, align: "right", render: (row) => row.editions.toLocaleString("en-US") },
+  ];
+}
+
+const EDITION_COLUMNS: Column<EditionSearchRow>[] = [
+  {
+    key: "title",
+    label: "Edition",
+    sortKey: "title",
+    width: "40%",
+    render: (e) => (
+      <div className="flex flex-col gap-0.5">
+        {e.publisher && <span className={FIELD_LABEL}>{e.publisher.name}</span>}
+        <Link href={`/edition/${e.id}`} className={`${CELL_LINK} ${ROW_TITLE} font-bold`}>
+          {e.title}
+        </Link>
+      </div>
+    ),
+  },
+  { key: "year", label: "Year", sortKey: "year", width: "10%", mono: true },
+  { key: "illustrators", label: "Illustrator", width: "22%", render: (e) => joinNames(e.illustrators) },
+  {
+    key: "binding",
+    label: "Binding",
+    width: "28%",
+    render: (e) => e.binding && <span className="line-clamp-2 text-sm">{e.binding}</span>,
+  },
+];
+
+const EDITION_SORTS = {
+  title: (e: EditionSearchRow) => e.title,
+  year: (e: EditionSearchRow) => e.year,
+  publisher: (e: EditionSearchRow) => e.publisher?.name ?? null,
+} as const;
+
+function Section({ id, title, count, children }: { id: string; title: string; count: string; children: React.ReactNode }) {
+  return (
+    <section id={id} aria-labelledby={`${id}-h`} className="flex scroll-mt-24 flex-col gap-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id={`${id}-h`} className="m-0 text-[28px] leading-[34px]">
+          {title}
+        </h2>
+        <span className="font-mono text-[13px] text-creme-gedempt">{count}</span>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function plural(n: number, word: string) {
+  return `${n.toLocaleString("en-US")} ${word}${n === 1 ? "" : "s"}`;
+}
+
+export default async function SearchPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const q = params.q?.trim() || null;
+  const criteria = parseCriteria(params);
+  const detailed = hasCriteria(criteria);
+  const sort = (params.sort && params.sort in EDITION_SORTS ? params.sort : "title") as keyof typeof EDITION_SORTS;
+  const dir: SortDir = params.dir === "desc" ? "desc" : "asc";
+
+  const [titles, authors, publishers, index, options] = await Promise.all([
+    getTitleList(),
+    getAuthorList(),
+    getPublisherList(),
+    getEditionIndex(),
+    getSearchOptions(),
+  ]);
+
+  // Quick search: everything that matches the term (the header's "Press Enter for all results")
+  const titleHits = q
+    ? sortBy(titles.filter((t) => matchesFilter([t.title, t.englishTitle, ...t.authors.map((a) => a.name)], q)), (t) => t.sortTitle, "asc")
+    : [];
+  const authorHits = q ? sortBy(authors.filter((a) => matchesFilter([a.name], q)), (a) => a.name, "asc") : [];
+  const publisherHits = q ? publishers.filter((p) => matchesFilter([p.name], q)) : [];
+  const quickTotal = titleHits.length + authorHits.length + publisherHits.length;
+  const titlePage = paginate(titleHits, Number(params.tpage ?? 1), PAGE_SIZE);
+
+  // Detailed search
+  const editions = detailed ? sortBy(filterEditions(index, criteria), EDITION_SORTS[sort], dir) : [];
+  const editionPage = paginate(editions, Number(params.page ?? 1), PAGE_SIZE);
+  // The lists only offer choices that still give results with the other criteria
+  const facets = {
+    publisher: facetCounts(index, criteria, "publisher", new Map(options.publishers.map((p) => [String(p.id), p.name]))),
+    series: facetCounts(index, criteria, "series", new Map(options.series.map((s) => [String(s.id), s.name]))),
+    language: facetCounts(index, criteria, "language"),
+  };
+
+  const baseParams = { ...(q ? { q } : {}), ...criteriaParams(criteria) };
+  const href = (changes: Record<string, string | null>, hash = "") => {
+    const next = new URLSearchParams();
+    const merged: Record<string, string | null> = {
+      ...baseParams,
+      sort: sort === "title" ? null : sort,
+      dir: dir === "asc" ? null : dir,
+      tpage: params.tpage ?? null,
+      page: params.page ?? null,
+      ...changes,
+    };
+    for (const [k, v] of Object.entries(merged)) if (v) next.set(k, v);
+    const qs = next.toString();
+    return `/titles/search${qs ? `?${qs}` : ""}${hash}`;
+  };
 
   return (
-    <div className="py-8">
-      <h1 className="text-4xl font-serif text-[#8b6f47] mb-8">Search Titles</h1>
+    <div className="flex flex-col gap-14">
+      {q && (
+        <div className="flex flex-col gap-10">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h1 className="m-0 text-4xl leading-none tracking-[-0.03em] sm:text-5xl sm:leading-[52px]">Search</h1>
+            <span className="font-mono text-[13px] text-creme-gedempt">
+              {plural(quickTotal, "result")} for “{q}”
+            </span>
+          </div>
 
-      <div className="mb-8">
-        <SearchBox />
-      </div>
-
-      {query && (
-        <div className="mb-6">
-          <p className="text-[#6b6b6b]">
-            {works.length > 0
-              ? `Found ${works.length} result${works.length !== 1 ? "s" : ""} for "${query}"`
-              : `No results found for "${query}"`}
-          </p>
+          {quickTotal === 0 ? (
+            <div className="flex flex-col items-start gap-3 rounded-card border border-lijn bg-cocoa p-6">
+              <p className="m-0 text-2xl font-extrabold leading-7 tracking-[-0.02em]">No results for “{q}”</p>
+              <p className="m-0 text-sm text-creme-gedempt">
+                Check the spelling or try fewer words. Looking for a specific edition? Try the detailed search below.
+              </p>
+              <Button href="#detailed">Detailed search</Button>
+            </div>
+          ) : (
+            <>
+              {titleHits.length > 0 && (
+                <Section id="titles" title="Titles" count={plural(titleHits.length, "title")}>
+                  <DataTable caption={`Titles matching ${q}`} columns={titleColumns(q)} rows={titlePage.rows} getRowKey={(r) => r.id} />
+                  <Pagination
+                    page={titlePage.page}
+                    totalPages={titlePage.totalPages}
+                    hrefFor={(p) => href({ tpage: String(p) }, "#titles")}
+                  />
+                </Section>
+              )}
+              {authorHits.length > 0 && (
+                <Section id="authors" title="Authors" count={plural(authorHits.length, "author")}>
+                  <DataTable caption={`Authors matching ${q}`} columns={authorColumns(q)} rows={authorHits.slice(0, PAGE_SIZE)} getRowKey={(r) => r.id} />
+                </Section>
+              )}
+              {publisherHits.length > 0 && (
+                <Section id="publishers" title="Publishers" count={plural(publisherHits.length, "publisher")}>
+                  <DataTable caption={`Publishers matching ${q}`} columns={publisherColumns(q)} rows={publisherHits} getRowKey={(r) => r.id} />
+                </Section>
+              )}
+            </>
+          )}
         </div>
       )}
 
-      {works.length > 0 && (
-        <div className="bg-white border border-[#e0ddd0] rounded overflow-hidden">
-          <div className="divide-y divide-[#e0ddd0]">
-            {works.map((work) => {
-              const authors =
-                work.work_authors
-                  ?.map((workAuthor) => workAuthor.author?.name)
-                  .filter((name): name is string => Boolean(name))
-                  .join(", ") || "Unknown";
+      <section id="detailed" aria-labelledby="detailed-h" className="flex scroll-mt-24 flex-col gap-6">
+        {q ? (
+          <h2 id="detailed-h" className="m-0 text-4xl leading-none tracking-[-0.03em] sm:text-5xl sm:leading-[52px]">
+            Detailed search
+          </h2>
+        ) : (
+          <h1 id="detailed-h" className="m-0 text-4xl leading-none tracking-[-0.03em] sm:text-5xl sm:leading-[52px]">
+            Detailed search
+          </h1>
+        )}
+        <DetailedSearchForm criteria={criteria} series={options.series} facets={facets} count={detailed ? editions.length : null} q={q} />
+      </section>
 
-              return (
-                <Link
-                  key={work.id}
-                  href={`/titles/${work.id}`}
-                  className="block p-6 hover:bg-[#fdfcf0] transition"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                    <div>
-                      <h3 className="text-xl font-serif text-[#8b6f47] mb-1">
-                        {work.original_title}
-                      </h3>
-                      {work.english_title && (
-                        <p className="text-[#6b6b6b] italic mb-1">
-                          {work.english_title}
-                        </p>
-                      )}
-                      <p className="text-[#6b6b6b]">{authors}</p>
-                    </div>
-                    {work.original_publication_year && (
-                      <p className="text-[#8b6f47] font-medium">
-                        {work.original_publication_year}
-                      </p>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+      {detailed && (
+        <Section id="results" title="Editions" count={plural(editions.length, "edition")}>
+          {editions.length === 0 ? (
+            <div className="flex flex-col items-start gap-3 rounded-card border border-lijn bg-cocoa p-6">
+              <p className="m-0 text-[22px] font-extrabold leading-7 tracking-[-0.02em]">No editions match these filters</p>
+              <p className="m-0 text-sm text-creme-gedempt">Remove a filter to see more.</p>
+              <TextLink href={q ? `/titles/search?q=${encodeURIComponent(q)}#detailed` : "/titles/search"} standalone className="text-sm">
+                Clear all filters
+              </TextLink>
+            </div>
+          ) : (
+            <>
+              <DataTable
+                caption="Editions matching the detailed search"
+                columns={EDITION_COLUMNS}
+                rows={editionPage.rows}
+                getRowKey={(e) => e.id}
+                sort={{
+                  key: sort,
+                  dir,
+                  hrefFor: (key, nextDir) =>
+                    href({ sort: key === "title" ? null : key, dir: nextDir === "asc" ? null : nextDir, page: null }, "#results"),
+                }}
+              />
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="font-mono text-[13px] text-creme-gedempt">
+                  {editionPage.from.toLocaleString("en-US")} to {editionPage.to.toLocaleString("en-US")} of{" "}
+                  {editionPage.total.toLocaleString("en-US")}
+                </span>
+                <Pagination
+                  page={editionPage.page}
+                  totalPages={editionPage.totalPages}
+                  hrefFor={(p) => href({ page: String(p) }, "#results")}
+                />
+              </div>
+            </>
+          )}
+        </Section>
       )}
     </div>
   );
 }
-

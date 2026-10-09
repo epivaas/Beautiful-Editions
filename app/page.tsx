@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { joinNames } from "@/app/lib/names";
 import { getPublisherSpotlight, getRecentEditions, getTitleSpotlight } from "@/app/lib/homeQueries";
 import { getPublisherList } from "@/app/lib/overviewQueries";
 import { newSeed, publisherCountParts, roundedCount, seededShuffle } from "@/app/lib/home";
@@ -113,7 +114,7 @@ export default async function HomePage({ searchParams }: PageProps) {
               eyebrow="Title in the spotlight"
               kind="title"
               name={titleSpotlight.work.title}
-              byline={titleSpotlight.work.authors.length ? `by ${titleSpotlight.work.authors.join(", ")}` : null}
+              byline={titleSpotlight.work.authors.length ? `by ${joinNames(titleSpotlight.work.authors)}` : null}
               count={`${titleSpotlight.editionCount} ${titleSpotlight.editionCount === 1 ? "edition" : "editions"}`}
               href={`/titles/${titleSpotlight.work.id}`}
               text={titleSpotlight.text}

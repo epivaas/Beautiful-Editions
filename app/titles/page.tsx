@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTitleList, type TitleListRow } from "@/app/lib/overviewQueries";
+import { NAME_SEPARATOR } from "@/app/lib/names";
 import {
   firstLetter,
   isLetterKey,
@@ -72,12 +73,12 @@ function columns(q: string | null): Column<TitleListRow>[] {
       row.authors.length > 0 && (
         <span className="text-sm">
           {row.authors.map((a, i) => (
-            // The comma sticks to the name before it, so it never ends up on a line of its own
+            // The separator sticks to the name before it, so it never ends up on a line of its own
             <span key={a.id} className="mr-1 inline-flex items-center">
               <Link href={`/author/${a.id}`} className={`${CELL_LINK} text-amber hover:underline`}>
                 <Highlight text={a.name} q={q} />
               </Link>
-              {i < row.authors.length - 1 && ","}
+              {i < row.authors.length - 1 && NAME_SEPARATOR.trim()}
             </span>
           ))}
         </span>

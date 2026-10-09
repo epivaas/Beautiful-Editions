@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { NAME_SEPARATOR } from "@/app/lib/names";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getEditionPage } from "@/app/lib/editionPageQuery";
@@ -43,11 +44,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 const INLINE_LINK = "underline underline-offset-[3px] hover:no-underline";
 
-/** "A, B and C" */
+/** "Doré, Gustave; Rackham, Arthur": names are "Last, First", so people are separated by a semicolon */
 function joinNames(names: ReactNode[]) {
   return names.map((name, i) => (
     <span key={i}>
-      {i > 0 && (i === names.length - 1 ? " and " : ", ")}
+      {i > 0 && NAME_SEPARATOR}
       {name}
     </span>
   ));
@@ -208,10 +209,10 @@ export default async function EditionPage({ params, searchParams }: PageProps) {
                     ))
                   ),
               },
-              { label: "Translator", value: role("Translator").join(", ") },
-              { label: "Illustrators", value: role("Illustrator").join(", ") },
-              { label: "Introduction", value: role("Introduction").join(", ") },
-              { label: "Editor", value: role("Editor").join(", ") },
+              { label: "Translator", value: joinNames(role("Translator")) },
+              { label: "Illustrators", value: joinNames(role("Illustrator")) },
+              { label: "Introduction", value: joinNames(role("Introduction")) },
+              { label: "Editor", value: joinNames(role("Editor")) },
               { label: "Series", value: edition.series?.name },
               { label: "Catalogue no.", value: edition.catalogue_number, mono: true },
               { label: "ISBN", value: edition.isbn, mono: true },

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { joinNames } from "@/app/lib/names";
 import type { ReactNode } from "react";
 import PhotoTile from "./PhotoTile";
 import { Button } from "./Button";
@@ -101,7 +102,7 @@ export default function EditionFeatureCard({
             {binding && <Fact label="Binding">{binding}</Fact>}
             {pages && <Fact label="Pages" mono>{pages}</Fact>}
             {illustrators.length > 0 && (
-              <Fact label={illustrators.length === 1 ? "Illustrator" : "Illustrators"}>{illustrators.join(", ")}</Fact>
+              <Fact label={illustrators.length === 1 ? "Illustrator" : "Illustrators"}>{joinNames(illustrators)}</Fact>
             )}
           </div>
         )}

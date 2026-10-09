@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTitlePage } from "@/app/lib/titlePageQuery";
+import { NAME_SEPARATOR } from "@/app/lib/names";
 import {
   collectPhotos,
   filterByPublisher,
@@ -152,7 +153,7 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
               by{" "}
               {authors.map((author, i) => (
                 <span key={author.id}>
-                  {i > 0 && ", "}
+                  {i > 0 && NAME_SEPARATOR}
                   <Link href={`/author/${author.id}`} className="underline underline-offset-[3px] hover:no-underline">
                     {author.name}
                   </Link>

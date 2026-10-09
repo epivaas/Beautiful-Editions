@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { joinNames } from "@/app/lib/names";
 import PhotoTile from "./PhotoTile";
 import { IncludesChip, VariantLabel } from "./Chip";
 import AlsoContains from "./AlsoContains";
@@ -52,7 +53,7 @@ export default function EditionCard({
         {/* Some bindings are a whole paragraph; the card shows two lines, the edition page the rest */}
         {meta && <div className="line-clamp-2 font-mono text-[13px] text-creme-gedempt">{meta}</div>}
         {illustrators.length > 0 && (
-          <div className="text-sm leading-[19px] text-creme-gedempt">{illustrators.join(", ")}</div>
+          <div className="text-sm leading-[19px] text-creme-gedempt">{joinNames(illustrators)}</div>
         )}
         {includes.length > 0 && (
           <div className="flex flex-wrap gap-1">
