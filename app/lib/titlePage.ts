@@ -1,5 +1,7 @@
 // Pure helpers for the title page (/titles/[id]). No Supabase import, so they can be unit tested.
 import { getPhotoUrl } from "./editionUtils";
+// Only functions cross this (circular) import, and only at call time
+import { limitedEditionName, parsePrinting } from "./editionPage";
 
 export type TitlePhotoRow = {
   id: number;
@@ -16,6 +18,8 @@ export type TitleSubEditionRow = {
   limited_edition_count: number | null;
   /** Kind of limited sub-edition (Lettered, Numbered, Named Edition...), from the limited_states list. */
   limited_state?: { name: string; sort_order: number } | null;
+  /** Description of the sub-edition: the name of a Named Edition or a printing ("Second printing: 2004"). */
+  impression_label?: string | null;
   photos: TitlePhotoRow[] | null;
 };
 
@@ -51,7 +55,52 @@ export type TitleWorkRow = {
   work_editions: { edition: TitleEditionRow | null }[] | null;
 };
 
-export type TitlePhoto = { id: number; src: string; alt: string; credit: string | null };
+/** Where a photo belongs: "Suntup Editions 2018 · Lettered edition", with a link to that page. */
+export type PhotoPlace = { label: string; href: string; editionId: number | null; subEditionId: number | null };
+
+export type TitlePhoto = {
+  id: number;
+  src: string;
+  alt: string;
+  /** Source and rights in one line (photos.copyright_statement): the © button and the lightbox. */
+  credit: string | null;
+  place: PhotoPlace | null;
+};
+
+function toPhoto(photo: TitlePhotoRow, alt: string, place: PhotoPlace | null): TitlePhoto {
+  return {
+    id: photo.id,
+    src: getPhotoUrl(photo.storage_path),
+    alt,
+    credit: photo.copyright_statement,
+    place,
+  };
+}
+
+/** "Suntup Editions 2018": publisher and year of an edition. */
+export function editionPlaceLabel(edition: { title: string; publication_year: number | null; publisher: { name: string } | null }) {
+  return [edition.publisher?.name.trim(), edition.publication_year].filter(Boolean).join(" ") || edition.title;
+}
+
+/** Where a sub-edition's photo belongs: a limited edition has its own page, a printing lives on the edition page. */
+export function subEditionPlace(
+  edition: { id: number; title: string; publication_year: number | null; publisher: { name: string } | null },
+  sub: { id: number; is_limited_edition: boolean | null; limited_state?: { name: string } | null; impression_label?: string | null }
+): PhotoPlace {
+  const name = sub.is_limited_edition
+    ? limitedEditionName(sub.limited_state?.name, sub.impression_label ?? null)
+    : parsePrinting(sub.impression_label ?? null).name || "Printing";
+  return {
+    label: `${editionPlaceLabel(edition)} · ${name}`,
+    href: sub.is_limited_edition ? `/sub-editions/${sub.id}` : `/edition/${edition.id}#printings`,
+    editionId: edition.id,
+    subEditionId: sub.id,
+  };
+}
+
+export function editionPlace(edition: { id: number; title: string; publication_year: number | null; publisher: { name: string } | null }): PhotoPlace {
+  return { label: editionPlaceLabel(edition), href: `/edition/${edition.id}`, editionId: edition.id, subEditionId: null };
+}
 
 export type EditionRow = {
   id: number;
@@ -110,27 +159,22 @@ function photoAlt(photo: TitlePhotoRow, edition: TitleEditionRow) {
 
 /** All photos of the editions and their sub-editions: main photos first, then newest edition, then sort order. */
 /** Photos of one (sub-)edition: main photo first, then sort order. Alt text is the caption or `fallbackAlt`. */
-export function toPhotos(rows: TitlePhotoRow[] | null, fallbackAlt: string): TitlePhoto[] {
+export function toPhotos(rows: TitlePhotoRow[] | null, fallbackAlt: string, place: PhotoPlace | null = null): TitlePhoto[] {
   return [...(rows ?? [])]
     .sort(
       (a, b) =>
         Number(Boolean(b.is_main)) - Number(Boolean(a.is_main)) || a.sort_order - b.sort_order || a.id - b.id
     )
-    .map((photo) => ({
-      id: photo.id,
-      src: getPhotoUrl(photo.storage_path),
-      alt: photo.caption || fallbackAlt,
-      credit: photo.copyright_statement,
-    }));
+    .map((photo) => toPhoto(photo, photo.caption || fallbackAlt, place));
 }
 
 export function collectPhotos(editions: TitleEditionRow[]): TitlePhoto[] {
-  const rows = editions.flatMap((edition) =>
-    [...(edition.photos || []), ...(edition.sub_editions || []).flatMap((s) => s.photos || [])].map((photo) => ({
-      photo,
-      edition,
-    }))
-  );
+  const rows = editions.flatMap((edition) => [
+    ...(edition.photos || []).map((photo) => ({ photo, edition, place: editionPlace(edition) })),
+    ...(edition.sub_editions || []).flatMap((s) =>
+      (s.photos || []).map((photo) => ({ photo, edition, place: subEditionPlace(edition, s) }))
+    ),
+  ]);
 
   return rows
     .sort(
@@ -140,12 +184,7 @@ export function collectPhotos(editions: TitleEditionRow[]): TitlePhoto[] {
         a.photo.sort_order - b.photo.sort_order ||
         a.photo.id - b.photo.id
     )
-    .map(({ photo, edition }) => ({
-      id: photo.id,
-      src: getPhotoUrl(photo.storage_path),
-      alt: photoAlt(photo, edition),
-      credit: photo.copyright_statement,
-    }));
+    .map(({ photo, edition, place }) => toPhoto(photo, photoAlt(photo, edition), place));
 }
 
 /**

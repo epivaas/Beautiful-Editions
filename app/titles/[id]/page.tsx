@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { getTitlePage } from "@/app/lib/titlePageQuery";
 import { NAME_SEPARATOR } from "@/app/lib/names";
 import {
@@ -18,6 +19,7 @@ import {
 import YellowBand from "@/components/YellowBand";
 import EmptyState from "@/components/EmptyState";
 import PhotoMosaic from "@/components/PhotoMosaic";
+import PhotoLightbox from "@/components/PhotoLightbox";
 import EditionCard from "@/components/EditionCard";
 import EditionFeatureCard from "@/components/EditionFeatureCard";
 import ViewToggle from "@/components/ViewToggle";
@@ -168,20 +170,18 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
         </YellowBand>
       </div>
 
-      <section aria-labelledby="photographs" className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="photographs" className="text-[28px] leading-[34px]">
+      {photos.length > 0 ? (
+        <>
+          <PhotoMosaic photos={photos} allHref={`/titles/${work.id}/photos`} />
+          <Suspense fallback={null}>
+            <PhotoLightbox photos={photos} />
+          </Suspense>
+        </>
+      ) : (
+        <section aria-labelledby="photographs" className="flex flex-col gap-4">
+          <h2 id="photographs" className="m-0 text-[28px] leading-[34px]">
             Photographs
           </h2>
-          {photos.length > 0 && (
-            <span className="font-mono text-[13px] text-creme-gedempt">
-              {photos.length} {photos.length === 1 ? "photo" : "photos"}
-            </span>
-          )}
-        </div>
-        {photos.length > 0 ? (
-          <PhotoMosaic photos={photos} />
-        ) : (
           <div className="flex flex-col items-start gap-3 rounded-card border border-lijn p-6 sm:flex-row sm:items-center sm:gap-6">
             <div className="flex h-[92px] w-full items-center justify-center bg-mat text-[13px] font-semibold text-inkt sm:w-40">
               No photographs yet
@@ -197,8 +197,8 @@ export default async function TitlePage({ params, searchParams }: PageProps) {
               </div>
             </div>
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       <section id="editions" aria-labelledby="editions-heading" className="flex scroll-mt-24 flex-col gap-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">

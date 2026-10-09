@@ -92,6 +92,24 @@ describe('collectPhotos', () => {
     expect(withCaption.alt).toBe('Title page');
     expect(without.alt).toBe('Edition 1, The Folio Society');
   });
+
+  it('says where each photo belongs: the edition, a limited edition or a printing', () => {
+    const photos = collectPhotos([
+      edition(1, {
+        publication_year: 1996,
+        photos: [photo(1, { is_main: true })],
+        sub_editions: [
+          { id: 7, is_limited_edition: true, limited_edition_count: 26, limited_state: { name: 'Lettered', sort_order: 10 }, photos: [photo(2)] },
+          { id: 8, is_limited_edition: false, limited_edition_count: null, impression_label: 'Second printing: 2004', photos: [photo(3)] },
+        ],
+      }),
+    ]);
+    expect(photos.map((p) => p.place)).toEqual([
+      { label: 'The Folio Society 1996', href: '/edition/1', editionId: 1, subEditionId: null },
+      { label: 'The Folio Society 1996 · Lettered edition', href: '/sub-editions/7', editionId: 1, subEditionId: 7 },
+      { label: 'The Folio Society 1996 · Second printing', href: '/edition/1#printings', editionId: 1, subEditionId: 8 },
+    ]);
+  });
 });
 
 describe('limitedLabel', () => {

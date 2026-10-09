@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { getEditionPage } from "@/app/lib/editionPageQuery";
 import {
   bandCounts,
@@ -13,6 +14,7 @@ import {
 import { collectPhotos, includesOf } from "@/app/lib/titlePage";
 import YellowBand from "@/components/YellowBand";
 import PhotoMosaic from "@/components/PhotoMosaic";
+import PhotoLightbox from "@/components/PhotoLightbox";
 import FactGrid from "@/components/FactGrid";
 import LimitedEditionCard from "@/components/LimitedEditionCard";
 import PrintingsTable from "@/components/PrintingsTable";
@@ -131,9 +133,12 @@ export default async function EditionPage({ params, searchParams }: PageProps) {
       </div>
 
       {photos.length > 0 && (
-        <section aria-label="Photographs">
-          <PhotoMosaic photos={photos} />
-        </section>
+        <>
+          <PhotoMosaic photos={photos} allHref={current ? `/titles/${current.id}/photos?edition=${edition.id}` : undefined} />
+          <Suspense fallback={null}>
+            <PhotoLightbox photos={photos} />
+          </Suspense>
+        </>
       )}
 
       <div className="flex flex-col gap-7">

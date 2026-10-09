@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { Suspense, useId, useState } from "react";
+import PhotoOpenLink from "./PhotoOpenLink";
 
 type PhotoTileProps = {
   src?: string | null;
@@ -11,13 +12,17 @@ type PhotoTileProps = {
   padding?: number;
   /** Size of the tile, e.g. "h-[190px]" or "h-[340px] w-[260px]". */
   className?: string;
+  /** Opens this photo in the lightbox on a click. */
+  photoId?: number;
+  /** Load at once instead of lazily, where the tile's width depends on the photo (rows of equal height). */
+  eager?: boolean;
 };
 
 /**
  * A photo on the grey mat: never cropped, never shown larger than its own size.
  * Plain <img> on purpose: next/image needs the dimensions up front, and we don't store them yet.
  */
-export default function PhotoTile({ src, alt, credit, padding = 12, className = "" }: PhotoTileProps) {
+export default function PhotoTile({ src, alt, credit, padding = 12, className = "", photoId, eager = false }: PhotoTileProps) {
   const [open, setOpen] = useState(false);
   const creditId = useId();
 
@@ -31,12 +36,19 @@ export default function PhotoTile({ src, alt, credit, padding = 12, className = 
         <img
           src={src}
           alt={alt}
-          loading="lazy"
+          loading={eager ? "eager" : "lazy"}
           decoding="async"
           className="block h-auto max-h-full w-auto max-w-full object-contain"
         />
       ) : (
         <span className="text-[13px] font-semibold text-inkt">No photograph yet</span>
+      )}
+
+      {src && photoId !== undefined && (
+        // The page's search parameters are read on the client only
+        <Suspense fallback={null}>
+          <PhotoOpenLink photoId={photoId} label={`Open photo: ${alt}`} />
+        </Suspense>
       )}
 
       {src && credit && (

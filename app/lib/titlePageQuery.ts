@@ -10,7 +10,7 @@ export const EDITION_CARD_SELECT = `
   publisher:publishers ( id, name ),
   photos ( ${PHOTO} ),
   sub_editions (
-    id, is_limited_edition, limited_edition_count,
+    id, is_limited_edition, limited_edition_count, impression_label,
     limited_state:limited_states ( name, sort_order ),
     photos ( ${PHOTO} )
   ),

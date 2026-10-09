@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { getVariantPage } from "@/app/lib/editionPageQuery";
 import { contributorsByRole, limitedEditionName, toLimitedCards, worksOf } from "@/app/lib/editionPage";
 import { variantChips, variantFacts } from "@/app/lib/variantPage";
-import { includesOf, toPhotos } from "@/app/lib/titlePage";
+import { editionPlace, includesOf, subEditionPlace, toPhotos } from "@/app/lib/titlePage";
 import YellowBand from "@/components/YellowBand";
 import PhotoMosaic from "@/components/PhotoMosaic";
+import PhotoLightbox from "@/components/PhotoLightbox";
 import PhotoTile from "@/components/PhotoTile";
 import FactGrid from "@/components/FactGrid";
 import IncludesBar from "@/components/IncludesBar";
@@ -60,8 +62,8 @@ export default async function VariantPage({ params }: PageProps) {
   const chips = variantChips(subs, sub.id);
   const others = toLimitedCards(subs, edition.title).filter((card) => card.id !== sub.id);
   // The variant's own photos; without them the edition's own (not those of other variants)
-  const ownPhotos = toPhotos(sub.photos, `${edition.title}, ${name}`);
-  const photos = ownPhotos.length > 0 ? ownPhotos : toPhotos(edition.photos, edition.title);
+  const ownPhotos = toPhotos(sub.photos, `${edition.title}, ${name}`, subEditionPlace(edition, sub));
+  const photos = ownPhotos.length > 0 ? ownPhotos : toPhotos(edition.photos, edition.title, editionPlace(edition));
   const editionPhotos = ownPhotos.length === 0 && photos.length > 0;
   const facts = variantFacts(sub, edition);
   const notes = [sub.impression_label, sub.details].filter((t): t is string => !!t?.trim());
@@ -129,14 +131,25 @@ export default async function VariantPage({ params }: PageProps) {
       </div>
 
       {/* The photo block never disappears: without any photo it shows one empty tile on the mat */}
-      <section aria-label="Photographs" className="flex flex-col gap-2">
-        {editionPhotos && <p className="m-0 text-[13px] text-creme-gedempt">Photos of the edition</p>}
-        {photos.length > 0 ? (
-          <PhotoMosaic photos={photos} />
-        ) : (
+      {photos.length > 0 ? (
+        <>
+          <PhotoMosaic
+            photos={photos}
+            note={editionPhotos ? "Photos of the edition" : undefined}
+            allHref={current ? `/titles/${current.id}/photos?${editionPhotos ? `edition=${edition.id}` : `sub=${sub.id}`}` : undefined}
+          />
+          <Suspense fallback={null}>
+            <PhotoLightbox photos={photos} />
+          </Suspense>
+        </>
+      ) : (
+        <section aria-labelledby="photographs" className="flex flex-col gap-4">
+          <h2 id="photographs" className="m-0 text-[28px] leading-[34px]">
+            Photographs
+          </h2>
           <PhotoTile alt={`${edition.title}, ${name}`} className="h-[190px] w-full max-w-[320px]" />
-        )}
-      </section>
+        </section>
+      )}
 
       <div className="flex flex-col gap-7">
         <IncludesBar items={includesOf(sub)} />
