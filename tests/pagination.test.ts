@@ -43,7 +43,9 @@ describe('getPageItems', () => {
 });
 
 describe('getPhotoUrl', () => {
-  afterEach(() => vi.unstubAllEnvs());
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
 
   it('builds a public URL on the R2 photos domain', () => {
     vi.stubEnv('NEXT_PUBLIC_PHOTOS_BASE_URL', 'https://images.shelfhound.org');
