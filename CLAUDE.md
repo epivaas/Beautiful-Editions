@@ -9,6 +9,7 @@ Naslagwerk en koperstool voor mooi geïllustreerde boekedities (Folio Society, C
 ## Stack en commando's
 - Next.js 16 (App Router, TypeScript, server components waar mogelijk), React 19, Tailwind CSS 4, Supabase (`@supabase/supabase-js`, client in `utils/supabase.ts`), Vitest. Gedeployed op Vercel.
 - `npm run dev`, `npm run build`, `npm run lint`, `npm test`.
+- Foto's staan in Cloudflare R2 (https://images.shelfhound.org), niet in Supabase storage. URL = `NEXT_PUBLIC_PHOTOS_BASE_URL` + `/` + `photos.storage_path` (bv. `sub_editions/1427/S1427_1.webp`), via `getPhotoUrl` in `app/lib/editionUtils.ts`.
 - Lees `.env.local` nooit voor en toon of commit die niet. Bewerk de database of het schema nooit zonder het eerst te bespreken.
 - Routes: `/titles/[id]` (titel), `/titles/[id]/photos`, `/edition/[id]`, `/sub-editions/[id]` (limited edition), `/author/[id]`, `/publishers/[id]`, `/series/[id]`, zoeken op `/titles/search`. `/publishers-series/[id]` stuurt alleen nog door.
 

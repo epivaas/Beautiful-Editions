@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { getPageItems } from '../app/lib/pagination';
 import { getPhotoUrl } from '../app/lib/editionUtils';
 
@@ -43,7 +43,15 @@ describe('getPageItems', () => {
 });
 
 describe('getPhotoUrl', () => {
-  it('builds a public URL in the Book-photos bucket', () => {
-    expect(getPhotoUrl('folio/odyssey.jpg')).toMatch(/\/storage\/v1\/object\/public\/Book-photos\/folio\/odyssey\.jpg$/);
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('builds a public URL on the R2 photos domain', () => {
+    vi.stubEnv('NEXT_PUBLIC_PHOTOS_BASE_URL', 'https://images.shelfhound.org');
+    expect(getPhotoUrl('sub_editions/1427/S1427_1.webp')).toBe('https://images.shelfhound.org/sub_editions/1427/S1427_1.webp');
+  });
+
+  it('does not double the slash between base URL and path', () => {
+    vi.stubEnv('NEXT_PUBLIC_PHOTOS_BASE_URL', 'https://images.shelfhound.org/');
+    expect(getPhotoUrl('/editions/979/E979_16.webp')).toBe('https://images.shelfhound.org/editions/979/E979_16.webp');
   });
 });

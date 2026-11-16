@@ -1,14 +1,15 @@
 import type { NextConfig } from "next";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+// Photos are served from Cloudflare R2 (custom domain), not from Supabase storage.
+const photosBaseUrl = process.env.NEXT_PUBLIC_PHOTOS_BASE_URL;
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: supabaseUrl
+    remotePatterns: photosBaseUrl
       ? [
           {
             protocol: "https",
-            hostname: new URL(supabaseUrl).hostname,
+            hostname: new URL(photosBaseUrl).hostname,
           },
         ]
       : [],

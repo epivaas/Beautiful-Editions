@@ -82,7 +82,7 @@ describe('collectPhotos', () => {
     ]);
     expect(photos.map((p) => p.id)).toEqual([11, 21, 20, 10]);
     expect(photos[0].credit).toBe('© 11');
-    expect(photos[0].src).toMatch(/Book-photos\/p11\.jpg$/);
+    expect(photos[0].src).toMatch(/\/p11\.jpg$/);
   });
 
   it('uses the caption as alt text, or the edition title and publisher', () => {

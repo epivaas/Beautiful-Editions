@@ -39,9 +39,14 @@ export interface Edition {
   series?: Series;
 }
 
-/** Public URL of a photo in the Book-photos storage bucket. */
-export const getPhotoUrl = (storagePath: string) =>
-  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/Book-photos/${storagePath}`;
+/**
+ * Public URL of a photo in the Cloudflare R2 bucket (custom domain, e.g. https://images.shelfhound.org).
+ * `storage_path` in the photos table is the object key, e.g. "sub_editions/1427/S1427_1.webp".
+ */
+export const getPhotoUrl = (storagePath: string) => {
+  const base = (process.env.NEXT_PUBLIC_PHOTOS_BASE_URL ?? "").replace(/\/+$/, "");
+  return `${base}/${storagePath.replace(/^\/+/, "")}`;
+};
 
 export const getMainPhoto = (photos?: Photo[]) => {
   if (!photos || photos.length === 0) return null;
